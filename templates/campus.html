@@ -849,17 +849,22 @@ updateYouHere(startNode.x, startNode.y);
 }
 
 function generateQR(){
-
   let loc = new URLSearchParams(window.location.search).get("location");
-
-  // fallback if no URL param
   if(!loc){
     loc = document.getElementById("destName").innerText;
   }
-
   const url = window.location.origin + "/campus_map?location=" + encodeURIComponent(loc);
+  const qrSrc = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encodeURIComponent(url);
 
-  window.open("https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + url);
+  const old = document.getElementById("qrImage");
+  if(old) old.remove();
+
+  const img = document.createElement("img");
+  img.id = "qrImage";
+  img.src = qrSrc;
+  img.style.cssText = "display:block;margin:12px auto;border:4px solid white;border-radius:8px;width:150px;height:150px;";
+  img.alt = "QR Code";
+  document.getElementById("directionsBox").appendChild(img);
 }
 // CLICK BUILDING → NAVIGATE
 document.querySelectorAll('.building[data-page]').forEach(b => {
@@ -906,9 +911,15 @@ function highlightFromURL(){
 
   if(!location) return;
 
-  const parts = location.split("ROOM");
-  const building = parts[0].trim().toUpperCase();
-  const room = parts[1] ? "ROOM " + parts[1].trim() : null;
+  const parts = location.split(/\s+room\s+/i);
+  const raw = parts[0].trim().toUpperCase();
+  const room = parts[1] ? "ROOM " + parts[1].trim().toUpperCase() : null;
+
+  let building = raw;
+  if(!nodes[raw]){
+    const key = Object.keys(nodes).find(k => k.includes(raw) || raw.includes(k));
+    if(key) building = key;
+  }
 
   showDirections(building);
 
@@ -917,10 +928,10 @@ function highlightFromURL(){
   }
 
   if(building === "IT BUILDING"){
-  setTimeout(() => {
-    window.location.href = "/it_building?from=gate&location=" + encodeURIComponent(location);
-  }, 2500); // wait for animation first
-}
+    setTimeout(() => {
+      window.location.href = "/it_building?from=gate&location=" + encodeURIComponent(location);
+    }, 2500);
+  }
 }
 
 highlightFromURL();
