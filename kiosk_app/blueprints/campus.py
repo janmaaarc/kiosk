@@ -76,14 +76,19 @@ def room_navigation():
     return render_template("room_navigation.html")
 
 
+def _building(name, floors=3):
+    return render_template("building_detail.html", building_name=name,
+                           floors=range(floors))
+
+
 @campus_bp.route("/ylagan_hall")
 def ylagan():
-    return render_template("ylagan.html")
+    return _building("Ylagan Hall", floors=2)
 
 
 @campus_bp.route("/automotive_building")
 def automotive():
-    return render_template("automotive.html")
+    return _building("Automotive Building")
 
 
 @campus_bp.route("/academic_building")
@@ -93,52 +98,52 @@ def academic_building():
 
 @campus_bp.route("/waf_&_rac_building")
 def waf_rac_building():
-    return render_template("waf_rac.html")
+    return _building("WAF & RAC Building")
 
 
 @campus_bp.route("/new_admin_building")
 def new_admin_building():
-    return render_template("new_admin.html")
+    return _building("New Admin Building", floors=4)
 
 
 @campus_bp.route("/old_admin_building")
 def old_admin_building():
-    return render_template("old_admin.html")
+    return _building("Old Admin Building", floors=2)
 
 
 @campus_bp.route("/fsm_building")
 def fsm_building():
-    return render_template("fsm.html")
+    return _building("FSM Building")
 
 
 @campus_bp.route("/civil_tech_building")
 def civil_tech_building():
-    return render_template("civil_tech.html")
+    return _building("Civil Tech Building")
 
 
 @campus_bp.route("/waf_&_fsm_building")
 def waf_fsm_building():
-    return render_template("waf_fsm.html")
+    return _building("WAF & FSM Building")
 
 
 @campus_bp.route("/tech_building")
 def tech_building():
-    return render_template("tech.html")
+    return _building("Tech Building", floors=4)
 
 
 @campus_bp.route("/graduate_school_building")
 def graduate_school_building():
-    return render_template("graduate_school.html")
+    return _building("Graduate School Building", floors=2)
 
 
 @campus_bp.route("/mechanical_building")
 def mechanical_building():
-    return render_template("mechanical.html")
+    return _building("Mechanical Building")
 
 
 @campus_bp.route("/te_building")
 def te_building():
-    return render_template("te.html")
+    return _building("TE Building")
 
 
 @campus_bp.route("/it_building")
@@ -148,4 +153,4 @@ def it_building():
 
 @campus_bp.route("/engineering-floor1")
 def engineering_floor1():
-    return render_template("floor1.html")
+    return _building("Engineering Building", floors=1)
