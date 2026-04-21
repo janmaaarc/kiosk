@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+logs/
+database.db
+*.db
+*.db.gz
+.env
+.env.*
+!deploy/kiosk.env.example
+static/uploads/
+.DS_Store
+.claude/
+REFERENCE/

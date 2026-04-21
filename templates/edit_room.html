@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Edit Room</title>
+</head>
+<body>
+
+<h2>Edit Room</h2>
+
+<form method="POST">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+Building:<br>
+<input type="text" name="building" value="{{ room['building'] }}"><br><br>
+
+Floor:<br>
+<input type="text" name="floor" value="{{ room['floor'] }}"><br><br>
+
+Room:<br>
+<input type="text" name="room" value="{{ room['room'] }}"><br><br>
+
+Description:<br>
+<input type="text" name="description" value="{{ room['description'] }}"><br><br>
+
+<button type="submit">Update Room</button>
+
+</form>
+
+<br>
+<a href="/rooms">Back</a>
+
+</body>
+</html>

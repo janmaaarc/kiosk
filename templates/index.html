@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+@font-face {
+  font-family: 'League Spartan';
+  src: url('/static/font/LeagueSpartan-VariableFont_wght.ttf');
+}
+
+:root {
+  --primary: #7b2d2d;   /* dark red */
+  --secondary: #b85757; /* lighter red */
+  --text-light: #b41919;
+  --text-dark: #111;
+}
+
+*{
+  font-family:'League Spartan', sans-serif;
+}
+
+body {
+  margin:0;
+  height:100vh;
+  overflow:hidden;
+  font-family:'League Spartan';
+}
+
+/* SLIDES */
+.slide {
+  position:absolute;
+  width:100%;
+  height:100%;
+  background-size:cover;
+  background-position:center;
+  opacity:0;
+  transition:opacity 1s ease-in-out;
+}
+
+.slide.active {
+  opacity:1;
+}
+
+/* DARK OVERLAY */
+.overlay {
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.4);
+}
+
+/* TEXT */
+.text {
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  text-align:center;
+  color:white;
+}
+
+.text h1 {
+  font-size:60px;
+  letter-spacing:10px;
+}
+
+.text p {
+  margin-top:20px;
+  font-size:20px;
+  letter-spacing:5px;
+  animation:blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0%,100%{opacity:1;}
+  50%{opacity:0.4;}
+}
+</style>
+</head>
+
+<body onclick="goToMenu()">
+
+<!-- SLIDES -->
+<div class="slide active" style="background-image:url('/static/images/screensaver/slide1.png')"></div>
+<div class="slide" style="background-image:url('/static/images/screensaver/slide2.png')"></div>
+<div class="slide" style="background-image:url('/static/images/screensaver/slide3.png')"></div>
+
+<div class="overlay"></div>
+
+<div class="text">
+  <h1>WELCOME</h1>
+  <p>SCAN YOUR RFID TO ACCESS THE KIOSK</p>
+</div>
+
+<script>
+function goToMenu(){
+  window.location.href = "/menu";
+}
+
+/* SLIDESHOW */
+let slides = document.querySelectorAll(".slide");
+let index = 0;
+
+setInterval(() => {
+  slides[index].classList.remove("active");
+  index = (index + 1) % slides.length;
+  slides[index].classList.add("active");
+}, 3000); // change every 3 sec
+</script>
+
+</body>
+</html>

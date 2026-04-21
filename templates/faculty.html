@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Faculty Kiosk</title>
+
+<style>
+@font-face {
+  font-family: 'League Spartan';
+  src: url('/static/font/LeagueSpartan-VariableFont_wght.ttf');
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'League Spartan';
+}
+
+
+body {
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  position: relative;
+}
+
+/* LEFT PANEL */
+.sidebar {
+  width:260px;
+  background:linear-gradient(180deg,#7b2d2d,#b85757);
+  color:white;
+  padding:70px 25px;
+
+  overflow-y:auto;          /* ✅ scroll */
+  scrollbar-width: none;    /* Firefox */
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none;            /* Chrome */
+}
+
+.sidebar h1 {
+  letter-spacing: 8px;
+  font-size: 18px;
+  margin-bottom: 30px;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.menu button {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.6);
+  text-align: left;
+  font-size: 13px;
+  letter-spacing: 2px;
+  padding: 10px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* OBLONG SELECTED STYLE (PDF STYLE) */
+.menu button.active {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  font-weight: bold;
+}
+
+.menu button:hover {
+  color: white;
+}
+
+/* MAIN */
+.main {
+  flex: 1;
+  position: relative;
+  background: url("/static/images/KIOSK BACKGROUND.png") center/cover no-repeat;
+  overflow-y: auto; /* 🔥 ADD */
+}
+
+
+
+/* TOP BAR */
+.topbar {
+  position: absolute;
+  top: 20px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.search {
+  padding: 10px 20px;
+  border-radius: 25px;
+  border: none;
+  width: 220px;
+  background: rgba(255,255,255,0.9);
+  outline: none;
+}
+.icon {
+  width: 35px;
+  height: 35px;
+  border: 2px solid black;
+  border-radius: 50%;
+}
+
+/* GRID */
+.grid{
+  margin-top:10px;
+  padding:0 60px 40px;
+  width:100%;
+
+  display:grid;
+  grid-template-columns: repeat(auto-fill, 180px); /* 🔥 fixed size */
+  justify-content:flex-start; /* 🔥 left aligned */
+  gap:35px;
+}
+.card {
+  text-align: center;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card img {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+/* SELECTED FACULTY EFFECT */
+.card.selected img {
+  outline: 5px solid rgba(255,255,255,0.9);
+  box-shadow: 0 0 25px rgba(255,255,255,0.8),
+              0 0 50px rgba(255,255,255,0.4);
+  transform: scale(1.1);
+  transition: 0.3s;
+   background: white;
+  padding: 5px;
+  border-radius: 50%;
+  box-shadow: 0 0 30px rgba(255,255,255,0.7);
+}
+
+.card p {
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+/* MODAL */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  width: 320px;
+  text-align: center;
+  border-radius: 10px;
+}
+
+.close {
+  margin-top: 20px;
+  padding: 10px;
+  background: black;
+  color: white;
+  cursor: pointer;
+}
+
+/* TOP BAR */
+.top-bar {
+    position: relative;
+    width: 100%;
+    height: 60px;
+}
+
+/* TOP LEFT ICONS (LIKE PDF) */
+.top-icons {
+    position: absolute;
+    top: 20px;
+    left: 280px;
+    display: flex;
+    gap: 10px;
+    z-index: 20;
+}
+
+.top-icon {
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.top-icon:hover {
+    transform: scale(1.1);
+}
+.dept-title{
+  width:100%;
+  text-align:center;
+  margin-top:90px;   /* push below top icons */
+  margin-bottom:25px;
+  color:#7b2d2d;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  font-size:30px;
+  font-weight:900;
+  letter-spacing:3px;
+}
+
+
+
+</style>
+</head>
+
+<body>
+
+<div class="top-icons">
+    <img src="{{ url_for('static', filename='images/icon/home_button.png') }}" 
+         class="top-icon" onclick="goHome()">
+         
+
+    <img src="{{ url_for('static', filename='images/icon/back_button.png') }}" 
+         class="top-icon" onclick="goBack()">
+</div>
+
+<div class="sidebar">
+  <h1 style="letter-spacing: 10px;">FACULTY</h1>
+  <div class="menu" id="menu"></div>
+</div>
+
+
+<div class="main">
+  <div class="overlay"></div>
+  <h2 class="dept-title" id="deptTitle">ALL</h2>
+  <div class="topbar">
+    <input type="text" id="search" class="search" placeholder="Search..">
+    <div class="icon"></div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-content" id="modalContent"></div>
+</div>
+
+
+<script>
+const data = [
+  {name:"MS. MARIEL BLANCA", dept:"Electronics Technology"},
+  {name:"MR. EDWIN SANTOS", dept:"Electrical Technology"},
+  {name:"MS. ALFIE CRUZ", dept:"Food and Service Management"},
+  {name:"MR. ROMMEL DE GUZMAN", dept:"Mechanical Technology"},
+  {name:"MS. BAULA", dept:"Entrepreneurship"},
+  {name:"MR. MICHAEL REYES", dept:"Automotive Technology"},
+  {name:"MR. CORREGIDOR", dept:"Electronics Technology"},
+  {name:"MS. ESTRADA", dept:"Civil Technology"},
+  {name:"MR. JOHN DOE", dept:"Drafting Technology"},
+  {name:"MS. JANE SMITH", dept:"Garments, Fashion and Design"},
+  {name:"MR. CARLOS RAMOS", dept:"Welding and Fabrication Technology"},
+  {name:"MS. ANGELA LOPEZ", dept:"Electronics Engineering"},
+
+  // duplicates for grid testing
+  {name:"MR. LEO MARTIN", dept:"Mechanical Technology"},
+  {name:"MS. ANNA TORRES", dept:"Food and Service Management"},
+  {name:"MR. KEVIN LIM", dept:"Electrical Technology"},
+  {name:"MS. DIANA CRUZ", dept:"Entrepreneurship"},
+  {name:"MR. MARK TAN", dept:"Automotive Technology"},
+  {name:"MS. LIZA REYES", dept:"Civil Technology"},
+  {name:"MR. JOSHUA LEE", dept:"Drafting Technology"},
+  {name:"MS. KAREN ONG", dept:"Garments, Fashion and Design"}
+];
+
+const categories = [
+  "All",
+  "Automotive Technology",
+  "Civil Technology",
+  "Drafting Technology",
+  "Electrical Technology",
+  "Electronics Technology",
+  "Food and Service Management",
+  "Garments, Fashion and Design",
+  "Heating, Ventilating, Air-Conditioning and Refrigeration Technology",
+  "Mechanical Technology",
+  "Welding and Fabrication Technology",
+  "Electronics Engineering",
+  "Entrepreneurship"
+];
+
+
+const grid = document.getElementById("grid");
+const menu = document.getElementById("menu");
+const search = document.getElementById("search");
+
+let active = "All";
+
+function renderMenu(){
+  menu.innerHTML="";
+  categories.forEach(c=>{
+    const btn=document.createElement("button");
+    btn.textContent=c.toUpperCase();
+    if(c===active) btn.classList.add("active");
+    btn.onclick=()=>{active=c; render();};
+    menu.appendChild(btn);
+  });
+}
+
+function render(){
+  renderMenu();
+  grid.innerHTML="";
+
+  const title = document.getElementById("deptTitle");
+  title.innerText = active.toUpperCase();
+
+  const text = search.value.toLowerCase();
+  
+
+  data
+  .filter(d=>active==="All" || d.dept===active)
+  .filter(d=>d.name.toLowerCase().includes(text))
+  .forEach(d=>{
+    const div=document.createElement("div");
+    div.className="card";
+
+    div.innerHTML=`
+      <img src="https://i.pravatar.cc/150?img=${Math.floor(Math.random()*70)}">
+      <p>${d.name}</p>
+    `;
+
+   div.onclick = () => {
+      selectCard(div); // highlight first
+      setTimeout(() => {
+        goToProfile(d);
+      }, 200); // small delay so user sees effect
+    };
+
+
+    grid.appendChild(div);
+  });
+}
+
+search.addEventListener("input", render);
+
+function showModal(d){
+  const modal=document.getElementById("modal");
+  const content=document.getElementById("modalContent");
+
+  content.innerHTML=`
+    <h3>${d.name}</h3>
+    <p>${d.dept} Department</p>
+    <p>IT Building, Room 202</p>
+    <div class="close" onclick="closeModal()">Close</div>
+  `;
+
+  modal.style.display="flex";
+}
+
+function goToProfile(d) {
+  const query = new URLSearchParams({
+    name: d.name,
+    dept: d.dept,
+    room: JSON.stringify([
+      "IT Building Room 202",
+      "Engineering Building Room 105"
+    ]),
+    img: "https://i.pravatar.cc/150"
+  }).toString();
+
+window.location.href = "/profile?" + query  
+}
+
+function goToMap(location){
+  window.location.href = "/campus_map?location=" + encodeURIComponent(location);
+}
+
+function selectCard(selectedCard) {
+  // remove previous selection
+  document.querySelectorAll(".card").forEach(card => {
+    card.classList.remove("selected");
+  });
+
+  // add to clicked card
+  selectedCard.classList.add("selected");
+}
+
+function closeModal(){
+  document.getElementById("modal").style.display="none";
+}
+
+render();
+function goBack() {
+    window.history.back();
+}
+
+function goHome() {
+    window.location.href = "/"; // change if your home route is different
+}
+
+</script>
+
+</body>
+</html>

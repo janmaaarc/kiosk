@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Events</title>
+
+    <style>
+        @font-face {
+            font-family: 'League Spartan';
+            src: url('/static/font/LeagueSpartan-VariableFont_wght.ttf');
+        }
+        
+        body {
+            margin: 0;
+            font-family: 'League Spartan', sans-serif;
+            background: url("/static/images/KIOSK BACKGROUND.png") no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 70px;
+            color: #7a1f2a;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            padding: 40px;
+        }
+
+        .card {
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .card img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .top-icons{
+            position:absolute;
+            top:15px;
+            left: 20px;
+            display:flex;
+            gap:15px;
+            z-index:10;
+        }
+
+        .top-icons img{
+            width:35px;
+            cursor:pointer;
+            transition:0.2s;
+        }
+
+        .top-icons img:hover{
+            transform:scale(1.1);
+        }
+
+        .icon{
+            width:35px;
+            height:35px;
+            border:2px solid black;
+            border-radius:50%;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<h1>EVENTS AND ACTIVITIES</h1>
+
+<div class="grid">
+    {% for event in events %}
+    <div class="card" onclick="go('{{ event.id }}')">
+        <img src="{{ url_for('static', filename=event.image) }}">
+    </div>
+    {% endfor %}
+</div>
+
+<div class="top-icons">
+    <img src="{{ url_for('static', filename='images/icon/back_button.png') }}" 
+         class="top-icon" onclick="goBack()">
+
+    <img src="{{ url_for('static', filename='images/icon/home_button.png') }}" 
+         class="top-icon" onclick="goHome()">
+</div>
+
+<script>
+function go(id){
+    window.location.href = "/event/" + id;
+}
+
+function goBack(){
+  window.history.back();
+}
+
+function goHome(){
+  window.location.href = "/";
+}
+
+</script>
+
+</body>
+</html>

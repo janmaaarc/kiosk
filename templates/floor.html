@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <script src="{{ url_for('static', filename='js/kiosk.js') }}"></script>
+
+<head>
+    <title>{{ building }} - Floor {{ floor }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/map.css') }}">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+</head>
+<body>
+
+<h1>{{ building }} - Floor {{ floor }}</h1>
+
+<div class="map-container">
+
+    <div class="you-are-here">You Are Here</div>
+
+    {% if highlight %}
+        <div class="route-line"></div>
+    {% endif %}
+
+    <div class="floor-map">
+{% for room in rooms %}
+    <div class="room 
+        {% if highlight and room["room"].lower() == highlight.lower() %}
+            highlighted
+        {% endif %}
+    "
+    onclick="location.href='/campus/{{ building }}/{{ floor }}/{{ room[\'room\'] }}'">
+        {{ room["room"] }}
+    </div>
+{% endfor %}
+    </div>
+
+    {% if directions %}
+        <div class="directions-panel">
+            <h3>Navgiation Instructions</h3>
+            <p>{{ directions }}</p>
+        </div>
+        {% endif %}
+        </div>
+
+</div>
+
+ <a href="/campus/{{ building }}">Back</a>
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+[Unit]
+Description=MPC Kiosk Flask app
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=kiosk
+Group=kiosk
+WorkingDirectory=/opt/kiosk
+EnvironmentFile=/etc/kiosk.env
+# /etc/kiosk.env must define at minimum:
+#   KIOSK_SECRET_KEY=<32+ random bytes, e.g. `python -c "import secrets; print(secrets.token_hex(32))"`>
+#   FLASK_ENV=production
+ExecStart=/opt/kiosk/.venv/bin/gunicorn \
+    --bind 127.0.0.1:8000 \
+    --workers 2 \
+    --access-logfile /opt/kiosk/logs/access.log \
+    --error-logfile  /opt/kiosk/logs/error.log \
+    "kiosk_app:create_app()"
+Restart=always
+RestartSec=3
+
+# Harden
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/kiosk/database.db /opt/kiosk/logs /opt/kiosk/REFERENCE/backups
+
+[Install]
+WantedBy=multi-user.target

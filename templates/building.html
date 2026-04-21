@@ -1,0 +1,17 @@
+<h1>{{ building | capitalize }} Building</h1>
+    <script src="{{ url_for('static', filename='js/kiosk.js') }}"></script>
+
+<h2>Select Floor</h2>
+
+{% for floor in floors %}
+    <a href="/floor/{{ building }}/{{ floor[0] }}">
+        Floor {{ floor[0] }}
+    </a>
+    <br>
+{% endfor %}
+
+
+<br><br>
+<a href="/campus">Back</a>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">

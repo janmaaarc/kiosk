@@ -1,0 +1,1007 @@
+<!DOCTYPE html> 
+<html> 
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> 
+  <head> 
+    <title>Campus Map</title>
+     <style> 
+     
+     body { 
+      margin: 0; font-family: 'League Spartan', sans-serif; 
+      overflow: hidden; 
+      background: url("/static/images/KIOSK BACKGROUND.png") no-repeat center center fixed; 
+      background-size: cover; } 
+
+      h1 { 
+        text-align: center; 
+        color: #7b2d2d; 
+        font-size: 50px; 
+        
+      /* ✅ exact kiosk-style size */ 
+      font-weight: 900; letter-spacing: 6px; 
+      /* ✅ wide spacing like PDF */ 
+      margin-top: 110px; 
+      /* ✅ perfect spacing under icons */ 
+      } 
+      .map-container { 
+        position: relative; 
+        width: 1920px; 
+        /* your original design width */ 
+        height: 1080px; 
+        /* your original design height */ 
+        transform: scale(0.7); 
+        /* adjust this */ 
+        transform-origin: top left; margin:auto; 
+      } 
+
+      /* SEARCH BAR */ 
+      .top-right { 
+        position: absolute; 
+        top: 20px; 
+        right: 30px; 
+      } 
+
+      .top-right input { 
+        padding: 10px;
+        border-radius: 20px; 
+        border: none; 
+      } 
+
+      /* ROAD */ 
+      .road { 
+        position: absolute; 
+        top: 400px; 
+        /* instead of 50% */ 
+        left: 150px; 
+        width: 1100px; 
+        height: 80px; 
+        background: lightgray; 
+        z-index: 1; 
+      } 
+
+        /* BUILDINGS */ 
+        .building { 
+          position: absolute; 
+          background: #f4d35e; 
+          border-radius: 8px; 
+          border: 2px solid rgba(0,0,0,0.2); 
+          text-align: center; 
+          font-weight: bold; 
+          padding-top: 10px; 
+          cursor: pointer; 
+          font-size: 14px; 
+          line-height: 1.2; 
+          box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
+          transition: all 0.2s ease; 
+          z-index: 2; } 
+          
+          .building:hover { 
+            transform: scale(1.05); 
+          background: #ffd54f; 
+          } 
+          
+          .building.active { 
+            background: #ff5722; 
+            /* 🔥 stronger orange/red */ 
+            transform: scale(1.08); 
+            box-shadow: 0 0 25px rgba(255,87,34,0.9); 
+            border: 3px solid white; 
+            animation: pulse 1s infinite alternate; 
+          } 
+
+          @keyframes pulse { 
+            from { transform: scale(1.05); } to { transform: scale(1.1); } 
+          } 
+
+          .road.active { 
+            background: #8e44ad; 
+          /* 🔥 purple (your route color) */ 
+          box-shadow: 0 0 20px rgba(142,68,173,0.9); 
+          } 
+          @keyframes pulseHere { 
+            0% { r: 10; opacity: 0.6; } 
+            100% { r: 25; opacity: 0; } 
+          } 
+          
+          .top-icons { 
+            position: absolute; 
+            top: 20px; 
+            left: 40px; 
+            /* aligns with your other pages */ 
+            display: flex; 
+            gap: 12px; 
+            z-index: 100; 
+            } 
+            
+            .top-icons img { 
+              width: 35px; 
+              height: 35px; 
+              cursor: pointer; 
+              transition: 0.2s; 
+            } 
+            
+            .top-icons img:hover {
+              transform: scale(1.1); 
+            } 
+
+            .directions-panel{ 
+              position:absolute; 
+              right:40px; 
+              top:140px; 
+              width:380px; 
+              background:white; 
+              padding:20px; 
+              border-radius:12px; 
+              box-shadow:0 10px 25px rgba(0,0,0,0.3); 
+            } 
+            
+            .dest-title{ font-size:12px; 
+              font-weight:bold; color:#555; 
+            }
+
+            .dest-name{ 
+              font-size:22px; 
+              font-weight:900; 
+              margin-bottom:15px; 
+              color:#7b2d2d; } 
+            
+            .directions-steps p{ 
+              font-size:14px; 
+              margin-bottom:10px; 
+            } 
+            
+            .qr-btn{ 
+              margin-top:15px; 
+              padding:12px; 
+              text-align:center; 
+              background:black; 
+              color:white; 
+              border-radius:8px; 
+              cursor:pointer; 
+              font-weight:bold; 
+            } 
+
+            .directions-panel { 
+              display: none; 
+            /* 🔥 hide by default */ } 
+
+            </style> 
+            </head> 
+            <body> 
+              <div class="top-icons"> 
+                <img src="{{ url_for('static', filename='images/icon/home_button.png') }}" 
+                onclick="goHome()"> <img src="{{ url_for('static', filename='images/icon/back_button.png') }}" 
+                onclick="goBack()"> <circle id="youHere" r="10" fill="#00c853"/> 
+                <circle id="youPulse" r="10" fill="#00c853" opacity="0.4"/> 
+              </div> 
+            
+            <div class="map-wrapper"> 
+              <div class="map-container"> 
+                <svg id="routeSVG" width="1920" height="1080" style="position:absolute; top:0; left:0; pointer-events:none; z-index: 999;"> 
+                  <path id="routeLine" fill="none" stroke="#8e44ad" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/> 
+                  <circle id="routeDot" r="8" fill="#8e44ad"/> 
+                </svg> 
+
+                 <h1>CAMPUS MAP</h1> 
+
+                 <div class="top-right"> 
+                  <input type="text" placeholder="Search..."> 
+                  </div> 
+                  
+                <div class="road"></div> 
+                <!-- BUILDINGS --> 
+                 <!-- TOP ROW --> 
+                  <div class="building" 
+                    style="top:90px; left:250px; width:650px; height:20px;"> 
+                    RODRIGUEZ BUILDING 
+                  </div> 
+                  
+                  <div class="building" data-name="MIST-NCESTD DORM" 
+                    style="top:90px; left:965px; width:350px; height:130px;">
+                    MIST-NCESTD DORM 
+                  </div>
+                      <div class="building" data-name="MULTI-PURPOSE BUILDING" 
+                      style="top:100px; left:1460px; width:170px; height:80px;"> 
+                      MULTI-PURPOSE BUILDING 
+                    </div> 
+                      <div class="building" data-name="Ylagan Hall" 
+                        style="top:220px; left:390px; width:170px; height:100px;" 
+                        data-page="/ylagan_hall"> 
+                        Ylagan Hall 
+                    </div> 
+                      
+                    <!-- LEFT SIDE --> 
+                      <div class="building" 
+                        data-name="MIST-NCESTD BUILDING" 
+                        style="top:180px; left:50px; width:250px; height:185px;"> 
+                        MIST-NCESTD BUILDING 
+                      </div> 
+                        
+                      <div class="building" 
+                        data-name="AUTOMOTIVE BUILDING" 
+                        style="top:210px; left:1460px; width:170px; height:130px;" 
+                        data-page="/automotive_building"> 
+                        AUTOMOTIVE BUILDING 
+                      </div> 
+                        
+                      <!-- CENTER BIG --> 
+                       <div class="building" 
+                       data-name="ACADEMIC BUILDING" 
+                       style="top:185px; left:600px; width:280px; height:130px;" 
+                       data-page="/academic_building"
+                       onclick="openBuilding('ACADEMIC BUILDING')"> 
+                       ACADEMIC BLDG 
+                      </div> 
+                       
+                       <!-- SMALL CLUSTERS (RIGHT) -->
+                      <div class="building" 
+                        data-name="WAF & RAC BUILDING" 
+                        style="top:290px; left:935px; width:250px; height:75px;" 
+                        data-page="/waf_&_rac_building"> 
+                        WAF & RAC BUILDING 
+                      </div> 
+
+                      <div class="building" 
+                        data-name="WAF & RAC BUILDING" 
+                        style="top:210px; left:1375px; width:75px; height:40px;" 
+                        data-page="/waf_&_rac_building"> 
+                      </div> 
+                        
+                      <div class="building" data-name="WAF & RAC BUILDING" 
+                        style="top:275px; left:1375px; width:75px; height:40px;" 
+                        data-page="/waf_&_rac_building">
+                      </div> 
+                        
+                      <div class="building" 
+                        data-name="POWER ROOM" 
+                        style="top:340px; left:1380px; width:70px; height:35px;"> 
+                        POWER ROOM 
+                      </div> 
+                        
+                      <!-- BOTTOM LEFT --> 
+                      <div class="building" 
+                        data-name="NEW ADMIN BUILDING" 
+                        style="top:500px; left:50px; width:150px; height:200px;" 
+                        data-page="/new_admin_building"> 
+                        NEW ADMIN BUILDING 
+                      </div> 
+                        
+                      <div class="building" 
+                        data-name="OLD ADMIN BUILDING" 
+                        style="top:550px; left:355px; width:80px; height:150px;" 
+                        data-page="/old_admin_building"> OLD ADMIN BUILDING 
+                        </div>
+                      
+                      <!-- BOTTOM CENTER --> 
+                      <div class="building" 
+                        data-name="FSM BUILDING" 
+                        style="top:550px; left:600px; width:200px; height:150px;" 
+                        data-page="/fsm_building"> 
+                        FSM BUILDING 
+                      </div> 
+
+                      <div class="building" 
+                        data-name="CIVIL TECH BUILDING" 
+                        style="top: 480px; left:810px; width:80px; height:220px;" 
+                        data-page="/civil_tech_building"> 
+                        Civil Tech BUILDING 
+                      </div> 
+                        
+                      <div class="building" 
+                        data-name="WAF & FSM BUILDING"
+                        style="top:780px; left:680px; width:600px; height:30px;" 
+                        data-page="/waf_&_fsm_building"> WAF & FSM BUILDING </div> 
+                        
+                        <!-- BOTTOM RIGHT LONG --> 
+                        <div class="building" data-name="TECH BUILDING" 
+                        style="top:550px; left:1205px; width:410px; height:150px;" 
+                        data-page="/tech_building"> 
+                        TECH BUILDING </div> 
+
+                        <div class="building" 
+                        style="top:480px; left:950px; width:90px; height:220px;" 
+                        data-page="/graduate_school_building"> 
+                          GRADUATE SCHOOL BUILDING 
+                        </div> 
+                          
+                        <div class="building" 
+                        style="top:480px; left:1080px; width:105px; height: 220px;" 
+                        data-page="/mechanical_building"> 
+                        MECHANICAL & ELECTRONICS BUILDING</div> 
+                        
+                        <!-- RIGHT SIDE VERTICAL --> 
+                         <div class="building" 
+                         data-name="IT BUILDING" 
+                         style="top:100px; left:1720px; width:120px; height:150px;" 
+                         data-page="/it_building"> 
+                         IT BUILDING </div> 
+                         
+                         <div class="building" 
+                         data-name="SCIENCE BUILDING" 
+                         style="top:270px; left:1720px; width:120px; height:150px;" 
+                         data-page="/science_building"> 
+                         SCIENCE BUILDING 
+                        </div> 
+                         
+                         <div class="building" data-name="TE BUILDING" style="top:445px; left:1720px; width:120px; height:340px;" 
+                         data-page="/te_building"> TE BUILDING </div> <!-- ROAD --> 
+                         
+                         <!-- MAIN HORIZONTAL ROAD --> 
+                         <div class="road" data-name="MAIN HORIZONTAL ROAD" style="top:400px; left:150px; width:1500px;"></div> 
+                         
+                         <!-- SECOND HORIZONTAL ROAD --> 
+                          <div class="road" data-name="SECOND HORIZONTAL ROAD" style="top:140px; left:150px; width:800px; height:35px;"></div> 
+                          
+                          <!--last HORIZONTAL ROAD --> 
+                          <div class="road" data-name="LAST HORIZONTAL ROAD" style="top:730px; left:150px; width:1500px; height:45px"></div> 
+                          
+                          <!-- 1st VERTICAL ROAD/left side --> 
+                          <div class="road" data-name="1ST VERTICAL ROAD" style="top:480px; left:210px; width:140px; height:340px;"></div> 
+                           
+                          <div class="road" data-name="2ND VERTICAL ROAD" style="top:150px; left:305px; width:40px; height:340px;"></div> 
+                           
+                           <!-- 2nd VERTICAL ROAD/left side/lolo's park --> 
+                          <div class="road" data-name="3RD VERTICAL ROAD" style="top:140px; left:565px; width:30px; height:635px;"></div>
+                            
+                          <!-- 3rd vertical ROAD --> 
+                           <div class="road" data-name="3RD VERTICAL ROAD" style="top:140px; left:895px; width:40px; height:600px;"></div> 
+                           
+                          <!-- fourth vertical ROAD --> 
+                           <div class="road" data-name="4TH VERTICAL ROAD" style="top:300px; left:1190px; width:20px; height:150px;"></div> 
+
+                          <!-- fifth vertical ROAD --> 
+                          <div class="road" data-name="5TH VERTICAL ROAD" style="top:90px; left:1345px; width:30px; height:390px;"></div> 
+                            
+                          <!-- last VERTICAL ROAD/middle side --> 
+                           <div class="road" data-name="LAST VERTICAL ROAD" style="top:100px; left:1650px; width:50px; height:700px;"></div> 
+                           
+                           <div class="directions-panel" id="directionsPanel"> 
+                            <div class="dest-title">DESTINATION</div> 
+                            <div class="dest-name" id="destName">IT BUILDING</div> 
+
+                            <div class="directions-steps" id="directionsBox"></div> 
+                            <div class="qr-btn" onclick="generateQR()">GENERATE QR CODE</div> 
+                          </div> 
+                            
+                          <script>
+
+                          function findPath(start, end){ 
+                              const queue = [[start]]; 
+                              const visited = new Set(); 
+
+                              while(queue.length > 0){ 
+                                
+                                const path = queue.shift(); 
+                                const node = path[path.length - 1]; 
+
+                                if(node === end){
+                                  return path;
+                                }
+
+                                if(!visited.has(node)){
+                                 visited.add(node); 
+                                  
+                                  const neighbors = graph[node] || []; 
+                                  
+                                  neighbors.forEach(n => { 
+                                    const newPath = [...path, n]; 
+                                    queue.push(newPath); 
+                                  }); 
+                                } 
+                              } 
+
+                              return null; 
+                            } 
+                              
+                              const GRID_SIZE = 40; 
+                              const cols = 1920 / GRID_SIZE; 
+                              const rows = 1080 / GRID_SIZE; 
+
+                              let grid = []; 
+                              
+                              function buildGrid(){ 
+
+                                grid = []; 
+                                
+                                for(let y = 0; y < rows; y++){ 
+                                  let row = []; 
+                                  
+                                  for(let x = 0; x < cols; x++){ 
+                                    row.push(1); // walkable // 
+                                    } 
+                                    
+                                    grid.push(row); 
+                                  } 
+                                  // BLOCK BUILDINGS //
+                                  document.querySelectorAll(".building").forEach(b => { 
+                                    const rect = b.getBoundingClientRect(); 
+                                    const parent = document.querySelector(".map-container").getBoundingClientRect(); 
+                                    
+                                    const scale = 0.7; 
+                                    
+                                    const left = (rect.left - parent.left) / scale; 
+                                    const top = (rect.top - parent.top) / scale; 
+                                    const right = left + rect.width / scale; 
+                                    const bottom = top + rect.height / scale; 
+                                    
+                                    for(let y = Math.floor(top / GRID_SIZE); y < bottom / GRID_SIZE; y++){ 
+                                      
+                                    for(let x = Math.floor(left / GRID_SIZE); x < right / GRID_SIZE; x++){ 
+                                      if(grid[y] && grid[y][x] !== undefined){ grid[y][x] = 0; 
+                                        // blocked //
+                                      } 
+                                    } 
+                                  } 
+                                }); 
+                              } 
+                              
+                              function findPathGrid(start, end){ 
+                                
+                                const open = []; 
+                                const closed = new Set(); 
+                                
+                                open.push({x:start.x, y:start.y, g:0, f:0, parent:null}); 
+
+                                function key(n){ 
+                                  return `${n.x},${n.y}`; } 
+                                
+                                while(open.length)
+                                
+                                  { open.sort((a,b)=>a.f-b.f); 
+                                  const current = open.shift(); 
+                                  
+                                if(current.x === end.x && current.y === end.y){ 
+                                  let path = []; 
+                                  let node = current; 
+                                
+                                while(node){ 
+                                  path.push({x:node.x, y:node.y}); 
+                                  node = node.parent; 
+                                } 
+                                return path.reverse(); 
+                              } 
+                              
+                              closed.add(key(current)); 
+                              
+                              const dirs = [ [1,0],[-1,0],[0,1],[0,-1] ]; 
+                              
+                            for(const d of dirs){ 
+                              const nx = current.x + d[0]; 
+                              const ny = current.y + d[1]; 
+                              
+                            if(!grid[ny] || grid[ny][nx] === 0) continue; 
+                            if(closed.has(`${nx},${ny}`)) continue; 
+
+                            const cost = getCellCost(nx, ny); 
+                            const g = current.g + cost; 
+                            const h = Math.abs(end.x - nx) + Math.abs(end.y - ny); 
+                            
+                            open.push({ 
+                              x:nx, 
+                              y:ny, 
+                              g, 
+                              f:g+h, 
+                              parent:current 
+                            }); 
+                          } 
+                        } 
+                        
+                        return null; 
+
+                      } 
+                        
+                        function getCellCost(x, y){ 
+                          // default = normal road//
+                          let cost = 1;
+                          
+                          //  example zones (YOU can adjust these) // main road = faster //
+                          if(y > 380 && y < 450){ 
+                            cost = 0.5; 
+                          } 
+
+                          // narrow vertical roads = slower //
+                          if(x > 550 && x < 600){ 
+                            cost = 2; 
+                          } 
+                          
+                          // near buildings = slower (crowded) //
+                          if(grid[y] && grid[y][x] === 0){ 
+                            cost = Infinity; // blocked 
+                            
+                          } 
+
+                          return cost;
+
+                        } 
+                        
+                        function toGrid(x,y){ 
+                          return { 
+                            x: Math.floor(x / GRID_SIZE), 
+                            y: Math.floor(y / GRID_SIZE) 
+                          }; 
+                        } 
+                        
+                        function drawGridPath(path){ 
+                          const converted = path.map(p => ({ 
+                            x: p.x * GRID_SIZE, 
+                            y: p.y * GRID_SIZE 
+                          })); 
+                          
+                          drawSmoothPath(converted); 
+                        } 
+                        
+                        function generateDirections(path){ 
+                          let steps = []; 
+                          steps.push("Start at the entrance."); 
+                          for(let i = 1; i < path.length; i++){ 
+                            const prev = path[i-1]; 
+                            const curr = path[i]; 
+                            const next = path[i+1]; 
+                            
+                            // final destination //
+                            if(!next){ 
+                              steps.push("Arrive at " + curr + "."); 
+                              break; 
+                            } 
+                            // skip building nodes //
+                            if(curr.includes("BUILDING")) continue; 
+
+                            const turn = getDirection(prev, curr, next); 
+                            
+                            steps.push(turn + " toward next path."); 
+                          } 
+                            return steps; 
+                          } 
+
+                            const nodes = {
+
+                              // MAIN LINE //
+                            "MAIN GATE": { x:150, y:420 }, 
+                            "INT_1": { x:300, y:420 }, 
+                            "INT_2": { x:565, y:420 }, 
+                            "INT_3": { x:895, y:420 }, 
+                            "INT_4": { x:1190, y:420 }, 
+                            "INT_5": { x:1345, y:420 }, 
+                            "INT_6": { x:1650, y:420 }, 
+
+                            // LEFT SIDE //
+                            "LEFT_DOWN": { x:210, y:600 }, 
+                            "OLD_ADMIN_ENT": { x:355, y:550 }, 
+                            // CENTER DOWN //
+                            "FSM_ENT": { x:650, y:550 }, 
+                            "CIVIL_ENT": { x:830, y:550 }, 
+                            // RIGHT SIDE DOWN //
+                            "TECH_ENT": { x:1300, y:550 }, 
+                            // TOP ROADS //
+                            "TOP_LEFT": { x:305, y:150 }, 
+                            "TOP_CENTER": { x:565, y:150 }, 
+                            "TOP_RIGHT": { x:895, y:150 }, 
+                            // RIGHT VERTICAL //
+                            "UP_IT": { x:1650, y:250 }, 
+                            "MID_SCI": { x:1650, y:350 }, 
+                            "DOWN_TE": { x:1650, y:600 }, 
+                            // BUILDINGS //
+                            "ACADEMIC BUILDING": { x:700, y:250 }, 
+                            "IT BUILDING": { x:1780, y:180 }, 
+                            "SCIENCE BUILDING": { x:1780, y:320 }, 
+                            "TE BUILDING": { x:1780, y:600 }, 
+                            "FSM BUILDING": { x:650, y:550 }, 
+                            "CIVIL TECH BUILDING": { x:830, y:550 },
+                            "TECH BUILDING": { x:1300, y:550 }, 
+                            "OLD ADMIN BUILDING": { x:355, y:550 } 
+                          }; 
+                          
+                          const graph = { 
+                            
+                            // MAIN ROAD CONNECTION //
+                            "MAIN GATE": ["INT_1"], 
+                            "INT_1": ["MAIN GATE", "INT_2", "LEFT_DOWN"], 
+                            "INT_2": ["INT_1", "INT_3", "TOP_CENTER", "FSM_ENT"], 
+                            "INT_3": ["INT_2", "INT_4", "TOP_RIGHT", "CIVIL_ENT"], 
+                            "INT_4": ["INT_3", "INT_5", "TECH_ENT"], 
+                            "INT_5": ["INT_4", "INT_6"], 
+                            "INT_6": ["INT_5", "UP_IT", "MID_SCI", "DOWN_TE"], 
+                            
+                            // LEFT SIDE//
+                            "LEFT_DOWN": ["INT_1", "OLD_ADMIN_ENT"], 
+                            "OLD_ADMIN_ENT": ["LEFT_DOWN", "OLD ADMIN BUILDING"], 
+                            "OLD ADMIN BUILDING": ["OLD_ADMIN_ENT"], 
+                            
+                            // CENTER BUILDINGS//
+                            "FSM_ENT": ["INT_2", "FSM BUILDING"], 
+                            "FSM BUILDING": ["FSM_ENT"], 
+                            "CIVIL_ENT": ["INT_3", "CIVIL TECH BUILDING"], 
+                            "CIVIL TECH BUILDING": ["CIVIL_ENT"], 
+                            
+                            // RIGHT BUILDINGS//
+                            "TECH_ENT": ["INT_4", "TECH BUILDING"], "TECH BUILDING": ["TECH_ENT"], 
+                            // TOP CONNECTIONS //
+                            "TOP_CENTER": ["INT_2", "ACADEMIC BUILDING"], 
+                            "ACADEMIC BUILDING": ["TOP_CENTER"], 
+                            
+                            // RIGHT VERTICAL SYSTEM //
+                            "UP_IT": ["INT_6", "IT BUILDING"], 
+                            "IT BUILDING": ["UP_IT"], 
+                            "MID_SCI": ["INT_6", "SCIENCE BUILDING"], 
+                            "SCIENCE BUILDING": ["MID_SCI"], 
+                            "DOWN_TE": ["INT_6", "TE BUILDING"], 
+                            "TE BUILDING": ["DOWN_TE"] 
+                          }; 
+                            
+                            function drawPath(path){ 
+
+                              const line = document.getElementById("routeLine");
+
+                              let d = ""; 
+                              
+                              for(let i = 0; i < path.length; i++){
+                                const p = nodes[path[i]]; 
+                                if(i === 0)
+                                { d += `M ${p.x} ${p.y}`; 
+                              } 
+
+                                else { 
+                                  const prev = nodes[path[i-1]]; 
+
+                                  const cx = (prev.x + p.x) / 2; 
+                                  const cy = (prev.y + p.y) / 2; 
+                                  
+                                // quadratic curve //
+                                d += `Q ${prev.x} ${prev.y}, ${cx} ${cy}`; 
+                              } 
+                            } 
+
+                            line.setAttribute("d", d); 
+                            
+                            // animation //
+                            const length = line.getTotalLength(); 
+                            line.style.strokeDasharray = length; 
+                            line.style.strokeDashoffset = length; 
+                            
+                            setTimeout(()=>{ 
+                              line.style.transition = "stroke-dashoffset 1.5s ease"; 
+                              line.style.strokeDashoffset = "0"; }, 
+                              50); 
+                              
+                              animateDot(path); 
+                            } 
+                            
+                            function getNearestNodeFromClick(x, y){ 
+
+                              let closest = null; 
+                              let minDist = Infinity; 
+                              
+                              Object.keys(nodes).forEach(name => { 
+                                
+                                if(!name.includes("BUILDING")){
+                                  
+                                  const n = nodes[name]; 
+                                  
+                                  const dist = Math.sqrt( 
+                                    (n.x - x)**2 + 
+                                    (n.y - y)**2 
+                                  ); 
+                                    
+                                    if(dist < minDist){ 
+                                      minDist = dist; closest = name; 
+                                    } 
+                                  } 
+                                }); 
+                                
+                                return closest; 
+                              } 
+                              
+                              document.querySelector(".map-container").addEventListener("click", (e) => { 
+                                
+                                const rect = e.currentTarget.getBoundingClientRect(); 
+                                const scale = 0.7; 
+                                const x = (e.clientX - rect.left) / scale; 
+                                const y = (e.clientY - rect.top) / scale; buildGrid(); 
+                                const start = toGrid(150, 420); 
+                                
+                                // gate //
+
+                                const end = toGrid(x, y); 
+                                const path = findPathGrid(start, end); 
+                                
+                                if(path){ drawGridPath(path); 
+                                } 
+                              }); 
+                                
+                                function getNearestNode(){ 
+                                  const startPoint = { x:150, y:420 }; 
+                                  
+                                  // gate position// 
+                                let closest = null; 
+                                let minDist = Infinity; 
+                                Object.keys(nodes).forEach(name => { 
+                                  
+                                  // 🚀 consider ALL walkable nodes//
+                                   if(!name.includes("BUILDING")){ 
+
+                                    const n = nodes[name]; 
+
+                                    const dist = Math.sqrt( 
+                                      (n.x - startPoint.x)**2 + 
+                                      (n.y - startPoint.y)**2 
+                                    ); 
+                                    
+                                    if(dist < minDist){ 
+                                      minDist = dist; 
+                                      closest = name; 
+                                    } 
+                                  } 
+                                }); 
+                                
+                                return closest; 
+                              } 
+
+function openBuilding(building){
+  window.location.href =
+    `/building?from=campus&building=${encodeURIComponent(building)}`;
+}
+                              
+                              function updateYouHere(x, y){ 
+                                const dot = document.getElementById("youHere"); 
+                                const pulse = document.getElementById("youPulse"); 
+
+                                dot.setAttribute("cx", x); 
+                                dot.setAttribute("cy", y); 
+                                
+                                pulse.setAttribute("cx", x); pulse.setAttribute("cy", y); 
+                                pulse.style.animation = "pulseHere 1.2s infinite"; 
+                              } 
+                              
+                              function getDirection(prev, curr, next){ 
+                                const A = nodes[prev]; 
+                                const B = nodes[curr]; 
+                                const C = nodes[next]; 
+                                
+                                const angle = Math.atan2(C.y - B.y, C.x - B.x) - Math.atan2(B.y - A.y, B.x - A.x); 
+                                const deg = angle * (180 / Math.PI); 
+
+                                if(deg > 45) return "Turn left"; 
+                                if(deg < -45) return "Turn right"; 
+
+                            return "Continue straight"; 
+                          } 
+
+                            function animateDot(path){ 
+
+                              const dot = document.getElementById("routeDot"); 
+                              const you = document.getElementById("youHere"); 
+                              const pulse = document.getElementById("youPulse"); 
+
+                              let i = 0; 
+                              let progress = 0; 
+
+                              function animate(){ 
+
+                                if(i >= path.length - 1) return;
+
+                              const A = nodes[path[i]]; 
+                              const B = nodes[path[i+1]]; progress += 0.01// 🔥 speed (lower = slower, smoother) //
+                              
+                              const x = A.x + (B.x - A.x) * progress;
+                              const y = A.y + (B.y - A.y) * progress;
+
+                              // route dot (purple)
+                              dot.setAttribute("cx", x);
+                              dot.setAttribute("cy", y);
+
+                              if(progress >= 1){
+                                progress = 0;
+                                i++;
+                              }
+
+                              requestAnimationFrame(animate);
+                            }
+
+                            animate();
+                          }
+
+document.getElementById("youPulse").style.animation = "pulseHere 1.2s infinite";
+
+function showDirections(destination){
+
+  const start = getNearestNode();
+  const target = nodes[destination] ? destination : destination.toUpperCase();
+  const path = findPath(start, target);
+
+if(!path){
+  alert("No path found for " + destination);
+  return;
+}
+
+const startNode = nodes[path[0]];
+updateYouHere(startNode.x, startNode.y);
+
+  // clear highlights
+  document.querySelectorAll(".road, .building").forEach(el=>{
+    el.classList.remove("active");
+  });
+
+  path.forEach(step=>{
+  if(!step.includes("ROAD")){
+  const el = document.querySelector(`[data-name="${step}"]`);
+  if(el){
+    el.classList.add("active");
+  }
+}
+});
+
+  // 🔥 DRAW ROUTE
+  drawPath(path);
+  const dot = document.getElementById("routeDot");
+  dot.setAttribute("cx", nodes[path[0]].x);
+  dot.setAttribute("cy", nodes[path[0]].y);
+
+  // instructions
+  const steps = generateDirections(path);
+
+  let html = "";
+  steps.forEach((step, i)=>{
+    html += `<p>${i+1}. ${step}</p>`;
+  });
+
+  document.getElementById("directionsBox").innerHTML = html;
+  document.getElementById("destName").innerText = destination;
+  document.getElementById("directionsPanel").style.display = "block";
+}
+
+function generateQR(){
+
+  let loc = new URLSearchParams(window.location.search).get("location");
+
+  // fallback if no URL param
+  if(!loc){
+    loc = document.getElementById("destName").innerText;
+  }
+
+  const url = window.location.origin + "/campus_map?location=" + encodeURIComponent(loc);
+
+  window.open("https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + url);
+}
+// CLICK BUILDING → NAVIGATE
+document.querySelectorAll('.building[data-page]').forEach(b => {
+  b.addEventListener('click', (e) => {
+    e.stopPropagation();
+    console.log("CLICKED:", b.innerText); // 🔥 check if it triggers
+
+    const page = b.getAttribute('data-page');
+    console.log("PAGE:", page);
+
+    if(page){
+      const location = b.getAttribute("data-name");
+
+window.location.href = page + "?from=gate&location=" + encodeURIComponent(location);
+    }
+});
+});
+
+// HOME / BACK
+function goHome(){
+  window.location.href = "/";
+}
+
+function goBack(){
+  if(document.referrer){
+    window.history.back();
+  } else {
+    window.location.href = "/";
+  }
+}
+
+function showRoomInfo(room){
+  const box = document.getElementById("directionsBox");
+
+  box.innerHTML += `
+    <p><b>Inside the building:</b></p>
+    <p>Proceed to ${room}.</p>
+  `;
+}
+
+function highlightFromURL(){
+  const params = new URLSearchParams(window.location.search);
+  const location = params.get("location");
+
+  if(!location) return;
+
+  const parts = location.split("ROOM");
+  const building = parts[0].trim().toUpperCase();
+  const room = parts[1] ? "ROOM " + parts[1].trim() : null;
+
+  showDirections(building);
+
+  if(room){
+    showRoomInfo(room);
+  }
+
+  if(building === "IT BUILDING"){
+  setTimeout(() => {
+    window.location.href = "/it_building?from=gate&location=" + encodeURIComponent(location);
+  }, 2500); // wait for animation first
+}
+}
+
+highlightFromURL();
+
+
+// SEARCH
+const input = document.querySelector('.top-right input');
+
+input.addEventListener('input', () => {
+  const value = input.value.toLowerCase();
+
+  document.querySelectorAll('.building').forEach(b => {
+    if(b.innerText.toLowerCase().includes(value)){
+      b.classList.add("active");
+    } else {
+      b.classList.remove("active");
+    }
+  });
+});
+
+input.addEventListener('keypress', (e) => {
+  if (e.key === "Enter") {
+    const value = input.value.toUpperCase().trim();
+
+    showDirections(value);
+
+    // also update URL like faculty click
+    const query = new URLSearchParams({
+      location: value
+    });
+
+    window.history.replaceState(null, "", "?" + query.toString());
+  }
+});
+
+function handleNavigationFlow(){
+
+  const params = new URLSearchParams(window.location.search);
+  const from = params.get("from");
+  const room = params.get("location");
+
+  if(from === "gate" && room){
+
+    // 🔥 highlight room
+    document.querySelectorAll(".room").forEach(r=>{
+      if(r.innerText.toLowerCase().includes(room.toLowerCase())){
+        r.style.background = "#ffcc00";
+      }
+    });
+
+    // 🔥 auto show directions
+    setTimeout(()=>{
+      showBuildingDirections();
+    }, 500);
+  }
+}
+
+function goToBuilding(buildingName, room){
+
+  // 🔥 1. DRAW CAMPUS PATH FIRST
+  const path = findCampusPath("GATE", buildingName);
+
+  if(path){
+    drawCampusPath(path);
+  }
+
+  // 🔥 2. WAIT (LET USER SEE IT)
+  setTimeout(() => {
+
+    // 🔥 3. GO TO BUILDING PAGE
+    window.location.href =
+      `/building?building=${buildingName}&location=${room}&from=campus`;
+
+  }, 2000); // adjust timing if needed
+}
+
+updateYouHere(150, 420); // MAIN GATE POSITION
+
+</script>
+<script src="{{ url_for('static', filename='js/kiosk.js') }}"></script>
+</div>
+
+</body>
+</html>

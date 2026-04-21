@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{ t("search_title") }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+body {
+    font-family: 'League Spartan', Arial, sans-serif;
+    text-align: center;
+    background: #f4f4f4;
+}
+
+h1 { margin-top: 60px; }
+
+.search-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+#searchInput {
+    width: 300px;
+    padding: 15px;
+    font-size: 18px;
+    font-family: inherit;
+}
+
+button {
+    padding: 15px 25px;
+    font-size: 18px;
+    color: white;
+    background: #333;
+    border: none;
+    cursor: pointer;
+}
+
+button:active { background: #555; }
+
+#suggestions div {
+    background: white;
+    padding: 16px 20px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    font-size: 18px;
+    text-align: left;
+    max-width: 340px;
+    margin: 0 auto;
+}
+
+#suggestions div:hover,
+#suggestions div:active {
+    background: #e6f7ff;
+}
+
+.result {
+    margin-top: 40px;
+    background: white;
+    display: inline-block;
+    padding: 30px;
+    border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>{{ t("search_title") }}</h1>
+
+<form method="POST">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="search-row">
+    <input type="text" id="searchInput" name="room" placeholder="{{ t('search_label') }}" autocomplete="off">
+    <button type="submit">{{ t("search_button") }}</button>
+  </div>
+</form>
+
+<div id="suggestions"></div>
+
+{% if result %}
+<div class="result">
+  <h2>Room {{ result['room'] }}</h2>
+  <p><b>Building:</b> {{ result['building'] }}</p>
+  <p><b>Floor:</b> {{ result['floor'] }}</p>
+  <p><b>Description:</b> {{ result['description'] }}</p>
+  <p><b>Directions:</b> Follow the hallway and turn left.</p>
+</div>
+{% endif %}
+
+<script src="{{ url_for('static', filename='js/kiosk.js') }}"></script>
+</body>
+</html>

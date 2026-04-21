@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Rooms</title>
+</head>
+
+<body>
+
+<h2>Room Management</h2>
+
+<a href="/dashboard">Back to Dashboard</a>
+<br><br>
+
+<table border="1">
+
+<tr>
+    <th>ID</th>
+    <th>Building</th>
+    <th>Floor</th>
+    <th>Room</th>
+    <th>Description</th>
+    <th>Edit</th>
+    <th>Delete</th>
+</tr>
+
+{% for room in rooms %}
+
+<tr>
+    <td>{{ room[0] }}</td>
+    <td>{{ room[1] }}</td>
+    <td>{{ room[2] }}</td>
+    <td>{{ room[3] }}</td>
+    <td>{{ room[4] }}</td>
+
+    <td>
+        <a href="/edit_room/{{ room[0] }}">Edit</a>
+    </td>
+
+    <td>
+        <form method="POST" action="{{ url_for('admin.delete_room', id=room[0]) }}" style="display:inline;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" onclick="return confirm('Delete this room?');">Delete</button>
+        </form>
+    </td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+</body>
+</html>

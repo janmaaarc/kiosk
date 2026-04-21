@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Office Info</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Segoe UI', sans-serif;
+}
+
+body{
+  display:flex;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:260px;
+  background:linear-gradient(180deg,#7b2d2d,#8f3a3a);
+  color:white;
+  padding:60px 25px;
+}
+
+.sidebar h1{
+  font-size:18px;
+  letter-spacing:4px;
+  margin-bottom:30px;
+}
+
+.menu{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
+
+.menu div{
+  font-size:13px;
+  letter-spacing:1px;
+  cursor:pointer;
+  opacity:.8;
+}
+
+.menu div:hover{
+  opacity:1;
+}
+
+/* ACTIVE (rounded pill like PDF) */
+.menu .active{
+  background:#f1dede;
+  color:#7b2d2d;
+  padding:6px 15px;
+  border-radius:20px;
+  font-weight:bold;
+  width:fit-content;
+}
+
+/* MAIN */
+.main{
+  flex:1;
+  position:relative;
+  background:url("/static/images/KIOSK BACKGROUND.png") center/cover no-repeat;
+}
+
+/* FADE OVERLAY */
+.main::before{
+  content:"";
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:rgba(255,255,255,0.75);
+}
+
+/* CONTENT */
+.content{
+  position:relative;
+  padding:60px;
+}
+
+/* TOP BAR */
+.topbar{
+  position:absolute;
+  top:20px;
+  right:40px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.search{
+  padding:10px 15px;
+  border-radius:20px;
+  border:none;
+  width:200px;
+  background:#eee;
+}
+
+/* TOP LEFT ICONS */
+.top-icons{
+  position:absolute;
+  top:15px;
+  left: 170px;
+  display:flex;
+  gap:15px;
+  z-index:10;
+}
+
+.top-icons img{
+  width:35px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.top-icons img:hover{
+  transform:scale(1.1);
+}
+
+.icon{
+  width:35px;
+  height:35px;
+  border:2px solid black;
+  border-radius:50%;
+}
+
+/* TITLE */
+.title{
+  text-align:center;
+  margin-top:40px;
+  font-size:40px;
+  font-weight:900;
+  color:#8b2e2e;
+  text-shadow:1px 1px 0 black;
+}
+
+/* INFO TEXT */
+.info{
+  margin-top:30px;
+  margin-left:80px;
+  font-size:16px;
+}
+
+.info p{
+  margin-bottom:10px;
+  font-weight:600;
+}
+
+/* PDF SECTION */
+.pdf-section{
+  margin-top:40px;
+  margin-left:80px;
+  width:70%;
+}
+
+.pdf-item{
+  padding:10px;
+  background:#eee;
+  margin-bottom:10px;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.pdf-item:hover{
+  background:#ddd;
+}
+
+iframe{
+  width:100%;
+  height:400px;
+  margin-top:15px;
+  display:none;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="top-icons">
+    <img src="{{ url_for('static', filename='images/icon/home_button.png') }}" 
+         class="top-icon" onclick="goHome()">
+         
+
+    <img src="{{ url_for('static', filename='images/icon/back_button.png') }}" 
+         class="top-icon" onclick="goBack()">
+</div>
+
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h1>OFFICE<br>INFORMATION</h1>
+
+  <div class="menu">
+    {% for o in offices %}
+      <div 
+        onclick="go('{{ o.key }}')"
+        class="{% if o.key == selected.key %}active{% endif %}"
+      >
+        {{ o.name }}
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <div class="topbar">
+    <input class="search" placeholder="Search..">
+    <div class="icon"></div>
+  </div>
+
+  <div class="content">
+
+    <!-- TITLE -->
+    <div class="title">{{ selected.name }}</div>
+
+    <!-- INFO -->
+    <div class="info">
+      <p>{{ selected.location }}</p>
+      <p>Office hours: {{ selected.hours }}</p>
+    </div>
+
+    <!-- PDF SECTION -->
+    <div class="pdf-section">
+      <h3>Forms & Memos</h3>
+
+      {% for file in selected.files %}
+        <div class="pdf-item" onclick="openPDF('{{ file.file }}')">
+          📄 {{ file.title }}
+        </div>
+      {% endfor %}
+
+      <iframe id="viewer"></iframe>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+function go(name){
+  window.location.href = "/office?name=" + name;
+}
+
+function openPDF(file){
+  let viewer = document.getElementById("viewer");
+  viewer.src = "/static/files/" + file;
+  viewer.style.display = "block";
+}
+
+function goBack(){
+  window.history.back();
+}
+
+function goHome(){
+  window.location.href = "/";
+}
+</script>
+
+</body>
+</html>

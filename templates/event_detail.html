@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ event.title }}</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: #f5f5f5;
+        }
+
+        .container {
+            display: flex;
+            gap: 40px;
+            padding: 50px;
+        }
+
+        .left img {
+            width: 350px;
+        }
+
+        .right {
+            max-width: 800px;
+        }
+
+        h1 {
+            color: #7a1f2a;
+            font-size: 50px;
+        }
+
+        p {
+            line-height: 1.6;
+        }
+
+        .back {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            padding: 10px 20px;
+            background: #eee;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="left">
+        <img src="{{ url_for('static', filename=event.image) }}">
+    </div>
+
+    <div class="right">
+        <h1>{{ event.title }}</h1>
+        <p>{{ event.content }}</p>
+    </div>
+</div>
+
+<div class="back" onclick="history.back()">Back</div>
+
+</body>
+</html>

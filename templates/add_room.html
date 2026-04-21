@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Add Room</title>
+</head>
+<body>
+
+<h2>Add Room</h2>
+
+<form method="POST">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+Building:<br>
+<input type="text" name="building"><br><br>
+
+Floor:<br>
+<input type="text" name="floor"><br><br>
+
+Room:<br>
+<input type="text" name="room"><br><br>
+
+Description:<br>
+<input type="text" name="description"><br><br>
+
+<button type="submit">Add Room</button>
+
+</form>
+
+</body>
+</html>

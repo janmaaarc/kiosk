@@ -1,0 +1,78 @@
+OFFICE_SUMMARIES = [
+    {"key": "Registrar", "name": "REGISTRAR", "image": "OSA.jpg"},
+    {"key": "PLACEMENT", "name": "PLACEMENT OFFICE", "image": "OSA.jpg"},
+    {"key": "Clinic", "name": "CLINIC", "image": "OSA.jpg"},
+    {"key": "LIBRARY", "name": "LIBRARY", "image": "OSA.jpg"},
+    {"key": "OSA", "name": "OFFICE OF THE STUDENT AFFAIRS", "image": "OSA.jpg"},
+    {"key": "CASHIER", "name": "CASHIER", "image": "OSA.jpg"},
+    {"key": "Guidance", "name": "GUIDANCE", "image": "OSA.jpg"},
+    {"key": "IRGO", "name": "IRGO", "image": "irgo.jpg"},
+]
+
+
+OFFICE_DETAILS = [
+    {
+        "key": "Registrar",
+        "name": "REGISTRAR",
+        "location": "Admin Building, Room 101",
+        "hours": "8:00 AM - 5:00 PM",
+        "desc": "Handles enrollment and records.",
+        "files": [{"title": "Registration Form", "file": "registration_form.pdf"}],
+    },
+    {
+        "key": "Clinic",
+        "name": "CLINIC",
+        "location": "Admin Building, Room 110",
+        "hours": "8:00 AM - 5:00 PM",
+        "desc": "Medical services.",
+        "files": [{"title": "Medical Form", "file": "medical_form.pdf"}],
+    },
+    {
+        "key": "OSA",
+        "name": "OFFICE OF STUDENT AFFAIRS",
+        "location": "Admin Building, Room 110",
+        "hours": "8:00 AM - 5:00 PM",
+        "desc": "Medical services.",
+        "files": [{"title": "Medical Form", "file": "medical_form.pdf"}],
+    },
+    {
+        "key": "PLACEMENT",
+        "name": "PLACEMENT OFFICE",
+        "location": "Admin Building, Room 110",
+        "hours": "8:00 AM - 5:00 PM",
+        "desc": "Medical services.",
+        "files": [{"title": "Medical Form", "file": "medical_form.pdf"}],
+    },
+    {
+        "key": "LIBRARY",
+        "name": "LIBRARY",
+        "location": "Admin Building, Room 110",
+        "hours": "8:00 AM - 5:00 PM",
+        "desc": "Medical services.",
+        "files": [{"title": "Medical Form", "file": "medical_form.pdf"}],
+    },
+    {
+        "key": "CASHIER",
+        "name": "CASHIER",
+        "location": "Admin Building, Room 110",
+        "hours": "8:00 AM - 5:00 PM",
+        "desc": "Medical services.",
+        "files": [{"title": "Medical Form", "file": "medical_form.pdf"}],
+    },
+    {
+        "key": "GUIDANCE",
+        "name": "GUIDANCE",
+        "location": "Admin Building, Room 110",
+        "hours": "8:00 AM - 5:00 PM",
+        "desc": "Medical services.",
+        "files": [{"title": "Medical Form", "file": "medical_form.pdf"}],
+    },
+    {
+        "key": "IRGO",
+        "name": "IRGO",
+        "location": "Admin Building, Room 110",
+        "hours": "8:00 AM - 5:00 PM",
+        "desc": "Medical services.",
+        "files": [{"title": "Medical Form", "file": "medical_form.pdf"}],
+    },
+]

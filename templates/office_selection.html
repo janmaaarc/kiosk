@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Office Selection</title>
+
+
+<style>
+@font-face {
+  font-family: 'League Spartan';
+  src: url('/static/font/LeagueSpartan-VariableFont_wght.ttf');
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:'League Spartan', sans-serif;
+  background:url("{{ url_for('static', filename='images/KIOSK BACKGROUND.png') }}") center/cover no-repeat;
+  height:100vh;
+  text-align:center;
+}
+
+/* NAV ICONS (TOP LEFT) */
+.top-icons {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  gap: 12px;
+  z-index: 1000;
+}
+
+.top-icon {
+  width: 50px;
+  height: 50px;
+  padding: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.top-icon:hover {
+  transform: scale(1.1);
+  background: #8b2e2e;
+}
+
+/* TOP BAR */
+.topbar{
+  position:absolute;
+  top:20px;
+  right:40px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.search{
+  padding:10px 15px;
+  border-radius:20px;
+  border:none;
+  width:200px;
+  background:#ffffff;
+}
+
+.icon{
+  width:35px;
+  height:35px;
+  border:2px solid black;
+  border-radius:50%;
+}
+
+/* TITLE (MATCH MENU) */
+.title{
+  margin-top:80px;
+  font-size:70px;
+  font-weight:900;
+  color:#8b2e2e;
+  text-shadow:2px 2px 0 black;
+  letter-spacing:5px;
+}
+
+/* GRID */
+.grid{
+  margin-top: 40px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 columns */
+  gap: 30px;
+  padding: 0 80px;
+}
+/* CARD */
+.card{
+  width: 100%; /* fill grid cell */
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.card img{
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.card p{
+  margin-top:10px;
+  font-weight:900;
+  font-size:16px;
+  letter-spacing:1px;
+}
+
+.card:hover{
+  transform:scale(1.05);
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="top-icons">
+  <img src="{{ url_for('static', filename='images/icon/back_button.png') }}" 
+       class="top-icon" onclick="goBack()">
+
+  <img src="{{ url_for('static', filename='images/icon/home_button.png') }}" 
+       class="top-icon" onclick="goHome()">
+</div>
+<!-- TOP BAR -->
+<div class="topbar">
+  <input class="search" placeholder="Search..">
+  <div class="icon"></div>
+</div>
+
+<!-- TITLE -->
+<div class="title">OFFICE INFORMATION</div>
+
+<!-- GRID -->
+<div class="grid">
+
+  {% for o in offices %}
+    <div class="card" onclick="go('{{ o.key }}')">
+
+      <img src="{{ url_for('static', filename='images/offices/' + o.image) }}">
+
+      <p>{{ o.name }}</p>
+
+    </div>
+  {% endfor %}
+
+
+
+</div>
+
+<script>
+
+function go(name){
+  window.location.href = "/office?name=" + name;
+}
+
+function goBack(){
+  window.history.back();
+}
+
+function goHome(){
+  window.location.href = "/";
+}
+</script>
+
+</body>
+</html>

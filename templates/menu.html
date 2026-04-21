@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Menu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        @font-face {
+            font-family: 'League Spartan';
+            src: url('/static/font/LeagueSpartan-VariableFont_wght.ttf');
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'League Spartan', sans-serif;
+            background: url("{{ url_for('static', filename='images/KIOSK BACKGROUND.png') }}") no-repeat center center fixed;
+            background-size: cover;
+            text-align: center;
+        }
+
+        .title {
+            margin-top: 80px;
+            font-size: 70px;
+            font-weight: 900;
+            color: #8b2e2e;
+            text-shadow: 2px 2px 0 black;
+            letter-spacing: 10px;
+        }
+
+        .menu-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            padding: 50px;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .menu-card {
+            background: rgba(255,255,255,0.9);
+            border-radius: 25px;
+            padding: 30px;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-card img {
+            width: 80px;
+            margin-bottom: 10px;
+            transition: filter 0.3s;
+        }
+
+        .menu-card h2 {
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+
+        .menu-card:hover,
+        .menu-card:active {
+            transform: scale(1.05);
+            background: #8b4a46;
+            color: white;
+        }
+
+        .menu-card:hover img,
+        .menu-card:active img {
+            filter: invert(1);
+        }
+
+        .menu-card:hover h2,
+        .menu-card:active h2 {
+            color: white;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="lang-toggle">
+        <form method="POST" action="/set_lang/{{ 'en' if lang == 'fil' else 'fil' }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit">{{ t("lang_toggle") }}</button>
+        </form>
+    </div>
+
+    <h1 class="title">{{ t("welcome") }}</h1>
+
+    <div class="menu-container">
+
+        <a href="/faculty">
+            <div class="menu-card">
+                <img src="{{ url_for('static', filename='images/icon/faculty_sched.png') }}" alt="">
+                <h2>{{ t("faculty") }}</h2>
+            </div>
+        </a>
+
+        <a href="/campus">
+            <div class="menu-card">
+                <img src="{{ url_for('static', filename='images/icon/campus_map.png') }}" alt="">
+                <h2>{{ t("campus_map") }}</h2>
+            </div>
+        </a>
+
+        <a href="/office-selection">
+            <div class="menu-card">
+                <img src="{{ url_for('static', filename='images/icon/office_info.png') }}" alt="">
+                <h2>{{ t("office_info") }}</h2>
+            </div>
+        </a>
+
+        <a href="/announcements">
+            <div class="menu-card">
+                <img src="{{ url_for('static', filename='images/icon/digital_announcements.png') }}" alt="">
+                <h2>{{ t("announcements") }}</h2>
+            </div>
+        </a>
+
+        <a href="/events">
+            <div class="menu-card">
+                <img src="{{ url_for('static', filename='images/icon/events_and_acts.png') }}" alt="">
+                <h2>{{ t("events") }}</h2>
+            </div>
+        </a>
+
+        <a href="/about">
+            <div class="menu-card">
+                <img src="{{ url_for('static', filename='images/icon/about_us.png') }}" alt="">
+                <h2>{{ t("about") }}</h2>
+            </div>
+        </a>
+
+    </div>
+</body>
+</html>

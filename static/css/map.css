@@ -1,0 +1,101 @@
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #f4f4f4;
+}
+
+body {
+    opacity: 0;
+    transition: opacity 0.4s ease-in;
+}
+
+body.loaded {
+    opacity: 1;
+}
+
+.map-container {
+    position: relative;
+    margin: 40px;
+}
+
+.route-line {
+    position: absolute;
+    top: 80px;
+    left: 50px;
+    width: 5px;
+    height: 0;
+    background-color: blue;
+    animation: drawPath 1.5s forwards;
+}
+
+@keyframes drawPath {
+    from { height: 0; }
+    to { height: 200px; }
+}
+.floor-map {
+    display: grid;
+    grid-template-columns: repeat(3, 200px);
+    gap: 20px;
+    justify-content: center;
+    margin-top: 50px;
+}
+
+.you-are-here {
+    background-color: green;
+    color: white;
+    padding: 20px;
+    font-weight: bold;
+    border: 3px solid darkgreen;
+}
+
+.direction-panel{
+    background: #eef6ff;
+    border: 3px solid #2a7fff;
+    padding: 15px;
+    margin: 20px auto;
+    width: 60%;
+    font-weight:bold;
+}
+
+.room {
+    background: #ffffff;
+    border: 2px solid #000;
+    padding: 40px 10px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.room:hover {
+    background: #d9f3ff;
+}
+
+.hallway {
+    background: #ccc;
+    padding: 40px 10px;
+}
+
+.highlighted {
+    background-color: yellow;
+    border: 3px solid red;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% { background-color: yellow; }
+    50% { background-color: orange; }
+    100% { background-color: yellow; }
+}
+
+body {
+    font-size: 1.5rem;
+}
+
+button, .room {
+    padding: 30px;
+    font-size: 1.3rem;
+}
+
+input {
+    font-size: 1.3rem;
+    padding: 15px;
+}

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Campus Map Directions</title>
+
+<style>
+@font-face {
+  font-family: 'League Spartan';
+  src: url('/static/font/LeagueSpartan-VariableFont_wght.ttf');
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'League Spartan',sans-serif;
+}
+
+body{
+  display:flex;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:260px;
+  background:linear-gradient(180deg,#7b2d2d,#b85757);
+  color:white;
+  padding:70px 25px;
+}
+
+.sidebar h1{
+  letter-spacing:8px;
+  font-size:18px;
+  margin-bottom:25px;
+}
+
+.menu{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
+
+.menu div{
+  font-size:13px;
+  letter-spacing:2px;
+  color: rgba(255,255,255,0.6);
+  padding:10px 15px;
+  border-radius:20px;
+  cursor:pointer;
+}
+
+.menu div.active{
+  background: rgba(255,255,255,0.2);
+  color:white;
+  font-weight:bold;
+}
+
+/* MAIN */
+.main{
+  flex:1;
+  background:url("/static/images/KIOSK BACKGROUND.png") center/cover no-repeat;
+  position:relative;
+  padding:30px 40px;
+  overflow-y:auto;
+}
+
+/* DARK OVERLAY */
+.main::before{
+  content:"";
+  position:absolute;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.4);
+  top:0;
+  left:0;
+  z-index:0;
+}
+
+.main *{
+  position:relative;
+  z-index:1;
+}
+
+/* TOP ICONS */
+.top-icons{
+  position:absolute;
+  top:20px;
+  left:20px;
+  display:flex;
+  gap:10px;
+  z-index:20;
+}
+
+.top-icons img{
+  width:35px;
+  cursor:pointer;
+}
+
+/* TITLE */
+.title{
+  margin-top:80px;
+  font-size:28px;
+  font-weight:900;
+}
+
+/* DESTINATION */
+.destination{
+  margin-top:10px;
+  font-size:18px;
+  font-weight:700;
+}
+
+/* DIRECTIONS BOX */
+.directions{
+  margin-top:30px;
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  width:500px;
+}
+
+.directions p{
+  margin-bottom:10px;
+  font-size:14px;
+}
+
+/* QR BUTTON */
+.qr-btn{
+  margin-top:20px;
+  padding:12px;
+  width:200px;
+  text-align:center;
+  background:black;
+  color:white;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+/* MAP IMAGE PLACEHOLDER */
+.map-box{
+  position:absolute;
+  right:50px;
+  top:150px;
+  width:400px;
+  height:300px;
+  background:white;
+  border-radius:10px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- TOP ICONS -->
+<div class="top-icons">
+  <img src="{{ url_for('static', filename='images/icon/home_button.png') }}" onclick="goHome()">
+  <img src="{{ url_for('static', filename='images/icon/back_button.png') }}" onclick="goBack()">
+</div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h1>C A M P U S</h1>
+  <div class="menu">
+    <div class="active">MAP</div>
+    <div>BUILDINGS</div>
+    <div>ROOMS</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <div class="title">CAMPUS MAP</div>
+  <div class="destination" id="destinationText">DESTINATION: IT BUILDING</div>
+
+  <!-- DIRECTIONS -->
+  <div class="directions" id="directionsBox">
+    <p>You are currently here.</p>
+    <p>Turn right at the first building.</p>
+    <p>Walk straight ahead.</p>
+    <p>At the intersection, turn left.</p>
+    <p>Continue straight.</p>
+    <p>The IT Building will be the last building on your right.</p>
+    <p>Enter through the main entrance.</p>
+
+    <p><b>Inside the building:</b></p>
+    <p>Take the stairs to the second floor.</p>
+    <p>Turn right.</p>
+    <p>The office will be on your right past the first room.</p>
+
+    <div class="qr-btn" onclick="generateQR()">GENERATE QR CODE</div>
+  </div>
+
+  <!-- MAP DISPLAY -->
+  <div class="map-box">
+    MAP IMAGE HERE
+  </div>
+
+</div>
+
+<script>
+function goBack(){
+  window.history.back();
+}
+
+function goHome(){
+  window.location.href="/";
+}
+
+/* GET LOCATION FROM URL */
+function getLocation(){
+  const params = new URLSearchParams(window.location.search);
+  return params.get("location") || "IT BUILDING";
+}
+
+function loadDestination(){
+  const loc = getLocation();
+  document.getElementById("destinationText").innerText = "DESTINATION: " + loc.toUpperCase();
+}
+
+loadDestination();
+
+/* QR GENERATOR (BASIC VERSION) */
+function generateQR(){
+  const loc = getLocation();
+  const url = window.location.origin + "/campus-map?location=" + encodeURIComponent(loc);
+
+  alert("QR Generated for: " + loc + "\n(Link: " + url + ")");
+}
+</script>
+
+</body>
+</html>

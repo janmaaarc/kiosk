@@ -1,0 +1,162 @@
+/* League Spartan custom font */
+@font-face {
+    font-family: 'League Spartan';
+    src: url("../font/LeagueSpartan-VariableFont_wght.ttf") format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Apply globally */
+body {
+    font-family: 'League Spartan', Arial, sans-serif;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+
+    background: url("/static/images/KIOSK BACKGROUND.png") no-repeat center center fixed;
+    background-size: cover;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+.slideshow-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
+
+.slides {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+}
+
+.instruction {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+    color: white;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 20px;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+body {
+    font-family: Arial;
+    margin: 0;
+    background-color: #f2f2f2;
+}
+
+.menu-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+button {
+    width: 300px;
+    padding: 20px;
+    margin: 15px;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.grid-menu {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    padding: 60px;
+}
+
+button {
+    padding: 40px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+#searchInput {
+    width: 60%;
+    padding: 15px;
+    font-size: 18px;
+}
+
+#suggestions div {
+    background: white;
+    padding: 15px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+#suggestions div:hover {
+    background: #e6f7ff;
+}
+
+body {
+    font-size: 1.5rem;
+}
+
+button, .room {
+    padding: 30px;
+    font-size: 1.3rem;
+}
+
+input {
+    font-size: 1.3rem;
+    padding: 15px;
+}
+
+/* Touch targets */
+a, button, [role="button"], .menu-card {
+    min-height: 60px;
+    min-width: 60px;
+}
+
+/* Active mirrors hover for touch devices */
+a:active, button:active {
+    opacity: 0.75;
+}
+
+.lang-toggle {
+    position: fixed;
+    top: 18px;
+    right: 24px;
+    z-index: 100;
+}
+
+.lang-toggle button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    background: rgba(139, 46, 46, 0.9);
+    color: #fff;
+    font-family: 'League Spartan', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 1px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    min-height: 44px;
+    min-width: 80px;
+    transition: background 0.2s;
+}
+
+.lang-toggle button:hover,
+.lang-toggle button:active {
+    background: rgba(100, 30, 30, 0.95);
+}
+

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Faculty Profile</title>
+
+<style>
+@font-face {
+  font-family: 'League Spartan';
+  src: url('/static/font/LeagueSpartan-VariableFont_wght.ttf');
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'League Spartan',sans-serif;
+}
+
+
+body{
+  display:flex;
+  height:100vh;
+  overflow:hidden;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width:260px;
+  background:linear-gradient(180deg,#7b2d2d,#b85757);
+  color:white;
+  padding:70px 25px;
+
+  overflow-y:auto;          /* ✅ scroll */
+  scrollbar-width: none;    /* Firefox */
+}
+
+.sidebar::-webkit-scrollbar {
+  display: none;            /* Chrome */
+}
+
+.sidebar h1{
+  letter-spacing:8px;
+  font-size:18px;
+  margin-bottom:25px;
+}
+
+.menu{
+  display:flex;
+  flex-direction:column;
+  gap:15px;
+}
+
+.menu div{
+  font-size:13px;
+  letter-spacing:2px;
+  color: rgba(255,255,255,0.6);
+  padding:10px 15px;
+  border-radius:20px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.menu div.active{
+  background: rgba(255,255,255,0.2);
+  color:white;
+  font-weight:bold;
+}
+
+/* MAIN */
+.main{
+  flex:1;
+  background:url("/static/images/KIOSK BACKGROUND.png") center/cover no-repeat;
+  position:relative;
+  padding:30px 40px;
+  
+}
+
+/* TOP ICONS */
+.top-icons{
+  position:absolute;
+  top:20px;
+  left:280px;
+  display:flex;
+  gap:15px;
+  z-index:10;
+}
+
+.top-icons img{
+  width:35px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.top-icons img:hover{
+  transform:scale(1.1);
+}
+
+/* SEARCH */
+.topbar{
+  position:absolute;
+  top:20px;
+  right:40px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.search{
+  padding:10px 15px;
+  border-radius:20px;
+  border:none;
+  width:200px;
+  background:#eee;
+}
+
+.icon{
+  width:35px;
+  height:35px;
+  border:2px solid black;
+  border-radius:50%;
+}
+
+/* HEADER */
+.header{
+  display:flex;
+  align-items:center;
+  margin-top:50px;
+  gap:25px;
+}
+
+/* PROFILE IMAGE (bigger like PDF) */
+.header{
+  display:flex;
+  align-items:center;
+  margin-top:80px;
+  gap:30px;
+}
+
+.header img{
+  width:150px;
+  height:150px;
+  border-radius:50%;
+}
+
+.header-text h2{
+  font-size:32px;
+  font-weight:900;
+}
+
+.header-text p{
+  font-size:14px;
+  margin-top:5px;
+}
+
+.header-text a{
+  font-size:14px;
+  margin-top:5px;
+  display:inline-block;
+}
+
+/* TABLE */
+.schedule-container{
+  position:relative;
+  margin-top:30px;
+  width:100%;
+  max-width:900px;
+}
+
+.schedule-bg{
+  width:100%;
+  display:block;
+}
+
+/* TEXT ON TOP OF IMAGE */
+.sched-item{
+  position:absolute;
+  font-size:12px;
+  text-align:center;
+  padding:5px;
+  border-radius:6px;
+  color:rgb(8, 3, 3);
+  font-weight:bold;
+  line-height:1.2;
+}
+
+.rooms a{
+  display:block;
+  font-size:14px;
+  margin-top:5px;
+  color:blue;
+}
+
+.dept-title{
+  position:absolute;
+  top:80px;
+  left:60px;
+  font-size:28px;
+  font-weight:900;
+  letter-spacing:2px;
+}
+
+/* COLORS */
+.yellow{ background:#ffc107; color:black; }
+.green{ background:#2e8b57; }
+.blue{ background:#3f6fd1; }
+.teal{ background:#3ca6a6; }
+
+.schedule{
+  margin-top:30px;
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+}
+
+.schedule th{
+  font-size:12px;
+  padding:8px;
+  border:1px solid #999;
+}
+
+.schedule td{
+  height:60px;
+  border:1px solid #999;
+  font-size:11px;
+  text-align:center;
+}
+
+/* SUBJECT COLORS (match PDF tones) */
+.yellow{ background:#ffc107; color:black; }
+.green{ background:#2e8b57; color:white; }
+.blue{ background:#3f6fd1; color:white; }
+.teal{ background:#3ca6a6; color:white; }
+</style>
+</head>
+
+<body>
+<!-- ICONS -->
+  <div class="top-icons">
+    <img src="{{ url_for('static', filename='images/icon/home_button.png') }}" onclick="goHome()">
+    <img src="{{ url_for('static', filename='images/icon/back_button.png') }}" onclick="goBack()">
+  </div>
+
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h1>FACULTY</h1>
+  <div class="menu">
+  <div onclick="goFaculty('All')" class="active">ALL</div>
+  <div onclick="goFaculty('Automotive Technology')">AUTOMOTIVE TECHNOLOGY</div>
+  <div onclick="goFaculty('Civil Technology')">CIVIL TECHNOLOGY</div>
+  <div onclick="goFaculty('Drafting Technology')">DRAFTING TECHNOLOGY</div>
+  <div onclick="goFaculty('Electrical Technology')">ELECTRICAL TECHNOLOGY</div>
+  <div onclick="goFaculty('Electronics Technology')">ELECTRONICS TECHNOLOGY</div>
+  <div onclick="goFaculty('Food and Service Management')">FOOD AND SERVICE MANAGEMENT</div>
+  <div onclick="goFaculty('Garments, Fashion and Design')">GARMENTS, FASHION AND DESIGN</div>
+  <div onclick="goFaculty('Mechanical Technology')">MECHANICAL TECHNOLOGY</div>
+  <div onclick="goFaculty('Welding and Fabrication Technology')">WELDING AND FABRICATION</div>
+  <div onclick="goFaculty('Electronics Engineering')">ELECTRONICS ENGINEERING</div>
+  <div onclick="goFaculty('Entrepreneurship')">ENTREPRENEURSHIP</div>
+</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- SEARCH -->
+  <div class="topbar">
+    <input type="text" class="search" placeholder="Search..">
+    <div class="icon"></div>
+  </div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <img src="https://i.pravatar.cc/150">
+    <div class="header-text">
+      <h2>MS. MARIEL BLANCA</h2>
+      <p>ELECTRONICS DEPARTMENT</p>
+      <div class="rooms"></div>
+    </div>
+  </div>
+
+  <!-- SCHEDULE -->
+<div class="schedule-container">
+  <img src="/static/images/schedule_template.png" class="schedule-bg">
+</div>
+
+<script>
+
+  const facultyData = [
+  {
+    name: "MS. MARIEL BLANCA",
+    dept: "Electronics Technology",
+    rooms: ["IT Building Room 202", "Lab 1"],
+    img: "https://i.pravatar.cc/150"
+  },
+  {
+    name: "MR. EDWIN SANTOS",
+    dept: "Automotive Technology",
+    rooms: ["Auto Lab Room 1"],
+    img: "https://i.pravatar.cc/151"
+  }
+];
+
+const schedules = {
+  "MS. MARIEL BLANCA": [
+    { day: "MON", time: "9:00-10:00", subject:"PILL42", prof:"ESTRADA", color:"yellow" },
+    { day: "TUE", time: "9:00-10:00", subject:"POM42", prof:"MICHAEL", color:"green" },
+    { day: "MON", time: "1:00-2:00", subject:"SPPM42", prof:"ROMMEL", color:"blue" }
+  ],
+
+  "MR. EDWIN SANTOS": [
+    { day: "MON", time: "9:00-10:00", subject:"PILL42", prof:"ESTRADA", color:"yellow" },
+    { day: "TUE", time: "9:00-10:00", subject:"POM42", prof:"MICHAEL", color:"green" },
+    { day: "MON", time: "1:00-2:00", subject:"SPPM42", prof:"ROMMEL", color:"blue" }
+  ]
+};
+
+const dayMap = {
+  "MON": 0,
+  "TUE": 1,
+  "WED": 2,
+  "THU": 3,
+  "FRI": 4,
+  "SAT": 5
+};
+
+const timeMap = {
+  "7:00-8:00": 0,
+  "8:00-9:00": 1,
+  "9:00-10:00": 2,
+  "10:00-11:00": 3,
+  "11:00-12:00": 4,
+  "12:00-1:00": 5,
+  "1:00-2:00": 6,
+  "2:00-3:00": 7,
+  "3:00-4:00": 8
+};
+
+
+function renderSchedule(name){
+  const container = document.querySelector(".schedule-container");
+
+  document.querySelectorAll(".sched-item").forEach(e => e.remove());
+
+  const sched = schedules[name];
+  if(!sched) return;
+
+  function renderSchedule(name){
+  const container = document.querySelector(".schedule-container");
+  const bg = document.querySelector(".schedule-bg");
+
+  document.querySelectorAll(".sched-item").forEach(e => e.remove());
+
+  const sched = schedules[name];
+  if(!sched) return;
+
+  const rect = bg.getBoundingClientRect();
+
+  const colWidth = rect.width / 7;   // 6 days + time column spacing
+  const rowHeight = rect.height / 10;
+
+  const startX = colWidth * 1.2;  // skip TIME column
+  const startY = rowHeight * 1.5;
+
+  sched.forEach(item=>{
+    const col = dayMap[item.day];
+    const row = timeMap[item.time];
+
+    if(col === undefined || row === undefined) return;
+
+    const div = document.createElement("div");
+    div.className = "sched-item " + item.color;
+
+    div.style.left = (startX + col * colWidth) + "px";
+    div.style.top = (startY + row * rowHeight) + "px";
+
+    div.style.width = (colWidth * 0.9) + "px";
+    div.style.height = (rowHeight * 0.8) + "px";
+
+    div.innerHTML = `
+      ${item.subject}<br>
+      ${item.prof}
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+  sched.forEach(item=>{
+    const col = dayMap[item.day];
+    const row = timeMap[item.time];
+
+    if(col === undefined || row === undefined) return;
+
+    const div = document.createElement("div");
+    div.className = "sched-item " + item.color;
+
+    div.style.left = (startX + col * colWidth) + "px";
+    div.style.top = (startY + row * rowHeight) + "px";
+
+    div.innerHTML = `
+      ${item.subject}<br>
+      ${item.prof}
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+function loadFromURL(){
+  const params = new URLSearchParams(window.location.search);
+
+  let name = params.get("name");
+  const dept = params.get("dept");
+
+  // ✅ FIX: if no name, auto-pick a faculty
+  if(!name){
+    if(dept){
+      const found = facultyData.find(f => f.dept === dept);
+      if(found){
+        name = found.name;
+
+        // update URL properly
+        const query = new URLSearchParams({
+          name: found.name,
+          dept: found.dept,
+          room: JSON.stringify(found.rooms || []),
+          img: found.img
+        });
+
+        window.location.search = query.toString();
+        return;
+      }
+    }
+
+    // fallback default
+    name = "MS. MARIEL BLANCA";
+  }
+
+  document.querySelector(".header-text h2").innerText = name;
+document.querySelector(".header-text p").innerText = dept + " DEPARTMENT";
+
+// 🔥 FIND FACULTY DATA
+const faculty = facultyData.find(f => f.name === name);
+
+// 🔥 RENDER ROOMS (CLICKABLE LINKS)
+const roomsDiv = document.querySelector(".rooms");
+roomsDiv.innerHTML = "";
+
+if(faculty && faculty.rooms){
+  faculty.rooms.forEach(room => {
+    const a = document.createElement("a");
+    a.innerText = room;
+
+    // 🔥 CLICK → GO TO MAP WITH LOCATION
+    a.onclick = () => {
+      const building = room.split(" Room")[0]; // extract building name
+      window.location.href = "/campus_map?location=" + encodeURIComponent(building);
+    };
+
+    roomsDiv.appendChild(a);
+  });
+}
+
+  renderSchedule(name);
+}
+
+function highlightActiveDept(){
+  const params = new URLSearchParams(window.location.search);
+  const currentDept = params.get("dept") || "All";
+
+  document.querySelectorAll(".menu div").forEach(item => {
+    item.classList.remove("active");
+
+    if(item.innerText.toUpperCase() === currentDept.toUpperCase()){
+      item.classList.add("active");
+    }
+  });
+}
+
+// NAVIGATION
+function goBack(){
+  window.history.back();
+}
+
+function goHome(){
+  window.location.href="/";
+}
+
+function goFaculty(dept){
+  window.location.href = "/faculty?dept=" + encodeURIComponent(dept);
+}
+
+// RUN ON LOAD
+loadFromURL();
+highlightActiveDept(); // ✅ ADD THIS
+</script>
+
+</body>
+</html>
