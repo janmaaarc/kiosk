@@ -171,6 +171,7 @@ iframe{
   height:400px;
   margin-top:15px;
   display:none;
+  border:none;
 }
 </style>
 
@@ -233,7 +234,7 @@ iframe{
         </div>
       {% endfor %}
 
-      <iframe id="viewer"></iframe>
+      <iframe id="viewer" sandbox="allow-same-origin"></iframe>
     </div>
 
   </div>
@@ -252,11 +253,11 @@ function openPDF(file){
 }
 
 function goBack(){
-  window.history.back();
+  window.location.href = "/office-selection";
 }
 
 function goHome(){
-  window.location.href = "/";
+  window.location.href = "/menu";
 }
 </script>
 

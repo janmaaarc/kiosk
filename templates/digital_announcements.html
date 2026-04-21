@@ -12,24 +12,32 @@
             margin: 0;
             font-family: 'League Spartan', sans-serif;
             background: url("/static/images/KIOSK BACKGROUND.png") no-repeat center center fixed;
-            background-size: cover
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
         .title {
             text-align: center;
-            font-size: 70px;
+            font-size: 55px;
             font-weight: 900;
             color: #8b2e2e;
             text-shadow: 2px 2px 0 black;
             letter-spacing: 5px;
-            margin-top: 60px;
+            margin-top: 50px;
+            flex-shrink: 0;
         }
 
         .grid {
+            flex: 1;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 30px;
-            padding: 40px;
+            gap: 24px;
+            padding: 24px 40px 40px;
+            align-content: start;
+            overflow-y: auto;
         }
 
         .card {
@@ -105,11 +113,11 @@ function openPDF(file){
 }
 
 function goBack(){
-  window.history.back();
+  window.location.href = "/menu";
 }
 
 function goHome(){
-  window.location.href = "/";
+  window.location.href = "/menu";
 }
 </script>
 
