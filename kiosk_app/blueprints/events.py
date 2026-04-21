@@ -1,16 +1,29 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, abort, render_template
 
-from kiosk_app.data.events import EVENT_DETAILS, EVENTS_LIST
+from kiosk_app.db import db_connection
 
 events_bp = Blueprint("events", __name__)
 
 
 @events_bp.route("/events")
 def events():
-    return render_template("events.html", events=EVENTS_LIST)
+    with db_connection() as conn:
+        rows = conn.execute(
+            "SELECT * FROM events"
+            " WHERE expires_at IS NULL OR expires_at > datetime('now')"
+            " ORDER BY id DESC"
+        ).fetchall()
+    return render_template("events.html", events=rows)
 
 
 @events_bp.route("/event/<int:event_id>")
 def event_detail(event_id: int):
-    event = EVENT_DETAILS.get(event_id)
+    with db_connection() as conn:
+        event = conn.execute(
+            "SELECT * FROM events WHERE id = ?"
+            " AND (expires_at IS NULL OR expires_at > datetime('now'))",
+            (event_id,),
+        ).fetchone()
+    if event is None:
+        abort(404)
     return render_template("event_detail.html", event=event)

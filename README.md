@@ -20,13 +20,15 @@ kiosk/
 │   ├── db.py                # get_db_connection(), db_connection() ctxmgr
 │   ├── auth.py              # login_required decorator
 │   ├── blueprints/
-│   │   ├── main.py          # /, /menu, /about, /profile, /faculty, /search
+│   │   ├── main.py          # /, /menu, /about, /profile, /faculty, /search, /api/rooms
 │   │   ├── campus.py        # /campus/*, /floor/*, per-building pages
 │   │   ├── announcements.py # /announcements, /announcement-view
 │   │   ├── events.py        # /events, /event/<id>
 │   │   ├── offices.py       # /office-selection, /office
-│   │   └── admin.py         # /admin (rate-limited), /dashboard, /rooms, etc.
-│   └── data/                # hardcoded announcement/event/office data
+│   │   ├── admin.py         # /admin (rate-limited), /dashboard, /rooms, etc.
+│   │   └── content.py       # /admin/events|announcements|offices CRUD, /admin/upload
+│   ├── i18n.py              # EN / FIL string table + get_translator()
+│   └── data/                # legacy hardcoded data (superseded by DB in Phase 3)
 ├── templates/               # Jinja templates (shared, incl. 404/429/500)
 ├── static/                  # css/, js/, font/, images/, announcements/,
 │                            # events/, files/, js/kiosk-scale.js
@@ -124,8 +126,8 @@ changes.
   `<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">`.
 - `/delete_room/<id>` is POST-only, triggered from a form with a CSRF token on
   `/rooms`.
-- `/announcement-view?file=…` validates `file` against a whitelist built from
-  `kiosk_app/data/announcements.py`.
+- `/announcement-view?file=…` looks up `file` in the DB — the response renders
+  the DB-stored value, never the raw query parameter.
 - `/search` escapes `%` / `_` / `\` before building the `LIKE` prefix.
 - `/admin` login is rate-limited to 5 attempts per 15 minutes per IP.
 - DB connections use a `db_connection()` context manager so they always close
@@ -135,10 +137,17 @@ changes.
 - Admin login successes and failures are logged at INFO / WARNING level to
   `logs/kiosk.log` (rotating, 10 MB × 5).
 
+## Admin content management
+
+Staff can manage events, announcements, and offices at `/dashboard` after
+logging in. Each section supports create, edit, and delete. Images and PDFs
+are uploaded via the drag-drop fields (stored under `static/uploads/`).
+
+Setting `expires_at` on any record hides it automatically on the public-facing
+pages once the timestamp passes — no redeploy required.
+
 ## Known limitations
 
-- Static content (events, announcements, offices) is still hardcoded in
-  `kiosk_app/data/*.py`. **Phase 3** of [ROADMAP.md](ROADMAP.md) moves these
-  into the DB so staff can publish without a redeploy.
 - No automated test suite yet (Phase 4).
-- Idle screensaver / auto-return to menu not implemented yet (Phase 2).
+- `kiosk_app/data/*.py` files are kept as a reference but are no longer read
+  at runtime; the DB is the source of truth after `init_db.py` has run.

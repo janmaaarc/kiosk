@@ -1,0 +1,58 @@
+{% extends "admin/base.html" %}
+{% block title %}Events{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <h1 class="page-title">Events</h1>
+    <a href="{{ url_for('content.event_add') }}" class="btn btn-primary">+ Add Event</a>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Image</th>
+            <th>Title</th>
+            <th>Date</th>
+            <th>Published</th>
+            <th>Expires</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ev in events %}
+        <tr>
+            <td>{{ ev['id'] }}</td>
+            <td>
+                {% if ev['image'] %}
+                <img class="img-thumb" src="{{ url_for('static', filename=ev['image']) }}"
+                     onerror="this.style.display='none'" alt="">
+                {% endif %}
+            </td>
+            <td>
+                {{ ev['title'] }}
+                {% if ev['expires_at'] and ev['expires_at'] < now %}
+                    <span class="expired-badge">EXPIRED</span>
+                {% endif %}
+            </td>
+            <td>{{ ev['date'] or '—' }}</td>
+            <td>{{ ev['published_at'][:10] if ev['published_at'] else '—' }}</td>
+            <td>{{ ev['expires_at'][:10] if ev['expires_at'] else '—' }}</td>
+            <td>
+                <a href="{{ url_for('content.event_edit', event_id=ev['id']) }}"
+                   class="btn btn-secondary btn-sm">Edit</a>
+                <form method="POST"
+                      action="{{ url_for('content.event_delete', event_id=ev['id']) }}"
+                      style="display:inline"
+                      onsubmit="return confirm('Delete this event?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" style="text-align:center;color:#888;">No events yet.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

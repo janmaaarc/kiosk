@@ -51,19 +51,26 @@ Grouped by delivery phase. Each phase is independently shippable.
 
 ---
 
-## Phase 3 — Content management
+## Phase 3 — Content management ✅ DONE (2026-04-21)
 
 **Goal:** staff update announcements / events / office info without touching code.
 
-| Item | Files |
-|---|---|
-| Migrate `ANNOUNCEMENTS`, `EVENTS_LIST`, `EVENT_DETAILS`, `OFFICES_*` from [kiosk_app/data/](kiosk_app/data/) to SQLite tables | [init_db.py](init_db.py) — add tables + seed from existing data |
-| Admin CRUD routes for each: list / add / edit / delete | new blueprint [blueprints/content.py](kiosk_app/blueprints/content.py) |
-| Image upload endpoint with size + MIME check, store under `static/uploads/` | same blueprint |
-| `published_at` / `expires_at` columns — expired items auto-hide | schema + query filter |
-| Data audit: fix duplicate placeholder dates (many events say "Feb 7, 14, 21") | one-time SQL update after migration |
+| Item | Status | Where |
+|---|---|---|
+| Migrate `ANNOUNCEMENTS`, `EVENTS_LIST`, `EVENT_DETAILS`, `OFFICES_*` from `kiosk_app/data/` to SQLite tables | ✅ | [init_db.py](init_db.py) |
+| Admin CRUD routes: list / add / edit / delete for events, announcements, offices | ✅ | [blueprints/content.py](kiosk_app/blueprints/content.py) |
+| Image/PDF upload endpoint with MIME whitelist + size limits (5 MB images, 10 MB PDFs) | ✅ | `/admin/upload` in [blueprints/content.py](kiosk_app/blueprints/content.py) |
+| `published_at` / `expires_at` columns — expired items auto-hide on public pages | ✅ | all public blueprints |
+| Admin base layout with sidebar navigation | ✅ | [templates/admin/base.html](templates/admin/base.html) |
+| Seeded: 30 events, 24 announcements, 8 offices | ✅ | [init_db.py](init_db.py) |
 
-**Ship when:** staff can publish a new event through `/dashboard` and it appears on `/events` without a redeploy.
+**Notes:**
+- Upload filenames are UUIDs (`uuid4().hex + ext`) — no user-supplied filenames reach the filesystem.
+- All CRUD routes are `@login_required` and rate-limited; upload endpoint is limited to 30 requests/min.
+- `offices.files` is stored as JSON text; `_with_files()` deserializes it before template rendering.
+- All active-filter SQL is inlined as string literals (no f-string interpolation) to satisfy bandit B608.
+
+**Ship when:** staff can publish a new event through `/dashboard` and it appears on `/events` without a redeploy. ✅
 
 ---
 

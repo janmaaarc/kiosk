@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{ event.title }}</title>
+    <title>{{ event['title'] }}</title>
 
     <style>
         body {
@@ -49,12 +49,12 @@
 
 <div class="container">
     <div class="left">
-        <img src="{{ url_for('static', filename=event.image) }}">
+        <img src="{{ url_for('static', filename=event['image']) }}">
     </div>
 
     <div class="right">
-        <h1>{{ event.title }}</h1>
-        <p>{{ event.content }}</p>
+        <h1>{{ event['title'] }}</h1>
+        <p style="white-space:pre-wrap">{{ event['details'] }}</p>
     </div>
 </div>
 

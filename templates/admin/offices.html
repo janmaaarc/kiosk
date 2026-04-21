@@ -1,0 +1,51 @@
+{% extends "admin/base.html" %}
+{% block title %}Offices{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <h1 class="page-title">Offices</h1>
+    <a href="{{ url_for('content.office_add') }}" class="btn btn-primary">+ Add Office</a>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Key</th>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Expires</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for o in offices %}
+        <tr>
+            <td>{{ o['id'] }}</td>
+            <td><code>{{ o['key'] }}</code></td>
+            <td>
+                {{ o['name'] }}
+                {% if o['expires_at'] and o['expires_at'] < now %}
+                    <span class="expired-badge">EXPIRED</span>
+                {% endif %}
+            </td>
+            <td>{{ o['location'] or '—' }}</td>
+            <td>{{ o['expires_at'][:10] if o['expires_at'] else '—' }}</td>
+            <td>
+                <a href="{{ url_for('content.office_edit', office_id=o['id']) }}"
+                   class="btn btn-secondary btn-sm">Edit</a>
+                <form method="POST"
+                      action="{{ url_for('content.office_delete', office_id=o['id']) }}"
+                      style="display:inline"
+                      onsubmit="return confirm('Delete this office?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" style="text-align:center;color:#888;">No offices yet.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

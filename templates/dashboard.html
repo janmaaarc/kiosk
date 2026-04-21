@@ -1,20 +1,42 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Admin Dashboard</title>
-</head>
-<body>
+{% extends "admin/base.html" %}
+{% block title %}Dashboard{% endblock %}
 
-<h1>Admin Dashboard</h1>
-<p>You are logged in.</p>
+{% block content %}
+<h1 class="page-title">Dashboard</h1>
 
-<h1>Admin Dashboard</h1>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:900px">
 
-<a href="/add_room">Add Room</a>
-<br>
-<a href="/rooms">View Rooms</a>
-<br>
-<a href="/logout">Logout</a>
+    <a href="{{ url_for('content.events_list') }}" style="text-decoration:none">
+        <div style="background:#fff;border-radius:8px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.1);
+                    border-left:4px solid #7b2d2d;cursor:pointer">
+            <div style="font-size:28px;font-weight:700;color:#7b2d2d">Events</div>
+            <div style="color:#666;margin-top:6px;font-size:14px">Add, edit, or expire events</div>
+        </div>
+    </a>
 
-</body>
-</html>
+    <a href="{{ url_for('content.announcements_list') }}" style="text-decoration:none">
+        <div style="background:#fff;border-radius:8px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.1);
+                    border-left:4px solid #7b2d2d;cursor:pointer">
+            <div style="font-size:28px;font-weight:700;color:#7b2d2d">Announcements</div>
+            <div style="color:#666;margin-top:6px;font-size:14px">Manage digital announcements</div>
+        </div>
+    </a>
+
+    <a href="{{ url_for('content.offices_list') }}" style="text-decoration:none">
+        <div style="background:#fff;border-radius:8px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.1);
+                    border-left:4px solid #7b2d2d;cursor:pointer">
+            <div style="font-size:28px;font-weight:700;color:#7b2d2d">Offices</div>
+            <div style="color:#666;margin-top:6px;font-size:14px">Update office information</div>
+        </div>
+    </a>
+
+    <a href="{{ url_for('admin.rooms') }}" style="text-decoration:none">
+        <div style="background:#fff;border-radius:8px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.1);
+                    border-left:4px solid #555;cursor:pointer">
+            <div style="font-size:28px;font-weight:700;color:#555">Rooms</div>
+            <div style="color:#666;margin-top:6px;font-size:14px">Campus room directory</div>
+        </div>
+    </a>
+
+</div>
+{% endblock %}

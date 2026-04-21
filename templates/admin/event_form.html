@@ -1,0 +1,68 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit' if event else 'Add' }} Event{% endblock %}
+
+{% block content %}
+<h1 class="page-title">{{ 'Edit' if event else 'Add' }} Event</h1>
+
+<div class="form-card">
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="form-group">
+        <label>Title *</label>
+        <input type="text" name="title" value="{{ event['title'] if event else '' }}" required>
+    </div>
+
+    <div class="form-group">
+        <label>Image path</label>
+        <div class="upload-row">
+            <input type="text" id="image-path" name="image"
+                   value="{{ event['image'] if event else '' }}"
+                   placeholder="e.g. events/women.jpg">
+            <input type="file" id="image-file" accept="image/*"
+                   onchange="previewUpload('image-file','image-path')">
+        </div>
+        <p class="hint">Type a path or upload a new image.</p>
+    </div>
+
+    <div class="form-group">
+        <label>Short description</label>
+        <input type="text" name="desc" value="{{ event['desc'] if event else '' }}">
+    </div>
+
+    <div class="form-group">
+        <label>Date</label>
+        <input type="text" name="date" value="{{ event['date'] if event else '' }}"
+               placeholder="e.g. April 01, 2026 - April 30, 2026">
+    </div>
+
+    <div class="form-group">
+        <label>Time</label>
+        <input type="text" name="time" value="{{ event['time'] if event else '' }}"
+               placeholder="e.g. 8:00 AM - 12:00 PM">
+    </div>
+
+    <div class="form-group">
+        <label>Details</label>
+        <textarea name="details" rows="8">{{ event['details'] if event else '' }}</textarea>
+    </div>
+
+    <div class="form-group">
+        <label>Published at</label>
+        <input type="datetime-local" name="published_at"
+               value="{{ event['published_at'][:16].replace(' ','T') if event and event['published_at'] else '' }}">
+    </div>
+
+    <div class="form-group">
+        <label>Expires at <span style="font-weight:400;color:#888">(leave blank = never)</span></label>
+        <input type="datetime-local" name="expires_at"
+               value="{{ event['expires_at'][:16].replace(' ','T') if event and event['expires_at'] else '' }}">
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:8px">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{{ url_for('content.events_list') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+</div>
+{% endblock %}
