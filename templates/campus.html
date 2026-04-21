@@ -123,15 +123,19 @@
               transform: scale(1.1); 
             } 
 
-            .directions-panel{ 
-              position:absolute; 
-              right:40px; 
-              top:140px; 
-              width:380px; 
-              background:white; 
-              padding:20px; 
-              border-radius:12px; 
-              box-shadow:0 10px 25px rgba(0,0,0,0.3); 
+            .directions-panel{
+              display:none;
+              position:absolute;
+              left:40px;
+              top:140px;
+              width:360px;
+              max-height:560px;
+              overflow-y:auto;
+              background:white;
+              padding:20px;
+              border-radius:12px;
+              box-shadow:0 10px 25px rgba(0,0,0,0.3);
+              z-index:1000;
             } 
             
             .dest-title{ font-size:16px;
@@ -161,9 +165,6 @@
               font-size:18px;
             } 
 
-            .directions-panel { 
-              display: none; 
-            /* 🔥 hide by default */ } 
 
             </style> 
             </head> 
