@@ -1242,19 +1242,17 @@ function highlightFromURL(){
 
 highlightFromURL();
 
-// Mobile view: show only the directions panel fullscreen
+// Mobile view: stretch directions panel to cover everything fullscreen
 if(new URLSearchParams(window.location.search).get("mobile") === "1"){
   const style = document.createElement("style");
   style.textContent = `
-    body > *:not(#directionsPanel) { display: none !important; }
     #directionsPanel {
-      display: block !important;
       position: fixed !important;
       inset: 0 !important;
       width: 100vw !important;
       height: 100vh !important;
       overflow-y: auto !important;
-      z-index: 9999 !important;
+      z-index: 99999 !important;
       padding: 30px 24px !important;
     }
   `;
