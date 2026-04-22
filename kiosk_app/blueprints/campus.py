@@ -1,6 +1,6 @@
 import socket
 
-from flask import Blueprint, render_template, request
+from flask import Blueprint, Response, render_template, request
 
 from kiosk_app.db import db_connection
 
@@ -72,7 +72,8 @@ def campus_map():
         }
         raw = request.args.get("location", "").strip().upper()
         location = raw if raw in _valid else ""
-        return render_template("directions_mobile.html", location=location)
+        html = render_template("directions_mobile.html", location=location)
+        return Response(html, content_type="text/html; charset=utf-8")
 
     return render_template(
         "campus.html",
