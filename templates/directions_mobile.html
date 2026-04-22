@@ -110,6 +110,16 @@ function titleCase(s) {
   }).join(" ");
 }
 
+var CUSTOM_DIRECTIONS = {
+  "ACADEMIC BUILDING": [
+    "You are currently here.",
+    "Walk straight ahead.",
+    "At the intersection, turn left.",
+    "The Academic Building is on your right.",
+    "Enter through the building entrance."
+  ]
+};
+
 var ul = document.getElementById("steps");
 
 if (!DEST) {
@@ -117,34 +127,32 @@ if (!DEST) {
   errEl.textContent = "No destination specified.";
   errEl.style.display = "block";
 } else {
-  var path = bfs("GATE", DEST);
-  if (path && path.length > 1) {
-    var middle = path.slice(1, -1);
-    for (var i = 0; i < middle.length; i++) {
-      var li  = document.createElement("li");
-      var num = document.createElement("span");
-      num.className = "num";
-      num.textContent = i + 1;
-      var txt = document.createElement("span");
-      txt.textContent = "Head toward " + titleCase(middle[i]);
-      li.appendChild(num);
-      li.appendChild(txt);
-      ul.appendChild(li);
+  var steps = CUSTOM_DIRECTIONS[DEST];
+
+  if (!steps) {
+    var path = bfs("GATE", DEST);
+    if (path && path.length > 1) {
+      steps = path.slice(1, -1).map(function(n) { return "Head toward " + titleCase(n); });
+    } else {
+      steps = ["Walk straight from the main entrance toward " + titleCase(DEST)];
     }
-    var arrive = document.getElementById("arrive-msg");
-    arrive.textContent = "You have arrived at " + titleCase(DEST);
-    arrive.style.display = "block";
-  } else {
+  }
+
+  for (var i = 0; i < steps.length; i++) {
     var li  = document.createElement("li");
     var num = document.createElement("span");
     num.className = "num";
-    num.textContent = "1";
+    num.textContent = i + 1;
     var txt = document.createElement("span");
-    txt.textContent = "Walk straight from the main entrance toward " + titleCase(DEST);
+    txt.textContent = steps[i];
     li.appendChild(num);
     li.appendChild(txt);
     ul.appendChild(li);
   }
+
+  var arrive = document.getElementById("arrive-msg");
+  arrive.textContent = "You have arrived at " + titleCase(DEST);
+  arrive.style.display = "block";
 }
 </script>
 </body>

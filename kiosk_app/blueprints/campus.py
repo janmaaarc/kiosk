@@ -226,6 +226,7 @@ _ACADEMIC_GROUND_ROOMS = [
             "The Medical and Dental Services will be on your right.",
         ],
     },
+
     {
         "name": "Record and Information Center",
         "left": 23.3, "top": 8.6, "width": 11.7, "height": 37.1,
@@ -246,6 +247,7 @@ _ACADEMIC_GROUND_ROOMS = [
             "The faculty entrance will be directly in front of you.",
         ],
     },
+
     {
         "name": "CR",
         "left": 83.3, "top": 8.6, "width": 10.0, "height": 37.1,
@@ -261,6 +263,7 @@ _ACADEMIC_GROUND_ROOMS = [
             "Continue down the corridor.",
             "The Quality Assurance Office will be on your left.",
         ],
+
     },
     {
         "name": "Conference Room",
@@ -302,10 +305,12 @@ _ACADEMIC_2ND_ROOMS = [
         "left": 6.7, "top": 8.6, "width": 10.8, "height": 37.1,
         "desc": "Office of the Director for Student Affairs",
         "office_key": "OSA",
-        "directions": _GO_UPSTAIRS_2 + [
-            "At the top of the stairs, turn left along the hallway.",
+        "directions": [
+            "After entering the building, proceed straight ahead toward the staircase/elevator.",
+            "Go up the stairs to the next floor.",
+            "At the top of the stairs, turn left into the hallway.",
             "Continue straight to the end of the corridor.",
-            "The Director for Student Affairs Office will be on your right.",
+            "The Office of Student Affairs will be on your right.",
         ],
     },
     {
@@ -313,7 +318,9 @@ _ACADEMIC_2ND_ROOMS = [
         "left": 17.5, "top": 8.6, "width": 14.2, "height": 37.1,
         "desc": "Guidance, counselling, scholarship, and admission services",
         "office_key": "Guidance",
-        "directions": _GO_UPSTAIRS_2 + [
+        "directions": [
+            "After entering the building, proceed straight ahead toward the staircase/elevator.",
+            "Go up the stairs to the next floor.",
             "At the top of the stairs, turn left along the hallway.",
             "Continue straight down the corridor.",
             "The Guidance and Counselling Office will be on your right.",
@@ -324,7 +331,9 @@ _ACADEMIC_2ND_ROOMS = [
         "left": 31.7, "top": 8.6, "width": 10.8, "height": 37.1,
         "desc": "Career placement and alumni follow-up services",
         "office_key": "PLACEMENT",
-        "directions": _GO_UPSTAIRS_2 + [
+        "directions": [
+            "After entering the building, proceed straight ahead toward the staircase/elevator.",
+            "Go up the stairs to the next floor.",
             "At the top of the stairs, turn left along the hallway.",
             "Continue straight down the corridor.",
             "The Placement and Follow-Up Office will be on your right.",
@@ -400,7 +409,9 @@ _ACADEMIC_4TH_ROOMS = [
         "left": 17.5, "top": 8.6, "width": 60.0, "height": 37.1,
         "desc": "Main academic library",
         "office_key": "LIBRARY",
-        "directions": _GO_UPSTAIRS_4 + [
+        "directions": [
+            "After entering the building, proceed straight ahead toward the staircase/elevator.",
+            "Go up the stairs to the 4th floor.",
             "At the top of the stairs, turn right into the hallway.",
             "Continue straight along the hallway.",
             "The entrance of the Library will be on your left.",
