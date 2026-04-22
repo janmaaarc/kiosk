@@ -60,16 +60,12 @@ def campus_map():
     lan_base_url = f"http://{_lan_ip()}:{port}"
 
 
-    html = render_template(
+    return render_template(
         "campus.html",
         indoor_directions=indoor_directions,
         room_placements=room_placements,
         lan_base_url=lan_base_url,
     )
-    return Response(html, headers={
-        "Content-Type": "text/html; charset=utf-8",
-        "X-Content-Type-Options": "nosniff",
-    })
 
 
 _VALID_LOCATIONS = {
