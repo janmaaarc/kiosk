@@ -1,7 +1,8 @@
 <!DOCTYPE html> 
 <html> 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> 
-  <head> 
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Campus Map</title>
      <style> 
      
@@ -268,9 +269,24 @@
             .qr-card-close:hover { color:#333; }
 
 
-            </style> 
-            </head> 
-            <body> 
+            .map-wrapper { overflow: hidden; }
+
+            @media (max-width: 1024px) {
+              .directions-panel {
+                width: 100% !important;
+                font-size: 15px;
+              }
+              .directions-panel ul li { font-size: 15px; }
+              .directions-panel .dest-name { font-size: 20px; }
+              .view-toggle { font-size: 13px; top: 16px; right: 16px; padding: 6px 14px; }
+              .qr-btn-float { top: 72px; right: 16px; font-size: 12px; padding: 8px 14px; }
+              .qr-card { right: 8px; width: 280px; }
+              #buildingPanel { width: 100% !important; right: -110% !important; }
+              #buildingPanel.open { right: 0 !important; }
+            }
+            </style>
+            </head>
+            <body>
               <div class="top-icons">
                 <img src="{{ url_for('static', filename='images/icon/home_button.png') }}"
                 onclick="goHome()">
@@ -557,12 +573,10 @@
                                     const rect = b.getBoundingClientRect(); 
                                     const parent = document.querySelector(".map-container").getBoundingClientRect(); 
                                     
-                                    const scale = 0.7; 
-                                    
-                                    const left = (rect.left - parent.left) / scale; 
-                                    const top = (rect.top - parent.top) / scale; 
-                                    const right = left + rect.width / scale; 
-                                    const bottom = top + rect.height / scale; 
+                                    const left = (rect.left - parent.left) / _mapScale;
+                                    const top = (rect.top - parent.top) / _mapScale;
+                                    const right = left + rect.width / _mapScale;
+                                    const bottom = top + rect.height / _mapScale;
                                     
                                     for(let y = Math.floor(top / GRID_SIZE); y < bottom / GRID_SIZE; y++){ 
                                       
@@ -1096,12 +1110,9 @@ const LAN_BASE_URL = {{ lan_base_url | tojson }};
 
 function generateQR(){
   let loc = new URLSearchParams(window.location.search).get("location");
-  if(!loc){ loc = document.getElementById("destName").textContent; }
+  if(!loc && _directionsActive){ loc = document.getElementById("destName").textContent; }
   if(!loc) return;
-  let url = LAN_BASE_URL + "/directions?location=" + encodeURIComponent(loc);
-  const photo = BUILDING_PHOTOS[loc.toUpperCase()];
-  if (photo) url += "&img=" + encodeURIComponent(photo);
-  if (_pendingUrl) url += "&burl=" + encodeURIComponent(_pendingUrl.split("?")[0]);
+  const url = LAN_BASE_URL + "/campus_map?location=" + encodeURIComponent(loc);
   document.getElementById("qrCardImage").src = "/qr?size=260&data=" + encodeURIComponent(url);
   document.getElementById("qrCard").classList.add("visible");
 }
@@ -1152,6 +1163,7 @@ document.querySelectorAll('.building[data-page]').forEach(b => {
     }
     const p = document.getElementById('buildingPanel');
     p.style.right = '0px';
+    p.style.width = window.innerWidth < 1024 ? '100%' : '360px';
     p.style.pointerEvents = 'auto';
     document.getElementById('viewToggle').style.display = 'none';
     document.getElementById('qrBtnFloat').style.display = 'none';
@@ -1159,7 +1171,7 @@ document.querySelectorAll('.building[data-page]').forEach(b => {
 });
 function closeBuildingPanel() {
   const p = document.getElementById('buildingPanel');
-  p.style.right = '-500px';
+  p.style.right = window.innerWidth < 1024 ? '-110%' : '-500px';
   p.style.pointerEvents = 'none';
   if (_directionsActive) {
     document.getElementById('viewToggle').style.display = 'flex';
@@ -1310,6 +1322,26 @@ updateYouHere(150, 420); // MAIN GATE POSITION
 </script>
 <script src="{{ url_for('static', filename='js/kiosk.js') }}"></script>
 </div>
+
+<script>
+var _mapScale = 0.7;
+
+function applyMapScale() {
+  var mc = document.querySelector('.map-container');
+  var mw = document.querySelector('.map-wrapper');
+  if (!mc || !mw) return;
+  var vw = window.innerWidth;
+  var vh = window.innerHeight;
+  _mapScale = Math.min(vw / 1920, vh / 1080);
+  mc.style.transform = 'scale(' + _mapScale + ')';
+  mc.style.transformOrigin = 'top left';
+  mw.style.width  = (1920 * _mapScale) + 'px';
+  mw.style.height = (1080 * _mapScale) + 'px';
+}
+
+applyMapScale();
+window.addEventListener('resize', applyMapScale);
+</script>
 
 <!-- Enter Building Preview Panel -->
 <div id="buildingPanel" style="
