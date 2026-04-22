@@ -42,35 +42,37 @@ body {
 }
 
 .sidebar h1 {
-  letter-spacing: 8px;
-  font-size: 22px;
-  margin-bottom: 30px;
+  letter-spacing: 4px;
+  font-size: 17px;
+  margin-bottom: 24px;
+  line-height: 1.4;
 }
 
 .menu {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 6px;
 }
 
 .menu button {
   background: none;
   border: none;
-  color: rgba(255,255,255,0.6);
+  color: rgba(255,255,255,0.75);
   text-align: left;
-  font-size: 16px;
-  letter-spacing: 2px;
-  padding: 12px 15px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 8px 12px;
   border-radius: 20px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.2s;
 }
 
 /* OBLONG SELECTED STYLE (PDF STYLE) */
 .menu button.active {
-  background: rgba(255,255,255,0.2);
-  color: white;
-  font-weight: bold;
+  background: #f1dede;
+  color: #7b2d2d;
+  font-weight: 700;
 }
 
 .menu button:hover {
@@ -98,19 +100,30 @@ body {
 }
 
 .search {
-  padding: 12px 20px;
-  border-radius: 25px;
-  border: none;
+  padding: 10px 16px 10px 40px;
+  border-radius: 20px;
+  border: 2px solid #e0d0d0;
   width: 240px;
-  font-size: 16px;
-  background: rgba(255,255,255,0.9);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  font-family: inherit;
+  background: #fdf8f8;
   outline: none;
+  transition: border-color 0.2s;
 }
+.search:focus { border-color: #8b2e2e; }
 .icon {
-  width: 35px;
-  height: 35px;
-  border: 2px solid black;
+  width: 38px;
+  height: 38px;
+  border: 2px solid #ccc;
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  color: #333;
 }
 
 /* GRID */
@@ -220,13 +233,13 @@ body {
 .dept-title{
   width:100%;
   text-align:center;
-  margin-top:90px;   /* push below top icons */
+  margin-top:90px;
   margin-bottom:25px;
-  color:#7b2d2d;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  font-size:30px;
+  color:#8b2e2e;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.15);
+  font-size:60px;
   font-weight:900;
-  letter-spacing:3px;
+  letter-spacing:5px;
 }
 
 

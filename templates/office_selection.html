@@ -57,12 +57,19 @@ body{
 }
 
 .search{
-  padding:10px 15px;
+  padding:10px 16px;
   border-radius:20px;
-  border:none;
-  width:200px;
-  background:#ffffff;
+  border:2px solid #e0d0d0;
+  width:220px;
+  background:#fdf8f8;
+  font-family:'League Spartan',sans-serif;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:1px;
+  outline:none;
+  transition:border-color 0.2s;
 }
+.search:focus { border-color:#8b2e2e; }
 
 .icon{
   width:35px;
@@ -74,10 +81,10 @@ body{
 /* TITLE (MATCH MENU) */
 .title{
   margin-top:80px;
-  font-size:70px;
+  font-size:60px;
   font-weight:900;
   color:#8b2e2e;
-  text-shadow:2px 2px 0 black;
+  text-shadow:2px 2px 0 rgba(0,0,0,0.15);
   letter-spacing:5px;
 }
 
@@ -106,8 +113,9 @@ body{
 .card p{
   margin-top:10px;
   font-weight:900;
-  font-size:16px;
-  letter-spacing:1px;
+  font-size:14px;
+  letter-spacing:2px;
+  color:#333;
 }
 
 .card:hover{
