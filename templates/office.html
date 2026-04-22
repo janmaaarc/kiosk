@@ -295,13 +295,11 @@ body {
       </a>
       {% else %}
         {% if selected.building_url %}
-        <a class="btn-directions"
-           href="{{ selected.building_url }}?location={{ selected.name | urlencode }}">
+        <a class="btn-directions" href="{{ selected.building_url }}">
           <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 7h10v2H7zm0 4h10v2H7zm0 4h7v2H7z"/></svg>
           ENTER BUILDING
         </a>
-        <a class="btn-directions"
-           href="/campus_map?location={{ selected.building_url | replace('/', '') | replace('_', ' ') | upper | urlencode }}">
+        <a class="btn-directions" href="/campus_map?location={{ selected.location | urlencode }}">
           <svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>
           SHOW DIRECTION
         </a>

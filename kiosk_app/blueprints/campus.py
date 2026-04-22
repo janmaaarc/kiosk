@@ -355,26 +355,26 @@ _ACADEMIC_3RD_ROOMS = [
         "name": "VP for Admin and Finance",
         "left": 6.7, "top": 8.6, "width": 9.2, "height": 37.1,
         "desc": "Office of the Vice President for Administration and Finance",
-        "directions": _GO_UPSTAIRS_3 + [
-            "At the top of the stairs, turn left along the hallway.",
-            "The Office of the VP for Administration and Finance will be the first door on your right.",
+        "directions": [
+            "From the staircase on the 3rd floor, turn left along the hallway.",
+            "The VP for Administration and Finance Office is the first door on your right.",
         ],
     },
     {
         "name": "VP for Academic Affairs",
         "left": 15.8, "top": 8.6, "width": 9.2, "height": 37.1,
         "desc": "Office of the Vice President for Academic Affairs",
-        "directions": _GO_UPSTAIRS_3 + [
-            "At the top of the stairs, turn left along the hallway.",
-            "The Office of the VP for Academic Affairs will be the second door on your right.",
+        "directions": [
+            "From the staircase on the 3rd floor, turn left along the hallway.",
+            "The VP for Academic Affairs Office is the second door on your right.",
         ],
     },
     {
         "name": "Program Chair's Office and Field Study Center",
         "left": 52.5, "top": 8.6, "width": 8.3, "height": 37.1,
         "desc": "Program Chair's Office and Field Study Center",
-        "directions": _GO_UPSTAIRS_3 + [
-            "At the top of the stairs, turn right along the hallway.",
+        "directions": [
+            "From the staircase on the 3rd floor, turn right along the hallway.",
             "The Program Chair's Office and Field Study Center will be on your right.",
         ],
     },
@@ -382,8 +382,8 @@ _ACADEMIC_3RD_ROOMS = [
         "name": "Dean for Technology and Instruction Office",
         "left": 60.8, "top": 8.6, "width": 8.3, "height": 37.1,
         "desc": "Dean for Technology and Instruction Office",
-        "directions": _GO_UPSTAIRS_3 + [
-            "At the top of the stairs, turn right along the hallway.",
+        "directions": [
+            "From the staircase on the 3rd floor, turn right along the hallway.",
             "The Dean for Technology and Instruction Office will be on your right.",
         ],
     },
@@ -391,8 +391,8 @@ _ACADEMIC_3RD_ROOMS = [
         "name": "Dean for Graduate School and Program Chair of Graduate School",
         "left": 69.2, "top": 8.6, "width": 8.3, "height": 37.1,
         "desc": "Dean for Graduate School and Program Chair of Graduate School Office",
-        "directions": _GO_UPSTAIRS_3 + [
-            "At the top of the stairs, turn right along the hallway.",
+        "directions": [
+            "From the staircase on the 3rd floor, turn right along the hallway.",
             "Continue straight to the end of the corridor.",
             "The Dean for Graduate School Office will be on your right.",
         ],
@@ -422,8 +422,8 @@ _ACADEMIC_4TH_ROOMS = [
         "name": "Computer Library",
         "left": 6.7, "top": 54.3, "width": 28.3, "height": 37.1,
         "desc": "Computer library and e-resources",
-        "directions": _GO_UPSTAIRS_4 + [
-            "At the top of the stairs, turn left into the hallway.",
+        "directions": [
+            "From the staircase on the 4th floor, turn left.",
             "The Computer Library will be on your left.",
         ],
     },
@@ -431,8 +431,8 @@ _ACADEMIC_4TH_ROOMS = [
         "name": "Educational Technology Room",
         "left": 67.5, "top": 54.3, "width": 25.8, "height": 37.1,
         "desc": "Educational technology and multimedia room",
-        "directions": _GO_UPSTAIRS_4 + [
-            "At the top of the stairs, turn right into the hallway.",
+        "directions": [
+            "From the staircase on the 4th floor, turn right.",
             "The Educational Technology Room will be at the end of the hallway on your right.",
         ],
     },
@@ -443,16 +443,16 @@ _ACADEMIC_5TH_ROOMS = [
         "name": "Staff Room",
         "left": 17.5, "top": 8.6, "width": 8.3, "height": 37.1,
         "desc": "Staff office",
-        "directions": _GO_UPSTAIRS_5 + [
-            "At the top of the stairs, the Staff Room will be directly ahead on your left.",
+        "directions": [
+            "From the staircase on the 5th floor, the Staff Room will be directly ahead on your left.",
         ],
     },
     {
         "name": "Control Room",
         "left": 17.5, "top": 54.3, "width": 8.3, "height": 37.1,
         "desc": "Control and monitoring room",
-        "directions": _GO_UPSTAIRS_5 + [
-            "At the top of the stairs, the Control Room will be on your left below the Staff Room.",
+        "directions": [
+            "From the staircase on the 5th floor, the Control Room will be on your left.",
         ],
     },
     {"name": "CR", "left": 83.3, "top": 8.6, "width": 10.0, "height": 37.1, "desc": "Comfort room"},

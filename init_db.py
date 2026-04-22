@@ -267,6 +267,35 @@ def _migrate(conn: sqlite3.Connection) -> None:
         )"""
     )
 
+    _OFFICE_BUILDING_URLS = {
+        "Registrar": "/new_admin_building?floor=1",
+        "CASHIER":   "/new_admin_building?floor=1",
+        "PLACEMENT": "/academic_building?floor=2",
+        "Clinic":    "/academic_building?floor=1",
+        "LIBRARY":   "/academic_building?floor=4",
+        "OSA":       "/academic_building?floor=2",
+        "Guidance":  "/academic_building?floor=2",
+        "IRGO":      "/tech_building?floor=1",
+    }
+    _OFFICE_LOCATIONS = {
+        "Registrar": "Admin Building, Ground Floor",
+        "CASHIER":   "Admin Building, Ground Floor",
+        "PLACEMENT": "Academic Building, 2nd Floor",
+        "Clinic":    "Academic Building, 1st Floor",
+        "LIBRARY":   "Academic Building, 4th Floor",
+        "OSA":       "Academic Building, 2nd Floor",
+        "Guidance":  "Academic Building, 2nd Floor",
+        "IRGO":      "Technology Building",
+    }
+    for key, url in _OFFICE_BUILDING_URLS.items():
+        conn.execute(
+            "UPDATE offices SET building_url = ? WHERE key = ?", (url, key)
+        )
+    for key, loc in _OFFICE_LOCATIONS.items():
+        conn.execute(
+            "UPDATE offices SET location = ? WHERE key = ?", (loc, key)
+        )
+
 
 def main() -> None:
     bcrypt = Bcrypt()

@@ -470,8 +470,8 @@
 
                           <!-- OUTSIDE / INSIDE toggle + QR button -->
                           <div class="view-toggle" id="viewToggle" style="display:none">
-                            <span class="toggle-btn active" id="toggleOutside" onclick="setView('outside')">OUTSIDE</span>
-                            <span class="toggle-btn" id="toggleInside" onclick="setView('inside')">INSIDE</span>
+                            <span class="toggle-btn active" id="toggleOutside" onclick="setView('outside')" title="Outdoor directions to the building">OUTSIDE</span>
+                            <span class="toggle-btn" id="toggleInside" onclick="setView('inside')" title="View floor plan and indoor directions">INSIDE</span>
                           </div>
                           <div class="qr-btn-float" id="qrBtnFloat" onclick="generateQR()" style="display:none">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm13-2h-2v2h2v-2zm-2 2h-2v2h2v-2zm4 0h-2v2h2v-2zm0 4h-2v2h2v-2zm-4 0h-2v2h2v-2z"/></svg>
@@ -1076,10 +1076,18 @@ function setView(view){
   if (view === "inside") {
     const el = document.querySelector(`.building[data-name="${dest}"]`);
     if (el && el.dataset.page) {
-      // If the user selected a specific room, jump straight to it on the
-      // floor plan so the indoor route draws automatically.
       const target = _pendingRoom || dest;
       window.location.href = el.dataset.page + "?location=" + encodeURIComponent(target);
+    } else {
+      const box = document.getElementById("directionsBox");
+      while (box.firstChild) box.removeChild(box.firstChild);
+      const li = document.createElement("li");
+      li.style.cssText = "opacity:.7;font-style:italic;";
+      li.textContent = "Floor plan not yet available. Use outdoor directions to reach the entrance.";
+      box.appendChild(li);
+      document.getElementById("toggleInside").classList.remove("active");
+      document.getElementById("toggleOutside").classList.add("active");
+      _currentView = "outside";
     }
   }
 }
@@ -1119,7 +1127,13 @@ const BUILDING_PHOTOS = {
   "TE BUILDING":          "/static/images/building/te_building.jpg",
 };
 let _pendingUrl = null;
+const ACTIVE_BUILDINGS = new Set(["ACADEMIC BUILDING", "NEW ADMIN BUILDING", "OLD ADMIN BUILDING"]);
 document.querySelectorAll('.building[data-page]').forEach(b => {
+  const bName = (b.getAttribute('data-name') || b.textContent.trim()).toUpperCase();
+  if (!ACTIVE_BUILDINGS.has(bName)) {
+    b.style.opacity = "0.55";
+    b.style.cursor = "default";
+  }
   b.onclick = function(e) {
     e.stopPropagation();
     const page = b.getAttribute('data-page');
