@@ -24,7 +24,9 @@ def campus():
         rows = conn.execute("SELECT DISTINCT building FROM rooms").fetchall()
     buildings = [row[0] for row in rows]
 
-    return render_template("campus.html", buildings=buildings)
+    port = request.host.split(":")[-1] if ":" in request.host else "5000"
+    lan_base_url = f"http://{_lan_ip()}:{port}"
+    return render_template("campus.html", buildings=buildings, lan_base_url=lan_base_url)
 
 
 @campus_bp.route("/campus_map")
