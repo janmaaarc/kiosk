@@ -35,15 +35,18 @@ dashboard — no coding required.
 
 | Feature | Description |
 |---|---|
-| **Campus map** | Interactive map of the whole campus. Click any building to see directions from the main gate, including step-by-step instructions and a QR code to share the route. |
-| **Floor plans** | Each building has one or more floor plan pages with clickable room overlays. Click a room to see its name, description, and a shortcut to the linked office. |
-| **Office directory** | Full list of campus offices with location, hours, an open/closed badge, downloadable forms, and a "Get Directions" link to the building floor plan. |
-| **Faculty directory** | Browse faculty by department. Each card shows a photo, name, and a "Find on Map" button when a room is assigned. |
+| **Interactive campus map** | 20+ buildings with A* routing from the main gate. Click a building to see a slide-in panel with photo, **ENTER BUILDING**, **SHOW DIRECTION**, and **CANCEL**. Route line animates along the roads with a "YOU ARE HERE" pin at the gate. OUTSIDE / INSIDE toggle switches between the campus route and the building's floor plan. |
+| **Floor plans** | Every building supports multi-floor plans. The Academic Building ships with 5 hand-drawn SVG floors (Ground, 2nd, 3rd, 4th, 5th). Each room is clickable and draws an indoor route line from the building entrance to the room with a "YOU ARE HERE" pin. |
+| **In-building search** | Every floor plan has a live search bar in the top right that finds rooms across all floors of that building. Match jumps to the correct floor and draws the route automatically. |
+| **Full route (outdoor → indoor)** | Click a room → **SHOW FULL ROUTE** → campus map draws the outdoor route with stakeholder-provided campus directions, then after 3.5 seconds automatically navigates to the floor plan and draws the indoor route to the specific room. |
+| **Office directory** | Offices with location, hours, a live open/closed badge calculated from device time, downloadable forms/memos, an inline PDF viewer, and **ENTER BUILDING** + **SHOW DIRECTION** buttons on each office. Offices without a configured building still get a SHOW DIRECTION fallback to the campus map. |
+| **Faculty directory** | Browse faculty by department. Each card has a photo, name, department, and a **FIND ON MAP** button when a room and building are assigned. |
 | **Events** | Upcoming and ongoing campus events with images, dates, times, and full details. |
 | **Announcements** | Digital notices and memos with PDF downloads. |
-| **Room search** | Search for any room by number. Returns building, floor, and description. |
-| **RFID entry** | The splash screen captures an RFID card scan and forwards the UID to the server for future integration. |
-| **Offline fallback** | If the device loses network, a branded offline page is shown instead of an error. |
+| **Global search (admin / public)** | `/api/search` covers rooms, offices, and faculty in one request. |
+| **QR codes** | Every route has a **GENERATE QR CODE** button that pops up a floating card. QR images are generated server-side at `/qr?data=…&size=…` so the kiosk works offline (no third-party API). |
+| **RFID entry** | The splash screen captures RFID keystrokes (works with any USB HID reader on a laptop). On a Raspberry Pi, set `KIOSK_ENABLE_RFID=1` to also spin up an `mfrc522`-based background watcher. Scanned UIDs are looked up in the `users` table and matched users land on their personalised profile. |
+| **Offline fallback** | A service worker caches static assets and shows a branded `/offline` page when the network drops. |
 
 ---
 
@@ -97,30 +100,71 @@ The sidebar search box filters offices by name in real time.
 
 The full-campus interactive map.
 
-- Tap any building label to open a slide-in panel on the right.
-- The panel shows the building name and an **ENTER BUILDING** button.
-- Pressing ENTER BUILDING navigates to that building's floor plan.
-- If a `?location=` parameter is present in the URL (e.g. from an office
-  "Get Directions" link), the map draws a walking route from the main gate to
-  that building and shows step-by-step directions in a panel on the left.
-- A **GENERATE QR CODE** button creates a QR code that encodes the directions
-  URL so visitors can scan and continue on their phone.
+- Tap any building label to open a slide-in panel on the right with the
+  building's photo, **ENTER BUILDING**, **SHOW DIRECTION**, and **CANCEL**.
+- **ENTER BUILDING** → jumps directly to that building's floor plan.
+- **SHOW DIRECTION** → draws a route line from the main gate to the building
+  without leaving the page. A red sidebar slides in from the left with
+  step-by-step directions and a "YOU ARE HERE" pin appears at the gate.
+- The top-right of the map shows an **OUTSIDE / INSIDE** toggle and a
+  **GENERATE QR CODE** button when directions are active.
+- **OUTSIDE / INSIDE** toggle — INSIDE jumps to the building's floor plan
+  (carrying the specific room if one was selected).
+- **GENERATE QR CODE** → pops up a floating white card with a QR of the
+  current directions URL (server-generated, no internet required). Click
+  anywhere outside the card to dismiss it.
+- `?location=<building>` in the URL automatically draws the route on load.
+- `?location=<building> room <room>` draws the outdoor route, then **after
+  3.5 seconds automatically navigates to the floor plan** at the right floor
+  with the specific room highlighted and the indoor route drawn.
 
 ---
 
-### Building floor plans — e.g. `/rodriguez_building`, `/it_building`
+### Building floor plans — e.g. `/academic_building`, `/it_building`
 
 Each building has its own URL. The floor plan page has:
 
-- A left sidebar with **floor selector buttons** (Ground Floor, Floor 2, etc.)
+- A left sidebar with **floor selector buttons** (e.g. `1ST FLOOR`,
+  `2ND FLOOR`, etc.). Switching floors fades the current plan before loading.
+- A top bar with home / back icons, the building title, a **room search bar**,
+  and a **SHOW DIRECTION** link.
 - A main area showing the floor plan image with **room rectangles** overlaid
-  at their exact positions.
-- Clicking a room opens an info panel showing the room name, description, a
-  **SHOW DIRECTION** back-link to the campus map, and a QR code linking to
-  the room's associated office (if one is configured).
-- Switching floors fades the current plan out before loading the next one.
-- If the page was opened from an office with a `?location=` parameter, the
-  matching room is highlighted in yellow with a pulsing animation.
+  at their exact positions. Each room is clickable.
+- **Room search bar** (top right) — live search across every room on every
+  floor of the current building. Matches display with the floor label badge
+  (`2ND FLOOR`). Clicking a match on the current floor highlights and routes
+  in place; clicking a match on a different floor navigates there.
+- **SHOW DIRECTION** (top right) → jumps to `/campus_map?location=<BUILDING>`
+  so the visitor can see the outdoor route.
+- Clicking a room opens a slide-up info panel with:
+  - Room name + description
+  - **DIRECTIONS** list — stakeholder-provided step-by-step wayfinding text
+  - **SHOW FULL ROUTE** button → outdoor route + auto-navigation back to
+    this floor plan with the specific room highlighted
+  - **OPEN OFFICE PAGE →** button (for rooms linked to an office)
+  - A QR code to the linked office page
+- Clicking a room also draws a **dashed indoor route line** from the
+  building entrance up the hallway to the room, with a "YOU ARE HERE" pin at
+  the entrance.
+- If the page loads with `?location=<room>`, that room is auto-highlighted
+  and the indoor route draws on load.
+
+#### Academic Building — 5 hand-drawn floors
+
+The Academic Building ships with complete SVG floor plans for all 5 floors,
+plus stakeholder-provided wayfinding text for every known room.
+
+| Floor | Rooms |
+|---|---|
+| 1st | Medical & Dental Services, Record & Information Center, MPC Cares, Faculty Room, CR, Quality Assurance Office, Conference Room, Repair & Maintenance, Function Hall |
+| 2nd | Director for Student Affairs, Guidance Scholarship & Admission, Placement and Follow-Up, Faculty Room, CR, Classroom, Command Centers |
+| 3rd | VP for Admin & Finance, VP for Academic Affairs, Program Chair's Office, Dean for Technology and Instruction, Dean for Graduate School, Classroom, Command Centers |
+| 4th | Library, Computer Library, Educational Technology Room, CR |
+| 5th | Staff Room, Control Room, CR |
+
+IT Building uses the client-supplied JPG floor plans for floors 1-3. Other
+buildings fall back to an empty placeholder until rooms are added via the
+admin dashboard.
 
 Full list of building URLs:
 
@@ -640,19 +684,76 @@ cache version changes, stale entries are cleared automatically on the next visit
 
 ## 14. RFID entry capture
 
-The splash screen (`/`) silently captures keystrokes from an RFID reader
-connected via USB (which appears as a keyboard device to the OS).
+The kiosk supports two RFID flows — keyboard emulation (works on any device)
+and a dedicated Raspberry Pi background watcher using `mfrc522` / `RPi.GPIO`.
 
-**How it works:**
-- Characters are accumulated into a buffer as they are typed.
+### Keyboard-emulation (default)
+
+The splash screen (`/`) silently captures keystrokes from an RFID reader that
+appears as a USB HID keyboard.
+
+- Characters accumulate into a buffer as they arrive.
 - If the Enter key is pressed and the buffer has more than 4 characters, the
   browser redirects to `/rfid?uid=<scanned-uid>`.
 - If no key is pressed for 100 ms and the buffer has more than 4 characters,
   the same redirect fires automatically (handles readers that do not send Enter).
 - Keystrokes from the RFID reader are not displayed visibly on screen.
 
-The `/rfid` route currently redirects to `/menu`. Future integration can map
-UIDs to student or staff records and personalise the kiosk experience.
+### Raspberry Pi watcher (optional)
+
+For deployments on a Pi with a physical RC522 module, the kiosk ships a
+background thread that polls the reader and notifies the Flask app directly.
+
+```bash
+# Install the Pi-only extras on the device
+sudo pip install mfrc522 RPi.GPIO spidev
+
+# Enable the watcher via the env file
+KIOSK_ENABLE_RFID=1
+KIOSK_INTERNAL_URL=http://127.0.0.1:8000
+```
+
+When `KIOSK_ENABLE_RFID=1` is set, `create_app()` starts the watcher on boot.
+Without the flag (e.g. on a laptop) the watcher stays dormant — nothing breaks.
+
+### Server lookup — `/rfid?uid=` and `/check_rfid`
+
+Both the keyboard-emulation flow and the Pi watcher hit the same endpoints:
+
+| Route | Method | Purpose |
+|---|---|---|
+| `/rfid?uid=<uid>` | GET | If the UID is in the `users` table, render `profile.html` with the person's name and role. Otherwise redirect to `/menu`. Rate-limited to 30/min. |
+| `/check_rfid` | POST (JSON) | Machine-to-machine lookup: `{"uid": "..."}` → `{"status":"authorized","user":{...}}` or `{"status":"unauthorized"}`. Localhost-only (remote calls get 403). Rate-limited to 60/min. CSRF-exempt because it's called by the watcher thread. |
+
+### Managing users
+
+The `users` table is populated manually for now:
+
+```sql
+INSERT INTO users (rfid_uid, name, role) VALUES ('AB12CD34', 'Juan dela Cruz', 'student');
+```
+
+---
+
+## 14a. Server-side QR code generation — `/qr?data=…&size=…`
+
+Every QR surface in the kiosk (directions QR, office QR, room QR) is
+generated server-side using the `qrcode` library. Works completely offline.
+
+**Parameters:**
+
+| Parameter | Required | Notes |
+|---|---|---|
+| `data` | Yes | The string to encode. Usually a URL. |
+| `size` | No | Pixel size (64–512, default 200). |
+
+**Examples:**
+```
+/qr?data=https://example.com&size=260
+/qr?data=/campus_map?location=ACADEMIC+BUILDING
+```
+
+Rate-limited to 60 requests/min. Returns a PNG image.
 
 ---
 
@@ -693,7 +794,7 @@ If the target display changes, update `DESIGN_W` and `DESIGN_H` in
 .venv/bin/pytest tests/ -q
 ```
 
-30 tests cover:
+38 tests cover:
 - All major public routes return HTTP 200
 - Health check endpoint returns correct JSON
 - Menu page injects kiosk scripts
@@ -701,6 +802,9 @@ If the target display changes, update `DESIGN_W` and `DESIGN_H` in
 - Admin login, logout, and session protection
 - Admin CRUD for rooms, events, announcements, offices
 - 404 error page
+- `/rfid?uid=` redirect and user profile rendering (6 tests)
+- `/check_rfid` JSON endpoint (authorised / unauthorised / missing UID)
+- `/qr?data=` PNG generation + missing-data rejection
 
 Each test run uses an isolated temporary database seeded by the `conftest.py`
 fixture. No test touches the `database.db` file.
@@ -724,12 +828,16 @@ kiosk/
 │   ├── extensions.py             bcrypt, CSRFProtect, Limiter singletons
 │   ├── db.py                     db_connection() context manager
 │   ├── auth.py                   login_required decorator
+│   ├── rfid.py                   Optional Pi-only mfrc522 + GPIO watcher
+│   │                             (no-op on laptops; enable with KIOSK_ENABLE_RFID)
 │   └── blueprints/
 │       ├── main.py               /, /menu, /faculty, /search, /api/search,
-│       │                         /api/rooms, /rfid, /offline, /sw.js, /healthz
+│       │                         /api/rooms, /rfid, /check_rfid, /qr,
+│       │                         /offline, /sw.js, /healthz
 │       ├── campus.py             /campus_map, all /building_name routes,
-│       │                         _floor_plan() helper
-│       ├── offices.py            /office-selection, /office
+│       │                         _floor_plan() helper, _ACADEMIC_FLOORS
+│       ├── offices.py            /office-selection, /office (with ENTER
+│       │                         BUILDING + SHOW DIRECTION buttons)
 │       ├── announcements.py      /announcements, /announcement-view
 │       ├── events.py             /events, /event/<id>
 │       ├── admin.py              /admin login, /dashboard, /rooms CRUD,
@@ -766,11 +874,23 @@ kiosk/
 │   ├── sw.js                     Service worker (cache-first assets,
 │   │                             network-first navigation, offline fallback)
 │   ├── font/                     LeagueSpartan and other typefaces
-│   ├── images/                   Campus map assets, building photos
+│   ├── images/
+│   │   ├── icon/                 Home / back icons
+│   │   ├── building/             Campus map building photos
+│   │   ├── floor_plans/          Hand-drawn SVGs + client JPGs
+│   │   │   ├── academic_ground.svg
+│   │   │   ├── academic_2nd.svg
+│   │   │   ├── academic_3rd.svg
+│   │   │   ├── academic_4th.svg
+│   │   │   ├── academic_5th.svg
+│   │   │   └── IT_1ST.JPG / IT_2ND.JPG / IT_3RD.JPG
+│   │   ├── offices/              Office cover photos
+│   │   ├── qr/                   Pre-generated QR codes (fallback)
+│   │   └── screensaver/          Splash slideshow images
 │   └── uploads/                  Admin-uploaded images and PDFs
 │
 ├── logs/                         Rotating app logs (auto-created)
-├── tests/                        pytest suite (30 tests)
+├── tests/                        pytest suite (38 tests)
 ├── scripts/
 │   ├── backup_db.sh              SQLite online backup + retention
 │   └── set_admin_password.py     Rotate admin password
@@ -792,6 +912,7 @@ kiosk/
 | `announcements` | Digital notices with thumbnail and PDF attachment |
 | `building_floors` | Floor plan images and labels for each building floor |
 | `faculty` | Faculty members with department, photo, room, and office link |
+| `users` | RFID UID → name + role (used by `/rfid?uid=` and `/check_rfid` for personalised entry) |
 
 All content tables have `published_at` and `expires_at` columns. Records with
 a past `expires_at` are automatically excluded from all public-facing queries.

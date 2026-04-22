@@ -163,14 +163,13 @@
               margin:18px 0;
             }
 
-            /* YOU ARE HERE pin marker */
             .you-are-here {
               position:absolute;
               width:54px;
               height:68px;
               transform:translate(-50%,-100%);
               pointer-events:none;
-              z-index:1500;
+              z-index:1350;
               display:none;
             }
             .you-are-here .pin {
@@ -192,9 +191,6 @@
               letter-spacing:0.5px;
             }
 
-            /* Top-right overlay: OUTSIDE / INSIDE toggle + QR button
-               Positioned fixed to the viewport so they are NOT affected by
-               the map-container's transform:scale(0.7). */
             .view-toggle {
               position:fixed;
               top:70px;
@@ -205,31 +201,37 @@
               z-index:2500;
               font-weight:900;
               letter-spacing:2px;
-              font-size:17px;
+              font-size:15px;
               color:#333;
+              background:rgba(255,255,255,0.96);
+              padding:8px 18px;
+              border-radius:24px;
+              box-shadow:0 4px 14px rgba(0,0,0,0.12);
             }
             .view-toggle .toggle-btn {
               cursor:pointer;
-              padding:6px 4px;
+              padding:4px 4px;
               opacity:0.55;
               transition:opacity 0.2s;
             }
             .view-toggle .toggle-btn.active { opacity:1; border-bottom:3px solid #8b1a1a; }
             .qr-btn-float {
               position:fixed;
-              top:108px;
+              top:125px;
               right:28px;
-              background:transparent;
+              background:rgba(255,255,255,0.96);
               color:#333;
-              padding:6px 10px;
+              padding:10px 18px;
               cursor:pointer;
               font-weight:900;
               letter-spacing:1.5px;
               font-size:13px;
               z-index:2500;
               display:flex;align-items:center;gap:8px;
+              border-radius:24px;
+              box-shadow:0 4px 14px rgba(0,0,0,0.12);
             }
-            .qr-btn-float:hover { background:rgba(123,45,45,0.08); border-radius:20px; }
+            .qr-btn-float:hover { background:#f0e6e6; }
 
             /* Floating QR code card */
             .qr-card {
@@ -896,23 +898,6 @@ const graph = {
                                 return closest; 
                               } 
                               
-                              document.querySelector(".map-container").addEventListener("click", (e) => { 
-                                
-                                const rect = e.currentTarget.getBoundingClientRect(); 
-                                const scale = 0.7; 
-                                const x = (e.clientX - rect.left) / scale; 
-                                const y = (e.clientY - rect.top) / scale; buildGrid(); 
-                                const start = toGrid(150, 420); 
-                                
-                                // gate //
-
-                                const end = toGrid(x, y); 
-                                const path = findPathGrid(start, end); 
-                                
-                                if(path){ drawGridPath(path); 
-                                } 
-                              }); 
-                                
                                 function getNearestNode(){ 
                                   const startPoint = { x:150, y:420 }; 
                                   
@@ -1068,9 +1053,21 @@ function showDirections(destination){
   document.getElementById("directionsPanel").style.display = "block";
   document.getElementById("viewToggle").style.display = "flex";
   document.getElementById("qrBtnFloat").style.display = "flex";
+  _directionsActive = true;
+
+  if (_pendingRoom) {
+    const buildingEl = document.querySelector(`.building[data-name="${destination}"]`);
+    const page = buildingEl && buildingEl.dataset.page;
+    if (page) {
+      setTimeout(() => {
+        window.location.href = page + "?location=" + encodeURIComponent(_pendingRoom);
+      }, 3500);
+    }
+  }
 }
 
 let _currentView = "outside";
+let _pendingRoom = null;  // set by highlightFromURL if a specific room was requested
 function setView(view){
   _currentView = view;
   document.getElementById("toggleOutside").classList.toggle("active", view === "outside");
@@ -1079,7 +1076,10 @@ function setView(view){
   if (view === "inside") {
     const el = document.querySelector(`.building[data-name="${dest}"]`);
     if (el && el.dataset.page) {
-      window.location.href = el.dataset.page + "?location=" + encodeURIComponent(dest);
+      // If the user selected a specific room, jump straight to it on the
+      // floor plan so the indoor route draws automatically.
+      const target = _pendingRoom || dest;
+      window.location.href = el.dataset.page + "?location=" + encodeURIComponent(target);
     }
   }
 }
@@ -1097,6 +1097,15 @@ function generateQR(){
 function closeQR(){
   document.getElementById("qrCard").classList.remove("visible");
 }
+document.addEventListener("click", (e) => {
+  const card = document.getElementById("qrCard");
+  if (!card || !card.classList.contains("visible")) return;
+  const qrBtn = document.getElementById("qrBtnFloat");
+  if (card.contains(e.target) || (qrBtn && qrBtn.contains(e.target))) return;
+  card.classList.remove("visible");
+});
+let _directionsActive = false;
+
 // CLICK BUILDING → SLIDE-IN PREVIEW PANEL
 const BUILDING_PHOTOS = {
   "ACADEMIC BUILDING":    "/static/images/building/academic_building.JPG",
@@ -1124,11 +1133,21 @@ document.querySelectorAll('.building[data-page]').forEach(b => {
     } else {
       img.style.display = 'none';
     }
-    document.getElementById('buildingPanel').style.right = '0';
+    const p = document.getElementById('buildingPanel');
+    p.style.right = '0px';
+    p.style.pointerEvents = 'auto';
+    document.getElementById('viewToggle').style.display = 'none';
+    document.getElementById('qrBtnFloat').style.display = 'none';
   };
 });
 function closeBuildingPanel() {
-  document.getElementById('buildingPanel').style.right = '-380px';
+  const p = document.getElementById('buildingPanel');
+  p.style.right = '-500px';
+  p.style.pointerEvents = 'none';
+  if (_directionsActive) {
+    document.getElementById('viewToggle').style.display = 'flex';
+    document.getElementById('qrBtnFloat').style.display = 'flex';
+  }
 }
 function enterBuilding() {
   if (_pendingUrl) window.location.href = _pendingUrl;
@@ -1137,7 +1156,6 @@ function showDirectionFromPanel() {
   const name = document.getElementById('panelBuildingName').textContent.trim();
   if (!name) return;
   closeBuildingPanel();
-  // Update URL so refreshing / sharing keeps the same directions, then draw.
   const params = new URLSearchParams(window.location.search);
   params.set("location", name);
   window.history.replaceState(null, "", "?" + params.toString());
@@ -1157,19 +1175,31 @@ function goBack(){
   }
 }
 
+const INDOOR_DIRECTIONS = {{ indoor_directions | default({}) | tojson }};
+const ROOM_PLACEMENTS = {{ room_placements | default({}) | tojson }};
+
+
 function showRoomInfo(room){
   const block = document.getElementById("insideBlock");
   const box = document.getElementById("insideBox");
   const heading = document.getElementById("insideHeading");
   const dest = document.getElementById("destName").textContent;
   const nice = dest.split(" ").map(w => w.length > 2 ? w[0] + w.slice(1).toLowerCase() : w).join(" ");
-  heading.textContent = "Inside the " + nice + ":";
-  while (box.firstChild) box.removeChild(box.firstChild);
-  [
+  const niceRoom = room.split(" ").map(w => w.length > 2 ? w[0] + w.slice(1).toLowerCase() : w).join(" ");
+  heading.textContent = "Inside " + nice + " → " + niceRoom + ":";
+
+  const buildingDirs = INDOOR_DIRECTIONS[dest.toUpperCase()] || {};
+  const roomKey = room.replace(/^ROOM\s+/i, "").toUpperCase();
+  const realSteps = buildingDirs[roomKey] || buildingDirs[room.toUpperCase()];
+
+  const steps = Array.isArray(realSteps) && realSteps.length ? realSteps : [
     "After entering the building, proceed straight ahead.",
-    "Turn left at the hallway.",
-    "The " + room + " will be on your left at the end of the hallway."
-  ].forEach(s => {
+    "Follow the corridor toward " + niceRoom + ".",
+    "The " + niceRoom + " will be clearly labelled.",
+  ];
+
+  while (box.firstChild) box.removeChild(box.firstChild);
+  steps.forEach(s => {
     const li = document.createElement("li");
     li.textContent = s;
     box.appendChild(li);
@@ -1185,7 +1215,8 @@ function highlightFromURL(){
 
   const parts = location.split(/\s+room\s+/i);
   const raw = parts[0].trim().toUpperCase();
-  const room = parts[1] ? "ROOM " + parts[1].trim().toUpperCase() : null;
+  const room = parts[1] ? parts[1].trim() : null;
+  _pendingRoom = room;
 
   let building = raw;
   if(!nodes[raw]){
@@ -1240,46 +1271,6 @@ input.addEventListener('keypress', (e) => {
   }
 });
 
-function handleNavigationFlow(){
-
-  const params = new URLSearchParams(window.location.search);
-  const from = params.get("from");
-  const room = params.get("location");
-
-  if(from === "gate" && room){
-
-    // 🔥 highlight room
-    document.querySelectorAll(".room").forEach(r=>{
-      if(r.innerText.toLowerCase().includes(room.toLowerCase())){
-        r.style.background = "#ffcc00";
-      }
-    });
-
-    // 🔥 auto show directions
-    setTimeout(()=>{
-      showBuildingDirections();
-    }, 500);
-  }
-}
-
-function goToBuilding(buildingName, room){
-
-  // 🔥 1. DRAW CAMPUS PATH FIRST
-  const path = findCampusPath("GATE", buildingName);
-
-  if(path){
-    drawCampusPath(path);
-  }
-
-  // 🔥 2. WAIT (LET USER SEE IT)
-  setTimeout(() => {
-
-    // 🔥 3. GO TO BUILDING PAGE
-    window.location.href =
-      `/building?building=${buildingName}&location=${room}&from=campus`;
-
-  }, 2000); // adjust timing if needed
-}
 
 updateYouHere(150, 420); // MAIN GATE POSITION
 
@@ -1289,7 +1280,7 @@ updateYouHere(150, 420); // MAIN GATE POSITION
 
 <!-- Enter Building Preview Panel -->
 <div id="buildingPanel" style="
-  position:fixed;top:0;right:-380px;width:360px;height:100vh;
+  position:fixed;top:0;right:-500px;width:360px;height:100vh;pointer-events:none;
   background:rgba(255,255,255,0.97);
   box-shadow:-4px 0 24px rgba(0,0,0,0.25);
   display:flex;flex-direction:column;justify-content:center;

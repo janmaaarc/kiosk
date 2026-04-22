@@ -86,7 +86,6 @@ body {
   color: #7b2d2d;
 }
 .top-bar .show-dir {
-  margin-left:auto;
   display:flex;align-items:center;gap:8px;
   color:#1a1a1a;
   font-weight:900;letter-spacing:2px;font-size:15px;
@@ -94,9 +93,69 @@ body {
   padding:8px 14px;
   border-radius:24px;
   transition:background 0.2s;
+  white-space:nowrap;
 }
 .top-bar .show-dir:hover { background:rgba(123,45,45,0.08); }
 .top-bar .show-dir svg { width:22px;height:22px;fill:#7b2d2d; }
+.top-bar .room-search {
+  position:relative;
+  margin-left:auto;
+  width:260px;
+}
+.top-bar .room-search input {
+  width:100%;
+  padding:10px 16px 10px 40px;
+  border-radius:22px;
+  border:2px solid #e4d4d4;
+  background:#fff;
+  font-family:inherit;
+  font-size:14px;
+  font-weight:700;
+  color:#333;
+  outline:none;
+  transition:border-color 0.2s;
+}
+.top-bar .room-search input:focus { border-color:#7b2d2d; }
+.top-bar .room-search::before {
+  content:"";
+  position:absolute;
+  left:14px; top:50%;
+  width:16px;height:16px;
+  transform:translateY(-50%);
+  background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238b2e2e'><path d='M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 5L20.49 19l-5-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/></svg>") no-repeat center/contain;
+  pointer-events:none;
+}
+.top-bar .room-search .suggestions {
+  position:absolute;
+  top:calc(100% + 4px);
+  left:0; right:0;
+  background:#fff;
+  border-radius:14px;
+  box-shadow:0 12px 32px rgba(0,0,0,0.18);
+  overflow:hidden;
+  z-index:40;
+  max-height:300px;
+  overflow-y:auto;
+  display:none;
+}
+.top-bar .room-search .suggestions.visible { display:block; }
+.top-bar .room-search .suggestions button {
+  display:block;
+  width:100%;
+  padding:10px 16px;
+  background:none;
+  border:none;
+  text-align:left;
+  font-family:inherit;
+  font-size:14px;
+  font-weight:700;
+  color:#333;
+  cursor:pointer;
+}
+.top-bar .room-search .suggestions button:hover { background:#f6ecec; color:#7b2d2d; }
+.top-bar .room-search .suggestions .floor-tag {
+  font-size:11px;color:#999;font-weight:700;letter-spacing:1px;margin-left:8px;
+}
 
 /* ── Floor plan wrapper ──────────────────────────── */
 .plan-wrapper {
@@ -117,9 +176,7 @@ body {
   pointer-events: none;
   user-select: none;
 }
-/* SVG floor plans use preserveAspectRatio="none" so they stretch to
-   fill the container and keep the room overlays aligned. Raster floor
-   plans (JPG/PNG) keep object-fit: contain so they are not distorted. */
+/* SVGs stretch so room overlays stay aligned; raster floor plans keep contain */
 .plan-wrapper img.floor-img.stretch { object-fit: fill; }
 
 /* Placeholder when no image */
@@ -275,9 +332,13 @@ body {
     <img src="{{ url_for('static', filename='images/icon/back_button.png') }}"
          onclick="history.back()" alt="Back">
     <h2>{{ building_name | upper }} — {{ floor_label | upper }}</h2>
+    <div class="room-search" id="roomSearch">
+      <input id="roomSearchInput" type="text" placeholder="Search rooms…" autocomplete="off">
+      <div class="suggestions" id="roomSearchSuggestions"></div>
+    </div>
     <a class="show-dir" href="/campus_map?location={{ building_name | upper | urlencode }}">
-      SHOW DIRECTION
       <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+      SHOW DIRECTION
     </a>
   </div>
   <div class="plan-wrapper" id="planWrapper">
@@ -330,12 +391,21 @@ body {
         </div>
         <ul id="infoDirections" style="margin:0 0 0 22px;padding:0;font-size:14px;color:#333;line-height:1.5"></ul>
       </div>
-      <div style="display:flex;gap:14px;align-items:center;margin-top:12px;flex-wrap:wrap">
-        <a id="infoOfficeBtn" href="#" style="display:none;background:#7b2d2d;color:#fff;
+      <div style="display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap">
+        <a id="infoRouteBtn" href="#" style="background:#7b2d2d;color:#fff;
              padding:10px 18px;border-radius:22px;font-weight:900;letter-spacing:1.5px;
+             text-decoration:none;font-size:13px;display:inline-flex;align-items:center;gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+          </svg>
+          SHOW FULL ROUTE
+        </a>
+        <a id="infoOfficeBtn" href="#" style="display:none;background:#fff;color:#7b2d2d;
+             border:2px solid #7b2d2d;
+             padding:8px 16px;border-radius:22px;font-weight:900;letter-spacing:1.5px;
              text-decoration:none;font-size:13px;">OPEN OFFICE PAGE →</a>
         <img id="infoQR" src="" alt="QR code"
-             style="width:80px;height:80px;display:none;border-radius:4px">
+             style="width:70px;height:70px;display:none;border-radius:4px">
       </div>
     </div>
 
@@ -350,12 +420,11 @@ function switchFloor(url) {
   setTimeout(() => { window.location.href = url; }, 250);
 }
 
-// Current building info for back-links
 const BUILDING_URL  = '{{ request.path }}';
 const FLOOR_NUMBER  = {{ floor_number }};
+const BUILDING_NAME = {{ building_name | tojson }};
 
 function handleRoomClick(btn) {
-  // Always draw the indoor route to the clicked room + show its info.
   document.querySelectorAll('.room-label').forEach(b => b.classList.remove('highlighted'));
   btn.classList.add('highlighted');
   drawIndoorRoute(btn);
@@ -366,7 +435,6 @@ function showInfo(btn) {
   document.getElementById('infoName').textContent = btn.dataset.name;
   document.getElementById('infoDesc').textContent = btn.dataset.desc || '';
 
-  // Per-room directions (if provided by the backend).
   const dirBlock = document.getElementById('infoDirectionsBlock');
   const dirList = document.getElementById('infoDirections');
   while (dirList.firstChild) dirList.removeChild(dirList.firstChild);
@@ -382,6 +450,10 @@ function showInfo(btn) {
   } else {
     dirBlock.style.display = 'none';
   }
+
+  const routeBtn = document.getElementById('infoRouteBtn');
+  const campusLoc = BUILDING_NAME + ' room ' + btn.dataset.name;
+  routeBtn.href = '/campus_map?location=' + encodeURIComponent(campusLoc);
 
   const qr = document.getElementById('infoQR');
   const officeBtn = document.getElementById('infoOfficeBtn');
@@ -404,7 +476,74 @@ function closeInfo() {
   document.getElementById('infoPanel').classList.remove('visible');
 }
 
-// Highlight room from ?location= param (e.g. coming from office directions)
+const ALL_ROOMS = {{ all_rooms_index | default([]) | tojson }};
+
+(function setupRoomSearch() {
+  const input = document.getElementById('roomSearchInput');
+  const box = document.getElementById('roomSearchSuggestions');
+  if (!input || !box) return;
+
+  function clearSuggestions() {
+    while (box.firstChild) box.removeChild(box.firstChild);
+    box.classList.remove('visible');
+  }
+
+  function render(matches) {
+    while (box.firstChild) box.removeChild(box.firstChild);
+    if (!matches.length) { box.classList.remove('visible'); return; }
+    matches.slice(0, 8).forEach(m => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.textContent = m.name;
+      const tag = document.createElement('span');
+      tag.className = 'floor-tag';
+      tag.textContent = (m.floor_label || ('Floor ' + m.floor)).toUpperCase();
+      btn.appendChild(tag);
+      btn.addEventListener('click', () => {
+        if (m.floor === FLOOR_NUMBER) {
+          const target = Array.from(document.querySelectorAll('.room-label'))
+            .find(b => b.dataset.name === m.name);
+          if (target) {
+            document.querySelectorAll('.room-label').forEach(b => b.classList.remove('highlighted'));
+            target.classList.add('highlighted');
+            drawIndoorRoute(target);
+            showInfo(target);
+          }
+          clearSuggestions();
+          input.value = m.name;
+        } else {
+          window.location.href = m.url;
+        }
+      });
+      box.appendChild(btn);
+    });
+    box.classList.add('visible');
+  }
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    if (!q) { clearSuggestions(); return; }
+    const matches = ALL_ROOMS.filter(r => r.name.toLowerCase().includes(q));
+    render(matches);
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const first = box.querySelector('button');
+      if (first) first.click();
+    } else if (e.key === 'Escape') {
+      clearSuggestions();
+      input.blur();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!document.getElementById('roomSearch').contains(e.target)) {
+      clearSuggestions();
+    }
+  });
+})();
+
 const params = new URLSearchParams(window.location.search);
 const loc = params.get('location');
 if (loc) {
@@ -416,9 +555,6 @@ if (loc) {
   });
 }
 
-// Draw a dashed route from the building entrance to the target room.
-// All coordinates are in percentages of the plan-wrapper (0..100)
-// so they scale with the container.
 function drawIndoorRoute(targetBtn) {
   const left = parseFloat(targetBtn.dataset.left);
   const top = parseFloat(targetBtn.dataset.top);
@@ -428,13 +564,8 @@ function drawIndoorRoute(targetBtn) {
 
   const roomCx = left + width / 2;
   const roomCy = top + height / 2;
-
-  // Entrance assumed to be the bottom-center of the floor plan
   const entranceX = 50;
   const entranceY = 96;
-
-  // Walk along the central hallway (y ~ 50) to the column above the room,
-  // then step up/down into the room.
   const hallwayY = 50;
   const corridorX = roomCx;
   const d = `M ${entranceX} ${entranceY} L ${entranceX} ${hallwayY} L ${corridorX} ${hallwayY} L ${corridorX} ${roomCy}`;

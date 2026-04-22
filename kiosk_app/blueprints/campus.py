@@ -16,7 +16,36 @@ def campus():
 
 @campus_bp.route("/campus_map")
 def campus_map():
-    return render_template("campus.html")
+    indoor_directions: dict[str, dict[str, list[str]]] = {}
+    room_placements: dict[str, dict[str, dict[str, float]]] = {}
+
+    for building_name, floors in (("Academic Building", _ACADEMIC_FLOORS),):
+        rooms_dirs: dict[str, list[str]] = {}
+        rooms_pos: dict[str, dict[str, float]] = {}
+        for floor in floors.values():
+            for room in floor.get("rooms", []) or []:
+                name_key = room["name"].upper()
+                directions = room.get("directions")
+                if directions:
+                    rooms_dirs[name_key] = list(directions)
+                rooms_pos[name_key] = {
+                    "left":   float(room.get("left", 0)),
+                    "top":    float(room.get("top", 0)),
+                    "width":  float(room.get("width", 10)),
+                    "height": float(room.get("height", 10)),
+                    "floor":  next((n for n, f in floors.items() if room in f.get("rooms", [])), 1),
+                }
+        key = building_name.upper()
+        if rooms_dirs:
+            indoor_directions[key] = rooms_dirs
+        if rooms_pos:
+            room_placements[key] = rooms_pos
+
+    return render_template(
+        "campus.html",
+        indoor_directions=indoor_directions,
+        room_placements=room_placements,
+    )
 
 
 def _floor_plan(building_name: str, floor_count: int = 3, base_url: str = "",
@@ -81,6 +110,17 @@ def _floor_plan(building_name: str, floor_count: int = 3, base_url: str = "",
     floor_data = floors[floor_number]
     highlight = request.args.get("location")
 
+    all_rooms_index = [
+        {
+            "name": r["name"],
+            "floor": n,
+            "floor_label": f["label"],
+            "url": f"/{base_url}?floor={n}&location=" + r["name"].replace(" ", "+"),
+        }
+        for n, f in floors.items()
+        for r in f.get("rooms", [])
+    ]
+
     return render_template(
         "floor_plan.html",
         building_name=building_name,
@@ -92,6 +132,7 @@ def _floor_plan(building_name: str, floor_count: int = 3, base_url: str = "",
             {"number": n, "label": f["label"], "url": f"/{base_url}?floor={n}"}
             for n, f in floors.items()
         ],
+        all_rooms_index=all_rooms_index,
         highlight=highlight,
     )
 
