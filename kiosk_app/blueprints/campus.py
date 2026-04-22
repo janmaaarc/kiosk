@@ -59,6 +59,21 @@ def campus_map():
     port = request.host.split(":")[-1] if ":" in request.host else "5000"
     lan_base_url = f"http://{_lan_ip()}:{port}"
 
+    if request.args.get("mobile") == "1":
+        _valid = {
+            "GATE","LAST HORIZONTAL ROAD","MAIN HORIZONTAL ROAD","SECOND HORIZONTAL ROAD",
+            "1ST VERTICAL ROAD","2ND VERTICAL ROAD","3RD VERTICAL ROAD","4TH VERTICAL ROAD",
+            "5TH VERTICAL ROAD","6TH VERTICAL ROAD","7TH VERTICAL ROAD","8TH VERTICAL ROAD",
+            "ACADEMIC BUILDING","IT BUILDING","FSM BUILDING","CIVIL TECH BUILDING",
+            "TECH BUILDING","MECHANICAL BUILDING","AUTOMOTIVE BUILDING","WAF & RAC BUILDING",
+            "SCIENCE BUILDING","NEW ADMIN BUILDING","OLD ADMIN BUILDING","YLAGAN HALL",
+            "RODRIGUEZ BUILDING","MIST-NCESTD DORM","MULTI-PURPOSE BUILDING",
+            "MIST-NCESTD BUILDING","TE BUILDING","POWER ROOM","GRADUATE SCHOOL BUILDING",
+        }
+        raw = request.args.get("location", "").strip().upper()
+        location = raw if raw in _valid else ""
+        return render_template("directions_mobile.html", location=location)
+
     return render_template(
         "campus.html",
         indoor_directions=indoor_directions,
