@@ -456,7 +456,7 @@ function showInfo(btn) {
 
   const routeBtn = document.getElementById('infoRouteBtn');
   const campusLoc = BUILDING_NAME + ' room ' + btn.dataset.name;
-  routeBtn.href = '/campus_map?location=' + encodeURIComponent(campusLoc);
+  routeBtn.href = '/campus_map?location=' + encodeURIComponent(campusLoc) + '&room_floor=' + FLOOR_NUMBER;
 
   const qr = document.getElementById('infoQR');
   const officeBtn = document.getElementById('infoOfficeBtn');

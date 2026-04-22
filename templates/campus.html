@@ -1074,14 +1074,16 @@ function showDirections(destination){
     const page = buildingEl && buildingEl.dataset.page;
     if (page) {
       setTimeout(() => {
-        window.location.href = page + "?location=" + encodeURIComponent(_pendingRoom);
+        const floorParam = _pendingFloor ? `floor=${_pendingFloor}&` : '';
+        window.location.href = page + '?' + floorParam + 'location=' + encodeURIComponent(_pendingRoom);
       }, 3500);
     }
   }
 }
 
 let _currentView = "outside";
-let _pendingRoom = null;  // set by highlightFromURL if a specific room was requested
+let _pendingRoom = null;
+let _pendingFloor = null;
 function setView(view){
   _currentView = view;
   document.getElementById("toggleOutside").classList.toggle("active", view === "outside");
@@ -1246,6 +1248,7 @@ function highlightFromURL(){
   const raw = parts[0].trim().toUpperCase();
   const room = parts[1] ? parts[1].trim() : null;
   _pendingRoom = room;
+  _pendingFloor = params.get("room_floor") ? parseInt(params.get("room_floor"), 10) : null;
 
   let building = raw;
   if(!nodes[raw]){
