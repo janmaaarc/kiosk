@@ -1,8 +1,21 @@
+import socket
+
 from flask import Blueprint, render_template, request
 
 from kiosk_app.db import db_connection
 
 campus_bp = Blueprint("campus", __name__)
+
+
+def _lan_ip() -> str:
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "127.0.0.1"
 
 
 @campus_bp.route("/campus")
@@ -41,10 +54,14 @@ def campus_map():
         if rooms_pos:
             room_placements[key] = rooms_pos
 
+    port = request.host.split(":")[-1] if ":" in request.host else "5000"
+    lan_base_url = f"http://{_lan_ip()}:{port}"
+
     return render_template(
         "campus.html",
         indoor_directions=indoor_directions,
         room_placements=room_placements,
+        lan_base_url=lan_base_url,
     )
 
 

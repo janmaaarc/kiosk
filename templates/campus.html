@@ -1084,13 +1084,15 @@ function setView(view){
   }
 }
 
+const LAN_BASE_URL = {{ lan_base_url | tojson }};
+
 function generateQR(){
   let loc = new URLSearchParams(window.location.search).get("location");
   if(!loc){
     loc = document.getElementById("destName").textContent;
   }
   if(!loc) return;
-  const url = window.location.origin + "/campus_map?location=" + encodeURIComponent(loc);
+  const url = LAN_BASE_URL + "/campus_map?location=" + encodeURIComponent(loc) + "&mobile=1";
   document.getElementById("qrCardImage").src = "/qr?size=260&data=" + encodeURIComponent(url);
   document.getElementById("qrCard").classList.add("visible");
 }
@@ -1240,6 +1242,14 @@ function highlightFromURL(){
 
 highlightFromURL();
 
+// Mobile view: hide kiosk chrome, show only the map + directions panel
+if(new URLSearchParams(window.location.search).get("mobile") === "1"){
+  document.querySelectorAll(".sidebar, .top-bar, .top-right, .view-toggle-bar, .qr-btn-float").forEach(el => {
+    if(el) el.style.display = "none";
+  });
+  document.querySelector(".campus-wrapper, .main-content, body > div:first-child") && null;
+  document.body.style.overflow = "auto";
+}
 
 // SEARCH
 const input = document.querySelector('.top-right input');
