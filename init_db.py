@@ -177,13 +177,14 @@ def _seed_offices(cur: sqlite3.Cursor) -> None:
         cur.execute(
             """
             INSERT OR IGNORE INTO offices
-                (key, name, image, location, hours, desc, files, published_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+                (key, name, image, location, hours, desc, files, building_url, published_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
             """,
             (
                 s["key"], s["name"], s.get("image", ""),
                 d.get("location", ""), d.get("hours", ""), d.get("desc", ""),
                 json.dumps(d.get("files", [])),
+                s.get("building_url", ""),
             ),
         )
 

@@ -1,12 +1,12 @@
 OFFICE_SUMMARIES = [
-    {"key": "Registrar", "name": "REGISTRAR", "image": "OSA.jpg"},
-    {"key": "PLACEMENT", "name": "PLACEMENT OFFICE", "image": "OSA.jpg"},
-    {"key": "Clinic", "name": "CLINIC", "image": "OSA.jpg"},
-    {"key": "LIBRARY", "name": "LIBRARY", "image": "OSA.jpg"},
-    {"key": "OSA", "name": "OFFICE OF THE STUDENT AFFAIRS", "image": "OSA.jpg"},
-    {"key": "CASHIER", "name": "CASHIER", "image": "OSA.jpg"},
-    {"key": "Guidance", "name": "GUIDANCE", "image": "OSA.jpg"},
-    {"key": "IRGO", "name": "IRGO", "image": "irgo.jpg"},
+    {"key": "Registrar", "name": "REGISTRAR",                    "image": "OSA.jpg",  "building_url": "/new_admin_building"},
+    {"key": "PLACEMENT", "name": "PLACEMENT OFFICE",             "image": "OSA.jpg",  "building_url": "/new_admin_building"},
+    {"key": "Clinic",    "name": "CLINIC",                       "image": "OSA.jpg",  "building_url": "/new_admin_building"},
+    {"key": "LIBRARY",   "name": "LIBRARY",                      "image": "OSA.jpg",  "building_url": "/new_admin_building"},
+    {"key": "OSA",       "name": "OFFICE OF THE STUDENT AFFAIRS","image": "OSA.jpg",  "building_url": "/new_admin_building"},
+    {"key": "CASHIER",   "name": "CASHIER",                      "image": "OSA.jpg",  "building_url": "/new_admin_building"},
+    {"key": "Guidance",  "name": "GUIDANCE",                     "image": "OSA.jpg",  "building_url": "/new_admin_building"},
+    {"key": "IRGO",      "name": "IRGO",                         "image": "irgo.jpg", "building_url": "/new_admin_building"},
 ]
 
 
