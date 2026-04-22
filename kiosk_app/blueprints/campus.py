@@ -132,23 +132,245 @@ def automotive():
 
 
 _ACADEMIC_GROUND_ROOMS = [
-    {"name": "Medical and Dental Services", "left": 6.7, "top": 8.6,  "width": 16.7, "height": 37.1, "desc": "Student health and dental clinic",       "office_key": "Clinic"},
-    {"name": "Record and Information Center","left":23.3,"top": 8.6,  "width": 11.7, "height": 37.1, "desc": "Official school records and documents", "office_key": "Registrar"},
-    {"name": "MPC Cares",                   "left": 35.0, "top": 8.6, "width": 9.2,  "height": 37.1, "desc": "Student welfare and assistance"},
-    {"name": "Faculty Room",                "left": 44.2, "top": 8.6, "width": 33.3, "height": 37.1, "desc": "Faculty lounge and workroom"},
-    {"name": "CR",                          "left": 83.3, "top": 8.6, "width": 10.0, "height": 37.1, "desc": "Comfort room"},
-    {"name": "Quality Assurance Office",    "left": 6.7, "top": 54.3, "width": 16.7, "height": 37.1, "desc": "Quality management and accreditation"},
-    {"name": "Conference Room",             "left": 23.3, "top": 54.3,"width": 11.7, "height": 37.1, "desc": "Meeting and conference facility"},
-    {"name": "Repair and Maintenance",      "left": 67.5, "top": 54.3,"width": 12.9, "height": 37.1, "desc": "Facilities maintenance office"},
-    {"name": "Function Hall",               "left": 80.4, "top": 54.3,"width": 12.9, "height": 37.1, "desc": "Multi-purpose function hall"},
+    {
+        "name": "Medical and Dental Services",
+        "left": 6.7, "top": 8.6, "width": 16.7, "height": 37.1,
+        "desc": "Student health and dental clinic",
+        "office_key": "Clinic",
+        "directions": [
+            "After entering the building, proceed straight ahead.",
+            "Turn left at the hallway.",
+            "Continue down the corridor.",
+            "The Medical and Dental Services will be on your right.",
+        ],
+    },
+    {
+        "name": "Record and Information Center",
+        "left": 23.3, "top": 8.6, "width": 11.7, "height": 37.1,
+        "desc": "Official school records and documents",
+        "office_key": "Registrar",
+    },
+    {
+        "name": "MPC Cares",
+        "left": 35.0, "top": 8.6, "width": 9.2, "height": 37.1,
+        "desc": "Student welfare and assistance",
+    },
+    {
+        "name": "Faculty Room",
+        "left": 44.2, "top": 8.6, "width": 33.3, "height": 37.1,
+        "desc": "Faculty lounge and workroom",
+        "directions": [
+            "After entering the building, proceed straight ahead.",
+            "The faculty entrance will be directly in front of you.",
+        ],
+    },
+    {
+        "name": "CR",
+        "left": 83.3, "top": 8.6, "width": 10.0, "height": 37.1,
+        "desc": "Comfort room",
+    },
+    {
+        "name": "Quality Assurance Office",
+        "left": 6.7, "top": 54.3, "width": 16.7, "height": 37.1,
+        "desc": "Quality management and accreditation",
+        "directions": [
+            "After entering the building, proceed straight ahead.",
+            "Turn left at the hallway.",
+            "Continue down the corridor.",
+            "The Quality Assurance Office will be on your left.",
+        ],
+    },
+    {
+        "name": "Conference Room",
+        "left": 23.3, "top": 54.3, "width": 11.7, "height": 37.1,
+        "desc": "Meeting and conference facility",
+    },
+    {
+        "name": "Repair and Maintenance",
+        "left": 67.5, "top": 54.3, "width": 12.9, "height": 37.1,
+        "desc": "Facilities maintenance office",
+    },
+    {
+        "name": "Function Hall",
+        "left": 80.4, "top": 54.3, "width": 12.9, "height": 37.1,
+        "desc": "Multi-purpose function hall",
+    },
+]
+
+_GO_UPSTAIRS_2 = [
+    "After entering the building, proceed straight ahead toward the staircase/elevator.",
+    "Go up the stairs to the 2nd floor.",
+]
+_GO_UPSTAIRS_3 = [
+    "After entering the building, proceed straight ahead toward the staircase/elevator.",
+    "Go up the stairs to the 3rd floor.",
+]
+_GO_UPSTAIRS_4 = [
+    "After entering the building, proceed straight ahead toward the staircase/elevator.",
+    "Go up the stairs to the 4th floor.",
+]
+_GO_UPSTAIRS_5 = [
+    "After entering the building, proceed straight ahead toward the staircase/elevator.",
+    "Go up the stairs to the 5th floor.",
+]
+
+_ACADEMIC_2ND_ROOMS = [
+    {
+        "name": "Director for Student Affairs",
+        "left": 6.7, "top": 8.6, "width": 10.8, "height": 37.1,
+        "desc": "Office of the Director for Student Affairs",
+        "office_key": "OSA",
+        "directions": _GO_UPSTAIRS_2 + [
+            "At the top of the stairs, turn left along the hallway.",
+            "Continue straight to the end of the corridor.",
+            "The Director for Student Affairs Office will be on your right.",
+        ],
+    },
+    {
+        "name": "Guidance Scholarship & Admission",
+        "left": 17.5, "top": 8.6, "width": 14.2, "height": 37.1,
+        "desc": "Guidance, counselling, scholarship, and admission services",
+        "office_key": "Guidance",
+        "directions": _GO_UPSTAIRS_2 + [
+            "At the top of the stairs, turn left along the hallway.",
+            "Continue straight down the corridor.",
+            "The Guidance and Counselling Office will be on your right.",
+        ],
+    },
+    {
+        "name": "Placement and Follow-Up",
+        "left": 31.7, "top": 8.6, "width": 10.8, "height": 37.1,
+        "desc": "Career placement and alumni follow-up services",
+        "office_key": "PLACEMENT",
+        "directions": _GO_UPSTAIRS_2 + [
+            "At the top of the stairs, turn left along the hallway.",
+            "Continue straight down the corridor.",
+            "The Placement and Follow-Up Office will be on your right.",
+        ],
+    },
+    {
+        "name": "Faculty Room",
+        "left": 53.3, "top": 8.6, "width": 24.2, "height": 37.1,
+        "desc": "Faculty lounge and workroom",
+    },
+    {"name": "CR", "left": 83.3, "top": 8.6, "width": 10.0, "height": 37.1, "desc": "Comfort room"},
+    {"name": "Classroom", "left": 6.7, "top": 54.3, "width": 28.3, "height": 37.1, "desc": "General classroom"},
+    {"name": "Command Center 1", "left": 67.5, "top": 54.3, "width": 13.3, "height": 37.1, "desc": "Command center"},
+    {"name": "Command Center 2", "left": 80.8, "top": 54.3, "width": 12.5, "height": 37.1, "desc": "Command center"},
+]
+
+_ACADEMIC_3RD_ROOMS = [
+    {
+        "name": "VP for Admin and Finance",
+        "left": 6.7, "top": 8.6, "width": 9.2, "height": 37.1,
+        "desc": "Office of the Vice President for Administration and Finance",
+        "directions": _GO_UPSTAIRS_3 + [
+            "At the top of the stairs, turn left along the hallway.",
+            "The Office of the VP for Administration and Finance will be the first door on your right.",
+        ],
+    },
+    {
+        "name": "VP for Academic Affairs",
+        "left": 15.8, "top": 8.6, "width": 9.2, "height": 37.1,
+        "desc": "Office of the Vice President for Academic Affairs",
+        "directions": _GO_UPSTAIRS_3 + [
+            "At the top of the stairs, turn left along the hallway.",
+            "The Office of the VP for Academic Affairs will be the second door on your right.",
+        ],
+    },
+    {
+        "name": "Program Chair's Office and Field Study Center",
+        "left": 52.5, "top": 8.6, "width": 8.3, "height": 37.1,
+        "desc": "Program Chair's Office and Field Study Center",
+        "directions": _GO_UPSTAIRS_3 + [
+            "At the top of the stairs, turn right along the hallway.",
+            "The Program Chair's Office and Field Study Center will be on your right.",
+        ],
+    },
+    {
+        "name": "Dean for Technology and Instruction Office",
+        "left": 60.8, "top": 8.6, "width": 8.3, "height": 37.1,
+        "desc": "Dean for Technology and Instruction Office",
+        "directions": _GO_UPSTAIRS_3 + [
+            "At the top of the stairs, turn right along the hallway.",
+            "The Dean for Technology and Instruction Office will be on your right.",
+        ],
+    },
+    {
+        "name": "Dean for Graduate School and Program Chair of Graduate School",
+        "left": 69.2, "top": 8.6, "width": 8.3, "height": 37.1,
+        "desc": "Dean for Graduate School and Program Chair of Graduate School Office",
+        "directions": _GO_UPSTAIRS_3 + [
+            "At the top of the stairs, turn right along the hallway.",
+            "Continue straight to the end of the corridor.",
+            "The Dean for Graduate School Office will be on your right.",
+        ],
+    },
+    {"name": "CR", "left": 83.3, "top": 8.6, "width": 10.0, "height": 37.1, "desc": "Comfort room"},
+    {"name": "Classroom", "left": 6.7, "top": 54.3, "width": 28.3, "height": 37.1, "desc": "General classroom"},
+    {"name": "Command Center 1", "left": 67.5, "top": 54.3, "width": 13.3, "height": 37.1, "desc": "Command center"},
+    {"name": "Command Center 2", "left": 80.8, "top": 54.3, "width": 12.5, "height": 37.1, "desc": "Command center"},
+]
+
+_ACADEMIC_4TH_ROOMS = [
+    {
+        "name": "Library",
+        "left": 17.5, "top": 8.6, "width": 60.0, "height": 37.1,
+        "desc": "Main academic library",
+        "office_key": "LIBRARY",
+        "directions": _GO_UPSTAIRS_4 + [
+            "At the top of the stairs, turn right into the hallway.",
+            "Continue straight along the hallway.",
+            "The entrance of the Library will be on your left.",
+        ],
+    },
+    {"name": "CR", "left": 83.3, "top": 8.6, "width": 10.0, "height": 37.1, "desc": "Comfort room"},
+    {
+        "name": "Computer Library",
+        "left": 6.7, "top": 54.3, "width": 28.3, "height": 37.1,
+        "desc": "Computer library and e-resources",
+        "directions": _GO_UPSTAIRS_4 + [
+            "At the top of the stairs, turn left into the hallway.",
+            "The Computer Library will be on your left.",
+        ],
+    },
+    {
+        "name": "Educational Technology Room",
+        "left": 67.5, "top": 54.3, "width": 25.8, "height": 37.1,
+        "desc": "Educational technology and multimedia room",
+        "directions": _GO_UPSTAIRS_4 + [
+            "At the top of the stairs, turn right into the hallway.",
+            "The Educational Technology Room will be at the end of the hallway on your right.",
+        ],
+    },
+]
+
+_ACADEMIC_5TH_ROOMS = [
+    {
+        "name": "Staff Room",
+        "left": 17.5, "top": 8.6, "width": 8.3, "height": 37.1,
+        "desc": "Staff office",
+        "directions": _GO_UPSTAIRS_5 + [
+            "At the top of the stairs, the Staff Room will be directly ahead on your left.",
+        ],
+    },
+    {
+        "name": "Control Room",
+        "left": 17.5, "top": 54.3, "width": 8.3, "height": 37.1,
+        "desc": "Control and monitoring room",
+        "directions": _GO_UPSTAIRS_5 + [
+            "At the top of the stairs, the Control Room will be on your left below the Staff Room.",
+        ],
+    },
+    {"name": "CR", "left": 83.3, "top": 8.6, "width": 10.0, "height": 37.1, "desc": "Comfort room"},
 ]
 
 _ACADEMIC_FLOORS = {
     1: {"label": "1st floor", "image": "images/floor_plans/academic_ground.svg", "rooms": _ACADEMIC_GROUND_ROOMS},
-    2: {"label": "2nd floor", "image": None, "rooms": []},
-    3: {"label": "3rd floor", "image": None, "rooms": []},
-    4: {"label": "4th floor", "image": None, "rooms": []},
-    5: {"label": "5th floor", "image": None, "rooms": []},
+    2: {"label": "2nd floor", "image": "images/floor_plans/academic_2nd.svg",    "rooms": _ACADEMIC_2ND_ROOMS},
+    3: {"label": "3rd floor", "image": "images/floor_plans/academic_3rd.svg",    "rooms": _ACADEMIC_3RD_ROOMS},
+    4: {"label": "4th floor", "image": "images/floor_plans/academic_4th.svg",    "rooms": _ACADEMIC_4TH_ROOMS},
+    5: {"label": "5th floor", "image": "images/floor_plans/academic_5th.svg",    "rooms": _ACADEMIC_5TH_ROOMS},
 }
 
 _IT_FLOORS = {

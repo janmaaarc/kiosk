@@ -15,45 +15,43 @@
     </style>
   </defs>
 
-  <!-- Outer building outline -->
   <rect x="80" y="60" width="1040" height="580" class="wall"/>
 
-  <!-- === TOP ROW === -->
-  <rect x="80" y="60" width="200" height="260" class="room"/>
-  <rect x="280" y="60" width="140" height="260" class="room-yellow"/>
-  <rect x="420" y="60" width="110" height="260" class="room-yellow"/>
-  <rect x="530" y="60" width="400" height="260" class="room"/>
+  <!-- TOP ROW -->
+  <rect x="80"  y="60" width="130" height="260" class="room"/>         <!-- Director -->
+  <rect x="210" y="60" width="170" height="260" class="room"/>         <!-- Guidance -->
+  <rect x="380" y="60" width="130" height="260" class="room"/>         <!-- Placement -->
+  <rect x="510" y="60" width="130" height="260" class="room-yellow"/>  <!-- blank -->
+  <rect x="640" y="60" width="290" height="260" class="room-yellow"/>  <!-- Faculty -->
 
   <!-- Elevator -->
   <text x="985" y="80" class="label-elev">ELEVATOR</text>
-  <rect x="980" y="95" width="10" height="210" fill="#f4d35e" stroke="#333" stroke-width="1"/>
+  <polygon points="985,95 975,115 995,115" fill="#f4d35e"/>
+  <rect x="980" y="115" width="10" height="190" fill="#f4d35e" stroke="#333" stroke-width="1"/>
 
-  <!-- CR (burgundy) -->
+  <!-- CR -->
   <rect x="1000" y="60" width="120" height="260" class="room-cr"/>
 
-  <!-- === CENTER HALLWAY === -->
+  <!-- CENTER HALLWAY -->
   <line x1="80" y1="320" x2="1120" y2="320" stroke="#333" stroke-width="3"/>
   <line x1="80" y1="380" x2="1120" y2="380" stroke="#333" stroke-width="3"/>
-
-  <!-- EXIT labels -->
-  <text x="100" y="350" class="label-exit">EXIT</text>
+  <text x="100"  y="350" class="label-exit">EXIT</text>
   <text x="1100" y="350" class="label-exit">EXIT</text>
 
-  <!-- === BOTTOM ROW === -->
-  <rect x="80" y="380" width="200" height="260" class="room"/>
-  <rect x="280" y="380" width="140" height="260" class="room-yellow"/>
+  <!-- BOTTOM ROW -->
+  <rect x="80"  y="380" width="340" height="260" class="room-yellow"/> <!-- Classroom -->
 
-  <!-- Left stairs -->
+  <!-- Left stairs + yellow block -->
   <rect x="420" y="380" width="85" height="180" fill="url(#stairs)" stroke="#333" stroke-width="2"/>
   <rect x="420" y="560" width="85" height="80" fill="#f4d35e" stroke="#333" stroke-width="2"/>
 
-  <!-- STAIRS labels -->
   <text x="535" y="510" class="label-stairs" transform="rotate(-90 535 510)">STAIRS</text>
   <text x="695" y="510" class="label-stairs" transform="rotate(-90 695 510)">STAIRS</text>
 
-  <!-- Right stairs -->
+  <!-- Right stairs + yellow block -->
   <rect x="725" y="380" width="85" height="180" fill="url(#stairs)" stroke="#333" stroke-width="2"/>
+  <rect x="725" y="560" width="85" height="80" fill="#f4d35e" stroke="#333" stroke-width="2"/>
 
-  <rect x="810" y="380" width="155" height="260" class="room-yellow"/>
-  <rect x="965" y="380" width="155" height="260" class="room-yellow"/>
+  <rect x="810" y="380" width="160" height="260" class="room-yellow"/> <!-- Command Center 1 -->
+  <rect x="970" y="380" width="150" height="260" class="room-yellow"/> <!-- Command Center 2 -->
 </svg>

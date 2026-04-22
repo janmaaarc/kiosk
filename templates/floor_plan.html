@@ -117,6 +117,10 @@ body {
   pointer-events: none;
   user-select: none;
 }
+/* SVG floor plans use preserveAspectRatio="none" so they stretch to
+   fill the container and keep the room overlays aligned. Raster floor
+   plans (JPG/PNG) keep object-fit: contain so they are not distorted. */
+.plan-wrapper img.floor-img.stretch { object-fit: fill; }
 
 /* Placeholder when no image */
 .plan-placeholder {
@@ -279,7 +283,8 @@ body {
   <div class="plan-wrapper" id="planWrapper">
 
     {% if floor_image %}
-    <img class="floor-img" src="{{ url_for('static', filename=floor_image) }}" alt="Floor plan">
+    <img class="floor-img{% if floor_image.endswith('.svg') %} stretch{% endif %}"
+         src="{{ url_for('static', filename=floor_image) }}" alt="Floor plan">
     {% else %}
     <div class="plan-placeholder">FLOOR PLAN IMAGE COMING SOON</div>
     {% endif %}
@@ -304,6 +309,7 @@ body {
             data-name="{{ room.name }}"
             data-desc="{{ room.desc | default('') }}"
             data-office-key="{{ room.office_key | default('') }}"
+            data-directions="{{ room.directions | default([]) | tojson | forceescape }}"
             data-left="{{ room.left }}"
             data-top="{{ room.top }}"
             data-width="{{ room.width }}"
@@ -318,7 +324,13 @@ body {
       <button class="info-close" onclick="closeInfo()">✕</button>
       <h3 id="infoName"></h3>
       <p id="infoDesc"></p>
-      <div style="display:flex;gap:14px;align-items:center;margin-top:10px;flex-wrap:wrap">
+      <div id="infoDirectionsBlock" style="display:none;margin-top:8px">
+        <div style="font-weight:900;color:#7b2d2d;letter-spacing:1.5px;font-size:13px;margin-bottom:6px">
+          DIRECTIONS
+        </div>
+        <ul id="infoDirections" style="margin:0 0 0 22px;padding:0;font-size:14px;color:#333;line-height:1.5"></ul>
+      </div>
+      <div style="display:flex;gap:14px;align-items:center;margin-top:12px;flex-wrap:wrap">
         <a id="infoOfficeBtn" href="#" style="display:none;background:#7b2d2d;color:#fff;
              padding:10px 18px;border-radius:22px;font-weight:900;letter-spacing:1.5px;
              text-decoration:none;font-size:13px;">OPEN OFFICE PAGE →</a>
@@ -353,6 +365,24 @@ function handleRoomClick(btn) {
 function showInfo(btn) {
   document.getElementById('infoName').textContent = btn.dataset.name;
   document.getElementById('infoDesc').textContent = btn.dataset.desc || '';
+
+  // Per-room directions (if provided by the backend).
+  const dirBlock = document.getElementById('infoDirectionsBlock');
+  const dirList = document.getElementById('infoDirections');
+  while (dirList.firstChild) dirList.removeChild(dirList.firstChild);
+  let directions = [];
+  try { directions = JSON.parse(btn.dataset.directions || '[]'); } catch (e) {}
+  if (Array.isArray(directions) && directions.length) {
+    directions.forEach(step => {
+      const li = document.createElement('li');
+      li.textContent = step;
+      dirList.appendChild(li);
+    });
+    dirBlock.style.display = 'block';
+  } else {
+    dirBlock.style.display = 'none';
+  }
+
   const qr = document.getElementById('infoQR');
   const officeBtn = document.getElementById('infoOfficeBtn');
   const officeKey = btn.dataset.officeKey;

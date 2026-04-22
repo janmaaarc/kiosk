@@ -231,6 +231,40 @@
             }
             .qr-btn-float:hover { background:rgba(123,45,45,0.08); border-radius:20px; }
 
+            /* Floating QR code card */
+            .qr-card {
+              position:fixed;
+              top:150px;
+              right:28px;
+              background:#fff;
+              border-radius:24px;
+              padding:24px 28px;
+              box-shadow:0 12px 40px rgba(0,0,0,0.18);
+              z-index:2600;
+              width:320px;
+              display:none;
+            }
+            .qr-card.visible { display:block; }
+            .qr-card-header {
+              display:flex;align-items:center;gap:10px;
+              font-weight:900;letter-spacing:1.5px;font-size:15px;
+              color:#333;margin-bottom:16px;
+            }
+            .qr-card-header svg { width:22px;height:22px;fill:#333; }
+            .qr-card img {
+              display:block;width:100%;height:auto;
+              max-width:260px;margin:0 auto 16px;
+            }
+            .qr-card-desc {
+              font-size:14px;line-height:1.4;color:#555;
+            }
+            .qr-card-close {
+              position:absolute;top:10px;right:14px;
+              background:none;border:none;font-size:20px;
+              cursor:pointer;color:#999;font-weight:700;
+            }
+            .qr-card-close:hover { color:#333; }
+
 
             </style> 
             </head> 
@@ -440,6 +474,19 @@
                           <div class="qr-btn-float" id="qrBtnFloat" onclick="generateQR()" style="display:none">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm13-2h-2v2h2v-2zm-2 2h-2v2h2v-2zm4 0h-2v2h2v-2zm0 4h-2v2h2v-2zm-4 0h-2v2h2v-2z"/></svg>
                             GENERATE QR CODE
+                          </div>
+
+                          <!-- Floating QR code card -->
+                          <div class="qr-card" id="qrCard">
+                            <button class="qr-card-close" onclick="closeQR()">&times;</button>
+                            <div class="qr-card-header">
+                              <svg viewBox="0 0 24 24"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm13-2h-2v2h2v-2zm-2 2h-2v2h2v-2zm4 0h-2v2h2v-2zm0 4h-2v2h2v-2zm-4 0h-2v2h2v-2z"/></svg>
+                              GENERATE QR CODE
+                            </div>
+                            <img id="qrCardImage" src="" alt="QR Code">
+                            <div class="qr-card-desc">
+                              Scan the QR code to open the directional guide on your phone (HTML/image/GIF format).
+                            </div>
                           </div>
 
                            <div class="directions-panel" id="directionsPanel">
@@ -681,7 +728,7 @@ const nodes = {
   "OLD_ADM_ENT":   {x:325,  y:500},
   "YLAGAN_ENT":    {x:475,  y:157},
   "MIST_DORM_ENT": {x:965,  y:157},
-  "ACADEMIC_ENT":  {x:580,  y:250},
+  "ACADEMIC_ENT":  {x:740,  y:420},
   "WAF_RAC_ENT":   {x:915,  y:327},
   "FSM_ENT":       {x:580,  y:590},
   "CIVIL_ENT":     {x:915,  y:500},
@@ -702,7 +749,7 @@ const nodes = {
   "YLAGAN HALL":              {x:475,  y:270},
   "MIST-NCESTD BUILDING":     {x:175,  y:272},
   "AUTOMOTIVE BUILDING":      {x:1545, y:275},
-  "ACADEMIC BUILDING":        {x:740,  y:250},
+  "ACADEMIC BUILDING":        {x:740,  y:315},
   "WAF & RAC BUILDING":       {x:1060, y:327},
   "POWER ROOM":               {x:1415, y:357},
   "NEW ADMIN BUILDING":       {x:125,  y:600},
@@ -722,8 +769,8 @@ const graph = {
   // MAIN ROAD
   "GATE":    ["INT_A", "MIST_BLD_ENT", "NEW_ADM_ENT"],
   "INT_A":   ["GATE", "INT_B", "TOP_A", "OLD_ADM_ENT"],
-  "INT_B":   ["INT_A", "INT_C", "TOP_B", "ACADEMIC_ENT", "FSM_ENT"],
-  "INT_C":   ["INT_B", "INT_D", "TOP_C", "WAF_RAC_ENT", "CIVIL_ENT", "MECH_ENT"],
+  "INT_B":   ["INT_A", "ACADEMIC_ENT", "TOP_B", "FSM_ENT"],
+  "INT_C":   ["ACADEMIC_ENT", "INT_D", "TOP_C", "WAF_RAC_ENT", "CIVIL_ENT", "MECH_ENT"],
   "INT_D":   ["INT_C", "INT_E"],
   "INT_E":   ["INT_D", "INT_MID", "MID_5TH", "TECH_ENT"],
   "INT_MID": ["INT_E", "INT_F", "UP_MID"],
@@ -733,7 +780,7 @@ const graph = {
   "TOP_A":   ["INT_A", "YLAGAN_ENT"],
   "YLAGAN_ENT":   ["TOP_A", "TOP_B", "YLAGAN HALL"],
   "YLAGAN HALL":  ["YLAGAN_ENT"],
-  "TOP_B":   ["YLAGAN_ENT", "TOP_C", "ACADEMIC_ENT", "RODRIGUEZ BUILDING"],
+  "TOP_B":   ["YLAGAN_ENT", "TOP_C", "RODRIGUEZ BUILDING"],
   "TOP_C":   ["TOP_B", "MIST_DORM_ENT", "WAF_RAC_ENT"],
   "MIST_DORM_ENT":  ["TOP_C", "MIST-NCESTD DORM"],
   "MIST-NCESTD DORM": ["MIST_DORM_ENT"],
@@ -754,7 +801,7 @@ const graph = {
   "OLD ADMIN BUILDING": ["OLD_ADM_ENT"],
 
   // CENTER VERTICALS
-  "ACADEMIC_ENT":  ["INT_B", "TOP_B", "ACADEMIC BUILDING"],
+  "ACADEMIC_ENT":  ["INT_B", "INT_C", "ACADEMIC BUILDING"],
   "ACADEMIC BUILDING": ["ACADEMIC_ENT"],
   "WAF_RAC_ENT":   ["INT_C", "TOP_C", "WAF & RAC BUILDING"],
   "WAF & RAC BUILDING": ["WAF_RAC_ENT"],
@@ -1040,20 +1087,15 @@ function setView(view){
 function generateQR(){
   let loc = new URLSearchParams(window.location.search).get("location");
   if(!loc){
-    loc = document.getElementById("destName").innerText;
+    loc = document.getElementById("destName").textContent;
   }
+  if(!loc) return;
   const url = window.location.origin + "/campus_map?location=" + encodeURIComponent(loc);
-  const qrSrc = "/qr?size=200&data=" + encodeURIComponent(url);
-
-  const old = document.getElementById("qrImage");
-  if(old) old.remove();
-
-  const img = document.createElement("img");
-  img.id = "qrImage";
-  img.src = qrSrc;
-  img.style.cssText = "display:block;margin:12px auto;border:4px solid white;border-radius:8px;width:150px;height:150px;";
-  img.alt = "QR Code";
-  document.getElementById("directionsBox").appendChild(img);
+  document.getElementById("qrCardImage").src = "/qr?size=260&data=" + encodeURIComponent(url);
+  document.getElementById("qrCard").classList.add("visible");
+}
+function closeQR(){
+  document.getElementById("qrCard").classList.remove("visible");
 }
 // CLICK BUILDING → SLIDE-IN PREVIEW PANEL
 const BUILDING_PHOTOS = {
@@ -1090,6 +1132,16 @@ function closeBuildingPanel() {
 }
 function enterBuilding() {
   if (_pendingUrl) window.location.href = _pendingUrl;
+}
+function showDirectionFromPanel() {
+  const name = document.getElementById('panelBuildingName').textContent.trim();
+  if (!name) return;
+  closeBuildingPanel();
+  // Update URL so refreshing / sharing keeps the same directions, then draw.
+  const params = new URLSearchParams(window.location.search);
+  params.set("location", name);
+  window.history.replaceState(null, "", "?" + params.toString());
+  showDirections(name);
 }
 
 // HOME / BACK
@@ -1257,6 +1309,17 @@ updateYouHere(150, 420); // MAIN GATE POSITION
     onmouseover="this.style.background='#5a1f1f'"
     onmouseout="this.style.background='#7b2d2d'">
     ENTER BUILDING
+  </button>
+  <button id="panelShowDirBtn" onclick="showDirectionFromPanel()" style="
+    background:#fff;color:#7b2d2d;border:2px solid #7b2d2d;border-radius:12px;
+    padding:14px 24px;font-size:14px;font-weight:900;letter-spacing:2px;
+    cursor:pointer;font-family:inherit;margin-bottom:12px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    transition:background 0.2s"
+    onmouseover="this.style.background='#fbeaea'"
+    onmouseout="this.style.background='#fff'">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+    SHOW DIRECTION
   </button>
   <button onclick="closeBuildingPanel()" style="
     background:transparent;color:#555;border:2px solid #ddd;border-radius:12px;
