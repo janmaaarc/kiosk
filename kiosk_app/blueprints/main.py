@@ -1,9 +1,12 @@
+import io
 import os
+from urllib.parse import quote
 
-from flask import Blueprint, Response, jsonify, redirect, render_template, request
+import qrcode
+from flask import Blueprint, Response, jsonify, redirect, render_template, request, send_file
 
 from kiosk_app.db import db_connection
-from kiosk_app.extensions import limiter
+from kiosk_app.extensions import csrf, limiter
 
 main_bp = Blueprint("main", __name__)
 
@@ -26,8 +29,41 @@ def faculty():
 
 
 @main_bp.route("/rfid")
+@limiter.limit("30 per minute")
 def rfid():
+    uid = request.args.get("uid", "").strip()
+    if not uid:
+        return redirect("/menu")
+    with db_connection() as conn:
+        row = conn.execute(
+            "SELECT name, role FROM users WHERE rfid_uid = ?", (uid,)
+        ).fetchone()
+    if row:
+        return render_template("profile.html", user_name=row["name"], user_role=row["role"])
     return redirect("/menu")
+
+
+_RFID_LOCAL_ADDRS = frozenset({"127.0.0.1", "::1", "localhost"})
+
+
+@main_bp.route("/check_rfid", methods=["POST"])
+@csrf.exempt
+@limiter.limit("60 per minute")
+def check_rfid():
+    # Only accept from localhost (the RFID watcher runs on the same host).
+    if request.remote_addr not in _RFID_LOCAL_ADDRS:
+        return jsonify({"status": "forbidden"}), 403
+    data = request.get_json(silent=True) or {}
+    uid = (data.get("uid") or "").strip()
+    if not uid:
+        return jsonify({"status": "error", "message": "missing uid"}), 400
+    with db_connection() as conn:
+        row = conn.execute(
+            "SELECT name, role FROM users WHERE rfid_uid = ?", (uid,)
+        ).fetchone()
+    if row:
+        return jsonify({"status": "authorized", "user": {"name": row["name"], "role": row["role"]}})
+    return jsonify({"status": "unauthorized"})
 
 
 @main_bp.route("/profile")
@@ -72,7 +108,7 @@ def api_search():
         ).fetchall():
             results.append({"type": "room", "name": row["room"],
                             "building": row["building"] or "",
-                            "url": "/search?room=" + row["room"]})
+                            "url": "/search?room=" + quote(row["room"], safe="")})
 
         for row in conn.execute(
             "SELECT key, name FROM offices WHERE name LIKE ? ESCAPE '\\'"
@@ -81,7 +117,7 @@ def api_search():
         ).fetchall():
             results.append({"type": "office", "name": row["name"],
                             "building": "",
-                            "url": "/office?name=" + row["key"]})
+                            "url": "/office?name=" + quote(row["key"], safe="")})
 
         for row in conn.execute(
             "SELECT name, department FROM faculty WHERE name LIKE ? ESCAPE '\\' LIMIT 5",
@@ -114,14 +150,34 @@ def offline():
     return render_template("offline.html")
 
 
+@main_bp.route("/qr")
+@limiter.limit("60 per minute")
+def qr_code():
+    data = request.args.get("data", "").strip()
+    if not data:
+        return ("missing data", 400)
+    try:
+        size = max(64, min(int(request.args.get("size", 200)), 512))
+    except (TypeError, ValueError):
+        size = 200
+    img = qrcode.make(data, box_size=max(1, size // 30), border=2)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return send_file(buf, mimetype="image/png")
+
+
 @main_bp.route("/sw.js")
 def service_worker():
     sw_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
         "static", "sw.js",
     )
-    with open(sw_path) as fh:
-        body = fh.read()
+    try:
+        with open(sw_path) as fh:
+            body = fh.read()
+    except FileNotFoundError:
+        return ("service worker not found", 404)
     return Response(body, mimetype="application/javascript",
                     headers={"Service-Worker-Allowed": "/"})
 

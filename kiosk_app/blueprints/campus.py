@@ -19,63 +19,6 @@ def campus_map():
     return render_template("campus.html")
 
 
-@campus_bp.route("/campus/<building_name>")
-def building(building_name: str):
-    with db_connection() as conn:
-        floors = conn.execute(
-            "SELECT DISTINCT floor FROM rooms WHERE LOWER(building) = LOWER(?)",
-            (building_name,),
-        ).fetchall()
-
-    return render_template("building.html", building=building_name, floors=floors)
-
-
-@campus_bp.route("/floor/<building_name>/<floor_number>")
-def floor(building_name: str, floor_number: str):
-    with db_connection() as conn:
-        rooms = conn.execute(
-            "SELECT room FROM rooms WHERE LOWER(building) = LOWER(?) AND floor = ?",
-            (building_name, floor_number),
-        ).fetchall()
-
-    highlight = request.args.get("highlight")
-    directions = (
-        f"Proceed to {highlight} on floor {floor_number} of {building_name}."
-        if highlight
-        else None
-    )
-
-    return render_template(
-        "floor.html",
-        building=building_name,
-        floor=floor_number,
-        rooms=rooms,
-        highlight=highlight,
-        directions=directions,
-    )
-
-
-@campus_bp.route("/campus/<building_name>/<floor_number>/<room_name>")
-def room(building_name: str, floor_number: str, room_name: str):
-    return render_template(
-        "room.html",
-        building=building_name,
-        floor=floor_number,
-        room=room_name,
-    )
-
-
-@campus_bp.route("/building_navigation")
-def building_navigation():
-    room_param = request.args.get("room")
-    return render_template("building_navigation.html", room=room_param)
-
-
-@campus_bp.route("/room_navigation")
-def room_navigation():
-    return render_template("room_navigation.html")
-
-
 def _floor_plan(building_name: str, floor_count: int = 3, base_url: str = "",
                 custom_floors: dict | None = None):
     """Generic floor_plan.html renderer for any building."""
@@ -188,24 +131,31 @@ def automotive():
     return _floor_plan("Automotive Building", floor_count=3, base_url="automotive_building")
 
 
-_GROUND_FLOOR_ROOMS = [
-    {"name": "Medical and Dental Services", "left": 1,  "top": 3,  "width": 13, "height": 38, "desc": "Student health and dental clinic",         "office_key": "Clinic"},
-    {"name": "Record and Information Center","left": 14, "top": 3,  "width": 10, "height": 38, "desc": "Official school records and documents",   "office_key": "Registrar"},
-    {"name": "MPC Cares",                    "left": 24, "top": 3,  "width": 10, "height": 38, "desc": "Student welfare and assistance"},
-    {"name": "Faculty Room",                 "left": 34, "top": 3,  "width": 28, "height": 38, "desc": "Faculty lounge and workroom"},
-    {"name": "CR",                           "left": 88, "top": 3,  "width": 11, "height": 38, "desc": "Comfort room"},
-    {"name": "Quality Assurance Office",     "left": 1,  "top": 58, "width": 13, "height": 38, "desc": "Quality management and accreditation"},
-    {"name": "Conference Room",              "left": 14, "top": 58, "width": 10, "height": 38, "desc": "Meeting and conference facility"},
-    {"name": "Repair and Maintenance",       "left": 62, "top": 58, "width": 13, "height": 38, "desc": "Facilities maintenance office"},
-    {"name": "Function Hall",                "left": 75, "top": 58, "width": 14, "height": 38, "desc": "Multi-purpose function hall"},
+_ACADEMIC_GROUND_ROOMS = [
+    {"name": "Medical and Dental Services", "left": 6.7, "top": 8.6,  "width": 16.7, "height": 37.1, "desc": "Student health and dental clinic",       "office_key": "Clinic"},
+    {"name": "Record and Information Center","left":23.3,"top": 8.6,  "width": 11.7, "height": 37.1, "desc": "Official school records and documents", "office_key": "Registrar"},
+    {"name": "MPC Cares",                   "left": 35.0, "top": 8.6, "width": 9.2,  "height": 37.1, "desc": "Student welfare and assistance"},
+    {"name": "Faculty Room",                "left": 44.2, "top": 8.6, "width": 33.3, "height": 37.1, "desc": "Faculty lounge and workroom"},
+    {"name": "CR",                          "left": 83.3, "top": 8.6, "width": 10.0, "height": 37.1, "desc": "Comfort room"},
+    {"name": "Quality Assurance Office",    "left": 6.7, "top": 54.3, "width": 16.7, "height": 37.1, "desc": "Quality management and accreditation"},
+    {"name": "Conference Room",             "left": 23.3, "top": 54.3,"width": 11.7, "height": 37.1, "desc": "Meeting and conference facility"},
+    {"name": "Repair and Maintenance",      "left": 67.5, "top": 54.3,"width": 12.9, "height": 37.1, "desc": "Facilities maintenance office"},
+    {"name": "Function Hall",               "left": 80.4, "top": 54.3,"width": 12.9, "height": 37.1, "desc": "Multi-purpose function hall"},
 ]
 
 _ACADEMIC_FLOORS = {
-    1: {"label": "Ground Floor", "image": None, "rooms": _GROUND_FLOOR_ROOMS},
+    1: {"label": "1st floor", "image": "images/floor_plans/academic_ground.svg", "rooms": _ACADEMIC_GROUND_ROOMS},
+    2: {"label": "2nd floor", "image": None, "rooms": []},
+    3: {"label": "3rd floor", "image": None, "rooms": []},
+    4: {"label": "4th floor", "image": None, "rooms": []},
+    5: {"label": "5th floor", "image": None, "rooms": []},
 }
 
 _IT_FLOORS = {
-    1: {"label": "Ground Floor", "image": None, "rooms": _GROUND_FLOOR_ROOMS},
+    1: {"label": "1st floor", "image": "images/floor_plans/IT_1ST.JPG", "rooms": []},
+    2: {"label": "2nd floor", "image": "images/floor_plans/IT_2ND.JPG", "rooms": []},
+    3: {"label": "3rd floor", "image": "images/floor_plans/IT_3RD.JPG", "rooms": []},
+    4: {"label": "4th floor", "image": None, "rooms": []},
 }
 
 

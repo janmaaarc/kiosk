@@ -265,9 +265,6 @@ body {
   <!-- Content -->
   <div class="content">
 
-    {% with crumbs=[{'label':'Home','url':'/menu'},{'label':'Offices','url':'/office-selection'},{'label':selected.name,'url':'#'}] %}
-    {% include '_breadcrumb.html' %}
-    {% endwith %}
     <div class="office-title">{{ selected.name | upper }}</div>
 
     <!-- Info chips -->
@@ -293,15 +290,28 @@ body {
       {# User came from a floor plan — show "Show Direction" back to that floor #}
       <a class="btn-directions"
          href="{{ from_building }}?floor={{ from_floor }}&location={{ from_room | urlencode }}">
-        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>
         SHOW DIRECTION
       </a>
-      {% elif selected.building_url %}
-      <a class="btn-directions"
-         href="{{ selected.building_url }}?location={{ selected.name | urlencode }}">
-        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-        GET DIRECTIONS
-      </a>
+      {% else %}
+        {% if selected.building_url %}
+        <a class="btn-directions"
+           href="{{ selected.building_url }}?location={{ selected.name | urlencode }}">
+          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 7h10v2H7zm0 4h10v2H7zm0 4h7v2H7z"/></svg>
+          ENTER BUILDING
+        </a>
+        <a class="btn-directions"
+           href="/campus_map?location={{ selected.building_url | replace('/', '') | replace('_', ' ') | upper | urlencode }}">
+          <svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>
+          SHOW DIRECTION
+        </a>
+        {% else %}
+        {# No building set — point to the campus map so visitors can still navigate #}
+        <a class="btn-directions" href="/campus_map">
+          <svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>
+          SHOW DIRECTION
+        </a>
+        {% endif %}
       {% endif %}
     </div>
 

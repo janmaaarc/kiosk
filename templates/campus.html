@@ -125,56 +125,122 @@
 
             .directions-panel{
               display:none;
-              position:absolute;
-              left:40px;
-              top:140px;
-              width:360px;
-              max-height:560px;
+              position:fixed;
+              left:0;top:0;
+              width:380px;
+              height:100vh;
+              background:linear-gradient(180deg, #7b2d2d 0%, #5a1f1f 100%);
+              padding:40px 34px;
+              box-sizing:border-box;
+              color:#fff;
+              z-index:1400;
               overflow-y:auto;
-              background:white;
-              padding:20px;
-              border-radius:12px;
-              box-shadow:0 10px 25px rgba(0,0,0,0.3);
-              z-index:1000;
-            } 
-            
-            .dest-title{ font-size:16px;
-              font-weight:bold; color:#555;
+              box-shadow:4px 0 20px rgba(0,0,0,0.2);
+            }
+            .directions-panel .dest-label {
+              font-size:22px;font-weight:900;letter-spacing:2px;
+              margin-bottom:6px;color:#fff;
+            }
+            .directions-panel .dest-name {
+              font-size:26px;font-weight:900;letter-spacing:1px;
+              margin-bottom:30px;color:#fff;line-height:1.2;
+            }
+            .directions-panel .dir-heading {
+              font-size:22px;font-weight:900;margin:0 0 14px;
+              color:#fff;
+            }
+            .directions-panel ul {
+              list-style:disc;
+              padding-left:22px;
+              margin:0 0 24px;
+            }
+            .directions-panel ul li {
+              font-size:17px;line-height:1.5;margin-bottom:8px;
+              color:#fff;
+            }
+            .directions-panel .divider {
+              border-top:1px solid rgba(255,255,255,0.3);
+              margin:18px 0;
             }
 
-            .dest-name{
-              font-size:28px;
+            /* YOU ARE HERE pin marker */
+            .you-are-here {
+              position:absolute;
+              width:54px;
+              height:68px;
+              transform:translate(-50%,-100%);
+              pointer-events:none;
+              z-index:1500;
+              display:none;
+            }
+            .you-are-here .pin {
+              width:54px;
+              height:54px;
+              background:#8b1a1a;
+              border-radius:50% 50% 50% 0;
+              transform:rotate(-45deg);
+              display:flex;align-items:center;justify-content:center;
+              box-shadow:0 4px 12px rgba(0,0,0,0.4);
+            }
+            .you-are-here .pin-text {
+              transform:rotate(45deg);
+              color:#fff;
               font-weight:900;
-              margin-bottom:15px;
-              color:#7b2d2d; }
-
-            .directions-steps p{
-              font-size:18px;
-              margin-bottom:10px;
-            } 
-            
-            .qr-btn{
-              margin-top:15px;
-              padding:14px;
+              font-size:9px;
               text-align:center;
-              background:black;
-              color:white;
-              border-radius:8px;
+              line-height:1;
+              letter-spacing:0.5px;
+            }
+
+            /* Top-right overlay: OUTSIDE / INSIDE toggle + QR button
+               Positioned fixed to the viewport so they are NOT affected by
+               the map-container's transform:scale(0.7). */
+            .view-toggle {
+              position:fixed;
+              top:70px;
+              right:28px;
+              display:flex;
+              gap:24px;
+              align-items:center;
+              z-index:2500;
+              font-weight:900;
+              letter-spacing:2px;
+              font-size:17px;
+              color:#333;
+            }
+            .view-toggle .toggle-btn {
               cursor:pointer;
-              font-weight:bold;
-              font-size:18px;
-            } 
+              padding:6px 4px;
+              opacity:0.55;
+              transition:opacity 0.2s;
+            }
+            .view-toggle .toggle-btn.active { opacity:1; border-bottom:3px solid #8b1a1a; }
+            .qr-btn-float {
+              position:fixed;
+              top:108px;
+              right:28px;
+              background:transparent;
+              color:#333;
+              padding:6px 10px;
+              cursor:pointer;
+              font-weight:900;
+              letter-spacing:1.5px;
+              font-size:13px;
+              z-index:2500;
+              display:flex;align-items:center;gap:8px;
+            }
+            .qr-btn-float:hover { background:rgba(123,45,45,0.08); border-radius:20px; }
 
 
             </style> 
             </head> 
             <body> 
-              <div class="top-icons"> 
-                <img src="{{ url_for('static', filename='images/icon/home_button.png') }}" 
-                onclick="goHome()"> <img src="{{ url_for('static', filename='images/icon/back_button.png') }}" 
-                onclick="goBack()"> <circle id="youHere" r="10" fill="#00c853"/> 
-                <circle id="youPulse" r="10" fill="#00c853" opacity="0.4"/> 
-              </div> 
+              <div class="top-icons">
+                <img src="{{ url_for('static', filename='images/icon/home_button.png') }}"
+                onclick="goHome()">
+                <img src="{{ url_for('static', filename='images/icon/back_button.png') }}"
+                onclick="goBack()">
+              </div>
             
             <div class="map-wrapper"> 
               <div class="map-container"> 
@@ -361,13 +427,32 @@
                           <!-- last VERTICAL ROAD/middle side --> 
                            <div class="road" data-name="LAST VERTICAL ROAD" style="top:100px; left:1650px; width:50px; height:700px;"></div> 
                            
-                           <div class="directions-panel" id="directionsPanel"> 
-                            <div class="dest-title">DESTINATION</div> 
-                            <div class="dest-name" id="destName">IT BUILDING</div> 
+                          <!-- YOU ARE HERE pin marker (inside map-container) -->
+                          <div class="you-are-here" id="youHerePin">
+                            <div class="pin"><div class="pin-text">YOU<br>ARE<br>HERE.</div></div>
+                          </div>
 
-                            <div class="directions-steps" id="directionsBox"></div> 
-                            <div class="qr-btn" onclick="generateQR()">GENERATE QR CODE</div> 
-                          </div> 
+                          <!-- OUTSIDE / INSIDE toggle + QR button -->
+                          <div class="view-toggle" id="viewToggle" style="display:none">
+                            <span class="toggle-btn active" id="toggleOutside" onclick="setView('outside')">OUTSIDE</span>
+                            <span class="toggle-btn" id="toggleInside" onclick="setView('inside')">INSIDE</span>
+                          </div>
+                          <div class="qr-btn-float" id="qrBtnFloat" onclick="generateQR()" style="display:none">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm13-2h-2v2h2v-2zm-2 2h-2v2h2v-2zm4 0h-2v2h2v-2zm0 4h-2v2h2v-2zm-4 0h-2v2h2v-2z"/></svg>
+                            GENERATE QR CODE
+                          </div>
+
+                           <div class="directions-panel" id="directionsPanel">
+                            <div class="dest-label">DESTINATION:</div>
+                            <div class="dest-name" id="destName">ACADEMIC BUILDING</div>
+                            <div class="dir-heading">Directions</div>
+                            <ul id="directionsBox"></ul>
+                            <div id="insideBlock" style="display:none">
+                              <div class="divider"></div>
+                              <div class="dir-heading" id="insideHeading">Inside the Building:</div>
+                              <ul id="insideBox"></ul>
+                            </div>
+                          </div>
                             
                           <script>
 
@@ -569,80 +654,137 @@
                             return steps; 
                           } 
 
-                            const nodes = {
+const nodes = {
+  // MAIN HORIZONTAL ROAD (y=420)
+  "GATE":      {x:150,  y:420},
+  "INT_A":     {x:325,  y:420},
+  "INT_B":     {x:580,  y:420},
+  "INT_C":     {x:915,  y:420},
+  "INT_D":     {x:1200, y:420},
+  "INT_E":     {x:1360, y:420},
+  "INT_MID":   {x:1545, y:420},
+  "INT_F":     {x:1675, y:420},
 
-                              // MAIN LINE //
-                            "MAIN GATE": { x:150, y:420 }, 
-                            "INT_1": { x:300, y:420 }, 
-                            "INT_2": { x:565, y:420 }, 
-                            "INT_3": { x:895, y:420 }, 
-                            "INT_4": { x:1190, y:420 }, 
-                            "INT_5": { x:1345, y:420 }, 
-                            "INT_6": { x:1650, y:420 }, 
+  // TOP HORIZONTAL ROAD (y=157)
+  "TOP_A":     {x:325,  y:157},
+  "TOP_B":     {x:580,  y:157},
+  "TOP_C":     {x:915,  y:157},
 
-                            // LEFT SIDE //
-                            "LEFT_DOWN": { x:210, y:600 }, 
-                            "OLD_ADMIN_ENT": { x:355, y:550 }, 
-                            // CENTER DOWN //
-                            "FSM_ENT": { x:650, y:550 }, 
-                            "CIVIL_ENT": { x:830, y:550 }, 
-                            // RIGHT SIDE DOWN //
-                            "TECH_ENT": { x:1300, y:550 }, 
-                            // TOP ROADS //
-                            "TOP_LEFT": { x:305, y:150 }, 
-                            "TOP_CENTER": { x:565, y:150 }, 
-                            "TOP_RIGHT": { x:895, y:150 }, 
-                            // RIGHT VERTICAL //
-                            "UP_IT": { x:1650, y:250 }, 
-                            "MID_SCI": { x:1650, y:350 }, 
-                            "DOWN_TE": { x:1650, y:600 }, 
-                            // BUILDINGS //
-                            "ACADEMIC BUILDING": { x:700, y:250 }, 
-                            "IT BUILDING": { x:1780, y:180 }, 
-                            "SCIENCE BUILDING": { x:1780, y:320 }, 
-                            "TE BUILDING": { x:1780, y:600 }, 
-                            "FSM BUILDING": { x:650, y:550 }, 
-                            "CIVIL TECH BUILDING": { x:830, y:550 },
-                            "TECH BUILDING": { x:1300, y:550 }, 
-                            "OLD ADMIN BUILDING": { x:355, y:550 } 
-                          }; 
-                          
-                          const graph = { 
-                            
-                            // MAIN ROAD CONNECTION //
-                            "MAIN GATE": ["INT_1"], 
-                            "INT_1": ["MAIN GATE", "INT_2", "LEFT_DOWN"], 
-                            "INT_2": ["INT_1", "INT_3", "TOP_CENTER", "FSM_ENT"], 
-                            "INT_3": ["INT_2", "INT_4", "TOP_RIGHT", "CIVIL_ENT"], 
-                            "INT_4": ["INT_3", "INT_5", "TECH_ENT"], 
-                            "INT_5": ["INT_4", "INT_6"], 
-                            "INT_6": ["INT_5", "UP_IT", "MID_SCI", "DOWN_TE"], 
-                            
-                            // LEFT SIDE//
-                            "LEFT_DOWN": ["INT_1", "OLD_ADMIN_ENT"], 
-                            "OLD_ADMIN_ENT": ["LEFT_DOWN", "OLD ADMIN BUILDING"], 
-                            "OLD ADMIN BUILDING": ["OLD_ADMIN_ENT"], 
-                            
-                            // CENTER BUILDINGS//
-                            "FSM_ENT": ["INT_2", "FSM BUILDING"], 
-                            "FSM BUILDING": ["FSM_ENT"], 
-                            "CIVIL_ENT": ["INT_3", "CIVIL TECH BUILDING"], 
-                            "CIVIL TECH BUILDING": ["CIVIL_ENT"], 
-                            
-                            // RIGHT BUILDINGS//
-                            "TECH_ENT": ["INT_4", "TECH BUILDING"], "TECH BUILDING": ["TECH_ENT"], 
-                            // TOP CONNECTIONS //
-                            "TOP_CENTER": ["INT_2", "ACADEMIC BUILDING"], 
-                            "ACADEMIC BUILDING": ["TOP_CENTER"], 
-                            
-                            // RIGHT VERTICAL SYSTEM //
-                            "UP_IT": ["INT_6", "IT BUILDING"], 
-                            "IT BUILDING": ["UP_IT"], 
-                            "MID_SCI": ["INT_6", "SCIENCE BUILDING"], 
-                            "SCIENCE BUILDING": ["MID_SCI"], 
-                            "DOWN_TE": ["INT_6", "TE BUILDING"], 
-                            "TE BUILDING": ["DOWN_TE"] 
-                          }; 
+  // BOTTOM HORIZONTAL ROAD (y=752)
+  "BOT_B":     {x:580,  y:752},
+  "BOT_C":     {x:915,  y:752},
+  "BOT_F":     {x:1675, y:752},
+
+  // APPROACH / ENTRY NODES (on roads, just outside buildings)
+  "MIST_BLD_ENT":  {x:150,  y:280},
+  "NEW_ADM_ENT":   {x:150,  y:580},
+  "OLD_ADM_ENT":   {x:325,  y:500},
+  "YLAGAN_ENT":    {x:475,  y:157},
+  "MIST_DORM_ENT": {x:965,  y:157},
+  "ACADEMIC_ENT":  {x:580,  y:250},
+  "WAF_RAC_ENT":   {x:915,  y:327},
+  "FSM_ENT":       {x:580,  y:590},
+  "CIVIL_ENT":     {x:915,  y:500},
+  "GRAD_ENT":      {x:915,  y:600},
+  "MECH_ENT":      {x:1090, y:500},
+  "TECH_ENT":      {x:1360, y:590},
+  "MID_5TH":       {x:1360, y:290},
+  "UP_5TH":        {x:1360, y:140},
+  "UP_MID":        {x:1545, y:200},
+  "IT_ENT":        {x:1675, y:200},
+  "SCI_ENT":       {x:1675, y:345},
+  "TE_ENT":        {x:1675, y:590},
+
+  // BUILDINGS — EXACT CENTERS MATCHING THE DIV POSITIONS
+  "RODRIGUEZ BUILDING":       {x:575,  y:100},
+  "MIST-NCESTD DORM":         {x:1140, y:155},
+  "MULTI-PURPOSE BUILDING":   {x:1545, y:140},
+  "YLAGAN HALL":              {x:475,  y:270},
+  "MIST-NCESTD BUILDING":     {x:175,  y:272},
+  "AUTOMOTIVE BUILDING":      {x:1545, y:275},
+  "ACADEMIC BUILDING":        {x:740,  y:250},
+  "WAF & RAC BUILDING":       {x:1060, y:327},
+  "POWER ROOM":               {x:1415, y:357},
+  "NEW ADMIN BUILDING":       {x:125,  y:600},
+  "OLD ADMIN BUILDING":       {x:395,  y:625},
+  "FSM BUILDING":             {x:700,  y:625},
+  "CIVIL TECH BUILDING":      {x:850,  y:590},
+  "WAF & FSM BUILDING":       {x:980,  y:795},
+  "TECH BUILDING":            {x:1410, y:625},
+  "GRADUATE SCHOOL BUILDING": {x:995,  y:590},
+  "MECHANICAL BUILDING":      {x:1132, y:590},
+  "IT BUILDING":              {x:1780, y:175},
+  "SCIENCE BUILDING":         {x:1780, y:345},
+  "TE BUILDING":              {x:1780, y:615},
+};
+
+const graph = {
+  // MAIN ROAD
+  "GATE":    ["INT_A", "MIST_BLD_ENT", "NEW_ADM_ENT"],
+  "INT_A":   ["GATE", "INT_B", "TOP_A", "OLD_ADM_ENT"],
+  "INT_B":   ["INT_A", "INT_C", "TOP_B", "ACADEMIC_ENT", "FSM_ENT"],
+  "INT_C":   ["INT_B", "INT_D", "TOP_C", "WAF_RAC_ENT", "CIVIL_ENT", "MECH_ENT"],
+  "INT_D":   ["INT_C", "INT_E"],
+  "INT_E":   ["INT_D", "INT_MID", "MID_5TH", "TECH_ENT"],
+  "INT_MID": ["INT_E", "INT_F", "UP_MID"],
+  "INT_F":   ["INT_MID", "IT_ENT", "SCI_ENT", "TE_ENT", "BOT_F"],
+
+  // TOP ROAD
+  "TOP_A":   ["INT_A", "YLAGAN_ENT"],
+  "YLAGAN_ENT":   ["TOP_A", "TOP_B", "YLAGAN HALL"],
+  "YLAGAN HALL":  ["YLAGAN_ENT"],
+  "TOP_B":   ["YLAGAN_ENT", "TOP_C", "ACADEMIC_ENT", "RODRIGUEZ BUILDING"],
+  "TOP_C":   ["TOP_B", "MIST_DORM_ENT", "WAF_RAC_ENT"],
+  "MIST_DORM_ENT":  ["TOP_C", "MIST-NCESTD DORM"],
+  "MIST-NCESTD DORM": ["MIST_DORM_ENT"],
+  "RODRIGUEZ BUILDING": ["TOP_B"],
+
+  // BOTTOM ROAD
+  "BOT_B":   ["FSM_ENT", "BOT_C", "WAF & FSM BUILDING"],
+  "BOT_C":   ["BOT_B", "BOT_F", "GRAD_ENT"],
+  "BOT_F":   ["BOT_C", "INT_F", "TE_ENT"],
+  "WAF & FSM BUILDING": ["BOT_B"],
+
+  // LEFT SIDE
+  "MIST_BLD_ENT":  ["GATE", "MIST-NCESTD BUILDING"],
+  "MIST-NCESTD BUILDING": ["MIST_BLD_ENT"],
+  "NEW_ADM_ENT":   ["GATE", "NEW ADMIN BUILDING"],
+  "NEW ADMIN BUILDING": ["NEW_ADM_ENT"],
+  "OLD_ADM_ENT":   ["INT_A", "OLD ADMIN BUILDING"],
+  "OLD ADMIN BUILDING": ["OLD_ADM_ENT"],
+
+  // CENTER VERTICALS
+  "ACADEMIC_ENT":  ["INT_B", "TOP_B", "ACADEMIC BUILDING"],
+  "ACADEMIC BUILDING": ["ACADEMIC_ENT"],
+  "WAF_RAC_ENT":   ["INT_C", "TOP_C", "WAF & RAC BUILDING"],
+  "WAF & RAC BUILDING": ["WAF_RAC_ENT"],
+  "FSM_ENT":       ["INT_B", "BOT_B", "FSM BUILDING"],
+  "FSM BUILDING":  ["FSM_ENT"],
+  "CIVIL_ENT":     ["INT_C", "GRAD_ENT", "CIVIL TECH BUILDING"],
+  "CIVIL TECH BUILDING": ["CIVIL_ENT"],
+  "GRAD_ENT":      ["CIVIL_ENT", "BOT_C", "GRADUATE SCHOOL BUILDING"],
+  "GRADUATE SCHOOL BUILDING": ["GRAD_ENT"],
+  "MECH_ENT":      ["INT_C", "MECHANICAL BUILDING"],
+  "MECHANICAL BUILDING": ["MECH_ENT"],
+
+  // RIGHT CLUSTER
+  "TECH_ENT":      ["INT_E", "TECH BUILDING"],
+  "TECH BUILDING": ["TECH_ENT"],
+  "MID_5TH":       ["INT_E", "UP_5TH", "POWER ROOM"],
+  "POWER ROOM":    ["MID_5TH"],
+  "UP_5TH":        ["MID_5TH", "MULTI-PURPOSE BUILDING"],
+  "MULTI-PURPOSE BUILDING": ["UP_5TH", "UP_MID"],
+  "UP_MID":        ["INT_MID", "AUTOMOTIVE BUILDING", "MULTI-PURPOSE BUILDING"],
+  "AUTOMOTIVE BUILDING": ["UP_MID"],
+
+  // RIGHT VERTICAL
+  "IT_ENT":        ["INT_F", "IT BUILDING"],
+  "IT BUILDING":   ["IT_ENT"],
+  "SCI_ENT":       ["INT_F", "SCIENCE BUILDING"],
+  "SCIENCE BUILDING": ["SCI_ENT"],
+  "TE_ENT":        ["INT_F", "BOT_F", "TE BUILDING"],
+  "TE BUILDING":   ["TE_ENT"],
+};
                             
                             function drawPath(path){ 
 
@@ -757,16 +899,13 @@ function openBuilding(building){
     `/building?from=campus&building=${encodeURIComponent(building)}`;
 }
                               
-                              function updateYouHere(x, y){ 
-                                const dot = document.getElementById("youHere"); 
-                                const pulse = document.getElementById("youPulse"); 
-
-                                dot.setAttribute("cx", x); 
-                                dot.setAttribute("cy", y); 
-                                
-                                pulse.setAttribute("cx", x); pulse.setAttribute("cy", y); 
-                                pulse.style.animation = "pulseHere 1.2s infinite"; 
-                              } 
+                              function updateYouHere(x, y){
+                                const pin = document.getElementById("youHerePin");
+                                if (!pin) return;
+                                pin.style.left = x + "px";
+                                pin.style.top = (y + 10) + "px";
+                                pin.style.display = "block";
+                              }
                               
                               function getDirection(prev, curr, next){ 
                                 const A = nodes[prev]; 
@@ -782,11 +921,9 @@ function openBuilding(building){
                             return "Continue straight"; 
                           } 
 
-                            function animateDot(path){ 
+                            function animateDot(path){
 
-                              const dot = document.getElementById("routeDot"); 
-                              const you = document.getElementById("youHere"); 
-                              const pulse = document.getElementById("youPulse"); 
+                              const dot = document.getElementById("routeDot");
 
                               let i = 0; 
                               let progress = 0; 
@@ -816,53 +953,88 @@ function openBuilding(building){
                             animate();
                           }
 
-document.getElementById("youPulse").style.animation = "pulseHere 1.2s infinite";
+
+function friendlyDirections(path, destination){
+  const steps = [];
+  steps.push("You are currently here.");
+  let hasTurn = false;
+  for (let i = 1; i < path.length - 1; i++) {
+    const prev = nodes[path[i-1]];
+    const curr = nodes[path[i]];
+    const next = nodes[path[i+1]];
+    if (!prev || !curr || !next) continue;
+    const a1 = Math.atan2(curr.y - prev.y, curr.x - prev.x);
+    const a2 = Math.atan2(next.y - curr.y, next.x - curr.x);
+    let diff = (a2 - a1) * 180 / Math.PI;
+    while (diff > 180) diff -= 360;
+    while (diff < -180) diff += 360;
+    if (diff > 35 && !hasTurn) { steps.push("At the intersection, turn right."); hasTurn = true; }
+    else if (diff < -35 && !hasTurn) { steps.push("At the intersection, turn left."); hasTurn = true; }
+  }
+  if (!hasTurn) steps.push("Walk straight ahead.");
+  const nice = destination.split(" ").map(w =>
+    w.length > 2 ? w[0] + w.slice(1).toLowerCase() : w
+  ).join(" ");
+  steps.push("The " + nice + " is on your right.");
+  steps.push("Enter through the main entrance.");
+  return steps;
+}
 
 function showDirections(destination){
-
   const start = getNearestNode();
   const target = nodes[destination] ? destination : destination.toUpperCase();
   const path = findPath(start, target);
 
-if(!path){
-  alert("No path found for " + destination);
-  return;
-}
+  if(!path){
+    console.warn("No path found for " + destination);
+    return;
+  }
 
-const startNode = nodes[path[0]];
-updateYouHere(startNode.x, startNode.y);
+  const startNode = nodes[path[0]];
+  updateYouHere(startNode.x, startNode.y);
 
-  // clear highlights
   document.querySelectorAll(".road, .building").forEach(el=>{
     el.classList.remove("active");
   });
-
   path.forEach(step=>{
-  if(!step.includes("ROAD")){
-  const el = document.querySelector(`[data-name="${step}"]`);
-  if(el){
-    el.classList.add("active");
-  }
-}
-});
+    if(!step.includes("ROAD")){
+      const el = document.querySelector(`[data-name="${step}"]`);
+      if(el){ el.classList.add("active"); }
+    }
+  });
 
-  // 🔥 DRAW ROUTE
   drawPath(path);
   const dot = document.getElementById("routeDot");
   dot.setAttribute("cx", nodes[path[0]].x);
   dot.setAttribute("cy", nodes[path[0]].y);
 
-  // instructions
-  const steps = generateDirections(path);
-
-  let html = "";
-  steps.forEach((step, i)=>{
-    html += `<p>${i+1}. ${step}</p>`;
+  const steps = friendlyDirections(path, destination);
+  const box = document.getElementById("directionsBox");
+  while (box.firstChild) box.removeChild(box.firstChild);
+  steps.forEach(s => {
+    const li = document.createElement("li");
+    li.textContent = s;
+    box.appendChild(li);
   });
 
-  document.getElementById("directionsBox").innerHTML = html;
-  document.getElementById("destName").innerText = destination;
+  document.getElementById("destName").textContent = destination;
   document.getElementById("directionsPanel").style.display = "block";
+  document.getElementById("viewToggle").style.display = "flex";
+  document.getElementById("qrBtnFloat").style.display = "flex";
+}
+
+let _currentView = "outside";
+function setView(view){
+  _currentView = view;
+  document.getElementById("toggleOutside").classList.toggle("active", view === "outside");
+  document.getElementById("toggleInside").classList.toggle("active", view === "inside");
+  const dest = document.getElementById("destName").textContent;
+  if (view === "inside") {
+    const el = document.querySelector(`.building[data-name="${dest}"]`);
+    if (el && el.dataset.page) {
+      window.location.href = el.dataset.page + "?location=" + encodeURIComponent(dest);
+    }
+  }
 }
 
 function generateQR(){
@@ -871,7 +1043,7 @@ function generateQR(){
     loc = document.getElementById("destName").innerText;
   }
   const url = window.location.origin + "/campus_map?location=" + encodeURIComponent(loc);
-  const qrSrc = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + encodeURIComponent(url);
+  const qrSrc = "/qr?size=200&data=" + encodeURIComponent(url);
 
   const old = document.getElementById("qrImage");
   if(old) old.remove();
@@ -884,6 +1056,15 @@ function generateQR(){
   document.getElementById("directionsBox").appendChild(img);
 }
 // CLICK BUILDING → SLIDE-IN PREVIEW PANEL
+const BUILDING_PHOTOS = {
+  "ACADEMIC BUILDING":    "/static/images/building/academic_building.JPG",
+  "IT BUILDING":          "/static/images/building/it_building.JPG",
+  "TECH BUILDING":        "/static/images/building/tech_building.JPG",
+  "NEW ADMIN BUILDING":   "/static/images/building/admin_building.JPG",
+  "OLD ADMIN BUILDING":   "/static/images/building/admin_building.JPG",
+  "CIVIL TECH BUILDING":  "/static/images/building/civil_tech_building.JPG",
+  "TE BUILDING":          "/static/images/building/te_building.jpg",
+};
 let _pendingUrl = null;
 document.querySelectorAll('.building[data-page]').forEach(b => {
   b.onclick = function(e) {
@@ -893,15 +1074,23 @@ document.querySelectorAll('.building[data-page]').forEach(b => {
     const name = b.getAttribute('data-name') || b.textContent.trim();
     _pendingUrl = page + "?from=gate&location=" + encodeURIComponent(name);
     document.getElementById('panelBuildingName').textContent = name;
+    const img = document.getElementById('panelBuildingImage');
+    const photo = BUILDING_PHOTOS[name.toUpperCase()];
+    if (photo) {
+      img.src = photo;
+      img.style.display = 'block';
+    } else {
+      img.style.display = 'none';
+    }
     document.getElementById('buildingPanel').style.right = '0';
   };
 });
 function closeBuildingPanel() {
   document.getElementById('buildingPanel').style.right = '-380px';
 }
-document.getElementById('panelEnterBtn').addEventListener('click', () => {
+function enterBuilding() {
   if (_pendingUrl) window.location.href = _pendingUrl;
-});
+}
 
 // HOME / BACK
 function goHome(){
@@ -917,12 +1106,23 @@ function goBack(){
 }
 
 function showRoomInfo(room){
-  const box = document.getElementById("directionsBox");
-
-  box.innerHTML += `
-    <p><b>Inside the building:</b></p>
-    <p>Proceed to ${room}.</p>
-  `;
+  const block = document.getElementById("insideBlock");
+  const box = document.getElementById("insideBox");
+  const heading = document.getElementById("insideHeading");
+  const dest = document.getElementById("destName").textContent;
+  const nice = dest.split(" ").map(w => w.length > 2 ? w[0] + w.slice(1).toLowerCase() : w).join(" ");
+  heading.textContent = "Inside the " + nice + ":";
+  while (box.firstChild) box.removeChild(box.firstChild);
+  [
+    "After entering the building, proceed straight ahead.",
+    "Turn left at the hallway.",
+    "The " + room + " will be on your left at the end of the hallway."
+  ].forEach(s => {
+    const li = document.createElement("li");
+    li.textContent = s;
+    box.appendChild(li);
+  });
+  block.style.display = "block";
 }
 
 function highlightFromURL(){
@@ -937,20 +1137,21 @@ function highlightFromURL(){
 
   let building = raw;
   if(!nodes[raw]){
-    const key = Object.keys(nodes).find(k => k.includes(raw) || raw.includes(k));
-    if(key) building = key;
+    // Only match building nodes (those containing BUILDING/HALL/ROOM/DORM),
+    // and prefer exact word matches to avoid wrong-building matches.
+    const buildingKeys = Object.keys(nodes).filter(k =>
+      /BUILDING|HALL|ROOM|DORM/.test(k)
+    );
+    const exact = buildingKeys.find(k => k === raw);
+    const starts = buildingKeys.find(k => k.startsWith(raw) || raw.startsWith(k));
+    const partial = buildingKeys.find(k => k.includes(raw) || raw.includes(k));
+    building = exact || starts || partial || raw;
   }
 
   showDirections(building);
 
   if(room){
     showRoomInfo(room);
-  }
-
-  if(building === "IT BUILDING"){
-    setTimeout(() => {
-      window.location.href = "/it_building?from=gate&location=" + encodeURIComponent(location);
-    }, 2500);
   }
 }
 
@@ -1044,8 +1245,11 @@ updateYouHere(150, 420); // MAIN GATE POSITION
   transition:right 0.35s cubic-bezier(0.16,1,0.3,1);">
   <div style="font-size:12px;letter-spacing:3px;color:#888;margin-bottom:12px">BUILDING</div>
   <h2 id="panelBuildingName" style="font-size:22px;font-weight:900;color:#7b2d2d;
-    letter-spacing:2px;margin-bottom:28px;line-height:1.3"></h2>
-  <button id="panelEnterBtn" style="
+    letter-spacing:2px;margin-bottom:16px;line-height:1.3"></h2>
+  <img id="panelBuildingImage" src="" alt=""
+       style="display:none;width:100%;height:180px;object-fit:cover;
+              border-radius:12px;margin-bottom:20px;box-shadow:0 4px 12px rgba(0,0,0,0.15)">
+  <button id="panelEnterBtn" onclick="enterBuilding()" style="
     background:#7b2d2d;color:#fff;border:none;border-radius:12px;
     padding:16px 24px;font-size:15px;font-weight:900;letter-spacing:2px;
     cursor:pointer;font-family:inherit;margin-bottom:12px;

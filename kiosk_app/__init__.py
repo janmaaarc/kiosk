@@ -117,6 +117,12 @@ def create_app() -> Flask:
     _configure_logging(app)
     _register_error_handlers(app)
 
+    # Optional: start RFID reader thread on the Pi only
+    if os.environ.get("KIOSK_ENABLE_RFID", "").lower() in ("1", "true", "yes"):
+        from kiosk_app.rfid import start_rfid_watcher
+        server_url = os.environ.get("KIOSK_INTERNAL_URL", "http://127.0.0.1:8000")
+        start_rfid_watcher(server_url=server_url)
+
     app.after_request(_inject_kiosk_scripts)
 
     @app.context_processor

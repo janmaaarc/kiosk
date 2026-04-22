@@ -92,6 +92,12 @@ def _bootstrap_db(path: str) -> None:
             photo TEXT, schedule_image TEXT, room TEXT, building TEXT,
             office_key TEXT
         );
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            rfid_uid TEXT UNIQUE NOT NULL,
+            name TEXT NOT NULL, role TEXT,
+            created_at TEXT DEFAULT (datetime('now'))
+        );
     """)
     pw = bcrypt.generate_password_hash("admin123").decode()
     conn.execute(

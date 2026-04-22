@@ -115,6 +115,14 @@ def _create_tables(cur: sqlite3.Cursor) -> None:
             building       TEXT,
             office_key     TEXT
         );
+
+        CREATE TABLE IF NOT EXISTS users (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            rfid_uid   TEXT UNIQUE NOT NULL,
+            name       TEXT NOT NULL,
+            role       TEXT,
+            created_at TEXT DEFAULT (datetime('now'))
+        );
         """
     )
 
@@ -180,6 +188,33 @@ def _seed_offices(cur: sqlite3.Cursor) -> None:
         )
 
 
+def _seed_faculty(cur: sqlite3.Cursor) -> None:
+    from kiosk_app.data.faculty import FACULTY
+
+    existing = cur.execute("SELECT COUNT(*) FROM faculty").fetchone()[0]
+    if existing:
+        return
+
+    for f in FACULTY:
+        cur.execute(
+            """
+            INSERT INTO faculty (name, department, position, photo,
+                                 schedule_image, room, building, office_key)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                f["name"],
+                f.get("department", ""),
+                f.get("position", ""),
+                f.get("photo", ""),
+                f.get("schedule_image", ""),
+                f.get("room", ""),
+                f.get("building", ""),
+                f.get("office_key", ""),
+            ),
+        )
+
+
 def _migrate(conn: sqlite3.Connection) -> None:
     """Non-destructive migrations for existing databases."""
     cols = {r[1] for r in conn.execute("PRAGMA table_info(offices)").fetchall()}
@@ -221,6 +256,15 @@ def _migrate(conn: sqlite3.Connection) -> None:
             office_key     TEXT
         )"""
     )
+    conn.execute(
+        """CREATE TABLE IF NOT EXISTS users (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            rfid_uid   TEXT UNIQUE NOT NULL,
+            name       TEXT NOT NULL,
+            role       TEXT,
+            created_at TEXT DEFAULT (datetime('now'))
+        )"""
+    )
 
 
 def main() -> None:
@@ -234,6 +278,7 @@ def main() -> None:
         _seed_events(cur)
         _seed_announcements(cur)
         _seed_offices(cur)
+        _seed_faculty(cur)
         conn.commit()
 
         existing = cur.execute(
