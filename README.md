@@ -17,16 +17,17 @@ dashboard — no coding required.
 5. [Local development setup](#5-local-development-setup)
 6. [Production deployment](#6-production-deployment)
 7. [Docker deployment](#7-docker-deployment)
-8. [Environment variables](#8-environment-variables)
-9. [Admin password management](#9-admin-password-management)
-10. [CSV bulk room import](#10-csv-bulk-room-import)
-11. [File uploads](#11-file-uploads)
-12. [Offline / service worker](#12-offline--service-worker)
-13. [RFID entry capture](#13-rfid-entry-capture)
-14. [Display scaling](#14-display-scaling)
-15. [Security overview](#15-security-overview)
-16. [Running the test suite](#16-running-the-test-suite)
-17. [Project layout](#17-project-layout)
+8. [Free cloud hosting options](#8-free-cloud-hosting-options)
+9. [Environment variables](#9-environment-variables)
+10. [Admin password management](#10-admin-password-management)
+11. [CSV bulk room import](#11-csv-bulk-room-import)
+12. [File uploads](#12-file-uploads)
+13. [Offline / service worker](#13-offline--service-worker)
+14. [RFID entry capture](#14-rfid-entry-capture)
+15. [Display scaling](#15-display-scaling)
+16. [Security overview](#16-security-overview)
+17. [Running the test suite](#17-running-the-test-suite)
+18. [Project layout](#18-project-layout)
 
 ---
 
@@ -452,7 +453,98 @@ Health check: `curl http://localhost:8000/healthz` → `{"status":"ok"}`.
 
 ---
 
-## 8. Environment variables
+## 8. Free cloud hosting options
+
+If you want to make the kiosk accessible online (e.g. for the client to preview
+or manage content remotely), both options below have a free tier and connect
+directly to this GitHub repo.
+
+---
+
+### Render — `render.com`
+
+1. Create a free account at [render.com](https://render.com).
+2. Click **New → Web Service** and connect this GitHub repo.
+3. Set the following in the Render dashboard:
+
+   | Setting | Value |
+   |---|---|
+   | **Runtime** | Python 3 |
+   | **Build command** | `pip install -r requirements.txt && python init_db.py` |
+   | **Start command** | `gunicorn app:app --bind 0.0.0.0:$PORT` |
+
+4. Under **Environment**, add:
+
+   | Key | Value |
+   |---|---|
+   | `KIOSK_SECRET_KEY` | Any long random string |
+   | `FLASK_ENV` | `production` |
+   | `KIOSK_ADMIN_PASSWORD` | Your chosen admin password |
+
+5. Click **Deploy**. Render builds and starts the app. Your URL will be
+   `https://your-app-name.onrender.com`.
+
+**Free tier limits:**
+- The instance **spins down after 15 minutes of inactivity** and takes ~30
+  seconds to wake on the next request. This is fine for demos and admin access
+  but not ideal for an always-on kiosk display.
+- The SQLite database file **resets on every redeploy** because the free tier
+  has no persistent disk. Uploaded images and added content will be lost on the
+  next deploy. For persistent storage, add a Render PostgreSQL database (free
+  for 90 days, then $7/mo) or upgrade to a paid plan with a disk.
+
+---
+
+### Railway — `railway.app`
+
+Railway gives $5 of free credit per month, which is enough to run this app
+continuously at low traffic.
+
+1. Create a free account at [railway.app](https://railway.app).
+2. Click **New Project → Deploy from GitHub repo** and select this repo.
+3. Railway auto-detects Python and sets up the build. Add the following
+   environment variables under **Variables**:
+
+   | Key | Value |
+   |---|---|
+   | `KIOSK_SECRET_KEY` | Any long random string |
+   | `FLASK_ENV` | `production` |
+   | `KIOSK_ADMIN_PASSWORD` | Your chosen admin password |
+
+4. Set the **Start command** (under Settings → Deploy):
+   ```
+   gunicorn app:app --bind 0.0.0.0:$PORT
+   ```
+
+5. Add a **Volume** (under the service → Volumes) mounted at `/app` to persist
+   the SQLite database across deploys. Railway supports persistent volumes on
+   all plans including the free credit tier.
+
+**Free tier limits:**
+- $5 of credit per month. A single low-traffic service uses roughly $0.50–$2
+  per month, so the free credit covers it most of the time.
+- No persistent volume on the absolute free hobby plan — add one from the
+  Railway dashboard to keep your data across deploys.
+
+---
+
+### Which one to choose
+
+| | Render | Railway |
+|---|---|---|
+| Easiest setup | Yes | Yes |
+| Always-on (no sleep) | No (free tier sleeps) | Yes (within credit) |
+| Persistent storage | Paid add-on | Volume add-on (included in credit) |
+| Custom domain | Yes (free) | Yes (free) |
+
+For a **demo or client preview**, either works. For a **production kiosk**
+running on a physical display on campus, the self-hosted deployment (Section 6)
+is recommended so the app runs locally on the device without depending on
+internet connectivity.
+
+---
+
+## 9. Environment variables
 
 | Variable | Required in prod | Purpose |
 |---|---|---|
@@ -463,7 +555,7 @@ Health check: `curl http://localhost:8000/healthz` → `{"status":"ok"}`.
 
 ---
 
-## 9. Admin password management
+## 10. Admin password management
 
 ```bash
 # First-time setup — seeds the admin account (will not overwrite an existing one)
@@ -479,7 +571,7 @@ in the `admins` table. The plain-text password is never written to disk.
 
 ---
 
-## 10. CSV bulk room import
+## 11. CSV bulk room import
 
 Instead of adding rooms one by one, you can import them in bulk from a CSV file.
 
@@ -513,7 +605,7 @@ place. Invalid rows are skipped and reported in the flash message.
 
 ---
 
-## 11. File uploads
+## 12. File uploads
 
 The upload endpoint is available from any admin form that has an image or PDF
 field. Click the upload button next to the field, select a file, and the path
@@ -529,7 +621,7 @@ a random UUID filename. The path stored in the database is relative to `static/`
 
 ---
 
-## 12. Offline / service worker
+## 13. Offline / service worker
 
 A service worker is registered automatically on every page. It caches static
 assets (CSS, fonts) on first visit and serves them from cache on subsequent
@@ -546,7 +638,7 @@ cache version changes, stale entries are cleared automatically on the next visit
 
 ---
 
-## 13. RFID entry capture
+## 14. RFID entry capture
 
 The splash screen (`/`) silently captures keystrokes from an RFID reader
 connected via USB (which appears as a keyboard device to the OS).
@@ -564,7 +656,7 @@ UIDs to student or staff records and personalise the kiosk experience.
 
 ---
 
-## 14. Display scaling
+## 15. Display scaling
 
 The kiosk is designed for a **1360 × 768** display (standard HD TV). The file
 `static/js/kiosk-scale.js` is injected into every HTML page automatically. It
@@ -577,7 +669,7 @@ If the target display changes, update `DESIGN_W` and `DESIGN_H` in
 
 ---
 
-## 15. Security overview
+## 16. Security overview
 
 | Area | Implementation |
 |---|---|
@@ -595,7 +687,7 @@ If the target display changes, update `DESIGN_W` and `DESIGN_H` in
 
 ---
 
-## 16. Running the test suite
+## 17. Running the test suite
 
 ```bash
 .venv/bin/pytest tests/ -q
@@ -615,7 +707,7 @@ fixture. No test touches the `database.db` file.
 
 ---
 
-## 17. Project layout
+## 18. Project layout
 
 ```
 kiosk/
