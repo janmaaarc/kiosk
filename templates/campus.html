@@ -1332,11 +1332,21 @@ function applyMapScale() {
   if (!mc || !mw) return;
   var vw = window.innerWidth;
   var vh = window.innerHeight;
-  _mapScale = Math.min(vw / 1920, vh / 1080);
-  mc.style.transform = 'scale(' + _mapScale + ')';
-  mc.style.transformOrigin = 'top left';
-  mw.style.width  = (1920 * _mapScale) + 'px';
-  mw.style.height = (1080 * _mapScale) + 'px';
+  if (vw < 1024) {
+    // Mobile: fit the whole map into the viewport
+    _mapScale = Math.min(vw / 1920, vh / 1080);
+    mc.style.transform = 'scale(' + _mapScale + ')';
+    mc.style.transformOrigin = 'top left';
+    mw.style.width  = (1920 * _mapScale) + 'px';
+    mw.style.height = (1080 * _mapScale) + 'px';
+  } else {
+    // Desktop: keep the original designed scale
+    _mapScale = 0.7;
+    mc.style.transform = 'scale(0.7)';
+    mc.style.transformOrigin = 'top left';
+    mw.style.width  = '';
+    mw.style.height = '';
+  }
 }
 
 applyMapScale();
