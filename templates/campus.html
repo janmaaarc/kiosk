@@ -1242,13 +1242,23 @@ function highlightFromURL(){
 
 highlightFromURL();
 
-// Mobile view: hide kiosk chrome, show only the map + directions panel
+// Mobile view: show only the directions panel fullscreen
 if(new URLSearchParams(window.location.search).get("mobile") === "1"){
-  document.querySelectorAll(".sidebar, .top-bar, .top-right, .view-toggle-bar, .qr-btn-float").forEach(el => {
-    if(el) el.style.display = "none";
-  });
-  document.querySelector(".campus-wrapper, .main-content, body > div:first-child") && null;
-  document.body.style.overflow = "auto";
+  const style = document.createElement("style");
+  style.textContent = `
+    body > *:not(#directionsPanel) { display: none !important; }
+    #directionsPanel {
+      display: block !important;
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      overflow-y: auto !important;
+      z-index: 9999 !important;
+      padding: 30px 24px !important;
+    }
+  `;
+  document.head.appendChild(style);
 }
 
 // SEARCH
