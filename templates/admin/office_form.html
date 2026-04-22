@@ -33,10 +33,42 @@
     </div>
 
     <div class="form-group">
-        <label>Location</label>
+        <label>Location <span style="font-weight:400;color:#888">(displayed to users)</span></label>
         <input type="text" name="location"
                value="{{ office['location'] if office else '' }}"
                placeholder="e.g. Admin Building, Room 101">
+    </div>
+
+    <div class="form-group">
+        <label>Building URL <span style="font-weight:400;color:#888">(links "Get Directions" to the floor plan)</span></label>
+        <select name="building_url" style="width:100%;padding:10px;border-radius:6px;border:1px solid #ddd;font-size:14px;">
+            <option value="">— No directions link —</option>
+            {% set burl = office['building_url'] if office and office['building_url'] else '' %}
+            {% for slug, label in [
+                ('/new_admin_building',       'New Admin Building'),
+                ('/old_admin_building',       'Old Admin Building'),
+                ('/academic_building',        'Academic Building'),
+                ('/it_building',              'IT Building'),
+                ('/science_building',         'Science Building'),
+                ('/tech_building',            'Tech Building'),
+                ('/rodriguez_building',       'Rodriguez Building'),
+                ('/mist_ncestd_building',     'MIST-NCESTD Building'),
+                ('/mist_ncestd_dorm',         'MIST-NCESTD Dorm'),
+                ('/graduate_school_building', 'Graduate School Building'),
+                ('/mechanical_building',      'Mechanical Building'),
+                ('/te_building',              'TE Building'),
+                ('/fsm_building',             'FSM Building'),
+                ('/civil_tech_building',      'Civil Tech Building'),
+                ('/automotive_building',      'Automotive Building'),
+                ('/multi_purpose_building',   'Multi-Purpose Building'),
+                ('/ylagan_hall',              'Ylagan Hall'),
+                ('/waf_&_rac_building',       'WAF & RAC Building'),
+                ('/waf_&_fsm_building',       'WAF & FSM Building'),
+                ('/power_room',               'Power Room'),
+            ] %}
+            <option value="{{ slug }}" {% if burl == slug %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
     </div>
 
     <div class="form-group">

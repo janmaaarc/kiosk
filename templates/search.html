@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>{{ t("search_title") }}</title>
+<title>Campus Room Finder</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <style>
 body {
@@ -65,13 +65,13 @@ button:active { background: #555; }
 
 <body>
 
-<h1>{{ t("search_title") }}</h1>
+<h1>Campus Room Finder</h1>
 
 <form method="POST">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <div class="search-row">
-    <input type="text" id="searchInput" name="room" placeholder="{{ t('search_label') }}" autocomplete="off">
-    <button type="submit">{{ t("search_button") }}</button>
+    <input type="text" id="searchInput" name="room" placeholder="Enter Room Number" autocomplete="off">
+    <button type="submit">Search</button>
   </div>
 </form>
 

@@ -129,34 +129,4 @@ a:active, button:active {
     opacity: 0.75;
 }
 
-.lang-toggle {
-    position: fixed;
-    top: 18px;
-    right: 24px;
-    z-index: 100;
-}
-
-.lang-toggle button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 20px;
-    background: rgba(139, 46, 46, 0.9);
-    color: #fff;
-    font-family: 'League Spartan', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    letter-spacing: 1px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    min-height: 44px;
-    min-width: 80px;
-    transition: background 0.2s;
-}
-
-.lang-toggle button:hover,
-.lang-toggle button:active {
-    background: rgba(100, 30, 30, 0.95);
-}
 

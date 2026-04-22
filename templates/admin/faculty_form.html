@@ -1,0 +1,80 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit' if member else 'Add' }} Faculty{% endblock %}
+
+{% block content %}
+<h1 class="page-title">{{ 'Edit' if member else 'Add' }} Faculty Member</h1>
+
+<div class="form-card">
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="form-group">
+        <label>Name *</label>
+        <input type="text" name="name"
+               value="{{ member['name'] if member else '' }}" required>
+    </div>
+
+    <div class="form-group">
+        <label>Department</label>
+        <input type="text" name="department"
+               value="{{ member['department'] if member else '' }}"
+               placeholder="e.g. College of Engineering">
+    </div>
+
+    <div class="form-group">
+        <label>Position</label>
+        <input type="text" name="position"
+               value="{{ member['position'] if member else '' }}"
+               placeholder="e.g. Instructor I">
+    </div>
+
+    <div class="form-group">
+        <label>Photo</label>
+        <div class="upload-row">
+            <input type="text" id="photo-path" name="photo"
+                   value="{{ member['photo'] if member else '' }}"
+                   placeholder="e.g. images/faculty/juan.jpg">
+            <input type="file" id="photo-file" accept="image/*"
+                   onchange="previewUpload('photo-file','photo-path')">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Schedule Image</label>
+        <div class="upload-row">
+            <input type="text" id="schedule-path" name="schedule_image"
+                   value="{{ member['schedule_image'] if member else '' }}"
+                   placeholder="e.g. images/schedules/juan_sched.png">
+            <input type="file" id="schedule-file" accept="image/*"
+                   onchange="previewUpload('schedule-file','schedule-path')">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Room <span style="font-weight:400;color:#888">(for "Find on Map")</span></label>
+        <input type="text" name="room"
+               value="{{ member['room'] if member else '' }}"
+               placeholder="e.g. Room 201">
+    </div>
+
+    <div class="form-group">
+        <label>Building</label>
+        <input type="text" name="building"
+               value="{{ member['building'] if member else '' }}"
+               placeholder="e.g. IT Building">
+    </div>
+
+    <div class="form-group">
+        <label>Office Key <span style="font-weight:400;color:#888">(links to office info)</span></label>
+        <input type="text" name="office_key"
+               value="{{ member['office_key'] if member else '' }}"
+               placeholder="e.g. Registrar">
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:8px">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{{ url_for('content.faculty_list') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+</div>
+{% endblock %}

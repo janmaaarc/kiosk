@@ -1,0 +1,19 @@
+services:
+  kiosk:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./database.db:/app/database.db
+      - ./static/uploads:/app/static/uploads
+      - ./static/files:/app/static/files
+      - ./logs:/app/logs
+    environment:
+      - KIOSK_SECRET_KEY=${KIOSK_SECRET_KEY}
+      - FLASK_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

@@ -1,0 +1,51 @@
+{% extends "admin/base.html" %}
+{% block title %}Building Floors{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <h1 class="page-title" style="margin:0">Building Floors</h1>
+    <a href="{{ url_for('content.building_floor_add') }}" class="btn btn-primary">+ Add Floor</a>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Building</th>
+            <th>Floor #</th>
+            <th>Label</th>
+            <th>Image</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for f in floors %}
+        <tr>
+            <td>{{ f['building'] }}</td>
+            <td>{{ f['floor_number'] }}</td>
+            <td>{{ f['floor_label'] }}</td>
+            <td>
+                {% if f['floor_image'] %}
+                <img src="{{ url_for('static', filename=f['floor_image']) }}"
+                     class="img-thumb" alt="floor plan">
+                {% else %}
+                <span style="color:#aaa;font-size:12px">none</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{{ url_for('content.building_floor_edit', floor_id=f['id']) }}"
+                   class="btn btn-secondary btn-sm">Edit</a>
+                <form method="POST"
+                      action="{{ url_for('content.building_floor_delete', floor_id=f['id']) }}"
+                      style="display:inline"
+                      onsubmit="return confirm('Delete this floor?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" style="text-align:center;color:#999;padding:20px">No floors configured yet.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

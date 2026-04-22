@@ -1,52 +1,56 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Rooms</title>
-</head>
+{% extends "admin/base.html" %}
+{% block title %}Rooms{% endblock %}
 
-<body>
-
-<h2>Room Management</h2>
-
-<a href="/dashboard">Back to Dashboard</a>
-<br><br>
-
-<table border="1">
-
-<tr>
-    <th>ID</th>
-    <th>Building</th>
-    <th>Floor</th>
-    <th>Room</th>
-    <th>Description</th>
-    <th>Edit</th>
-    <th>Delete</th>
-</tr>
-
-{% for room in rooms %}
-
-<tr>
-    <td>{{ room[0] }}</td>
-    <td>{{ room[1] }}</td>
-    <td>{{ room[2] }}</td>
-    <td>{{ room[3] }}</td>
-    <td>{{ room[4] }}</td>
-
-    <td>
-        <a href="/edit_room/{{ room[0] }}">Edit</a>
-    </td>
-
-    <td>
-        <form method="POST" action="{{ url_for('admin.delete_room', id=room[0]) }}" style="display:inline;">
+{% block content %}
+<div class="toolbar">
+    <h1 class="page-title" style="margin-bottom:0">Room Management</h1>
+    <div style="display:flex;gap:8px">
+        <form method="POST" action="{{ url_for('admin.rooms_import_csv') }}"
+              enctype="multipart/form-data" style="display:flex;gap:6px;align-items:center">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" onclick="return confirm('Delete this room?');">Delete</button>
+            <input type="file" name="csv_file" accept=".csv" required style="font-size:13px">
+            <button type="submit" class="btn btn-secondary">Import CSV</button>
         </form>
-    </td>
-</tr>
+        <a href="{{ url_for('admin.add_room') }}" class="btn btn-primary">+ Add Room</a>
+    </div>
+</div>
 
-{% endfor %}
-
+{% if rooms %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Building</th>
+            <th>Floor</th>
+            <th>Room</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for room in rooms %}
+        <tr>
+            <td style="color:#999;font-size:12px">{{ room[0] }}</td>
+            <td>{{ room[1] }}</td>
+            <td>{{ room[2] }}</td>
+            <td><strong>{{ room[3] }}</strong></td>
+            <td style="color:#555">{{ room[4] }}</td>
+            <td>
+                <a href="{{ url_for('admin.edit_room', room_id=room[0]) }}" class="btn btn-secondary btn-sm">Edit</a>
+                <form method="POST" action="{{ url_for('admin.delete_room', id=room[0]) }}" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger btn-sm"
+                        onclick="return confirm('Delete this room?')">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
-
-</body>
-</html>
+{% else %}
+<div style="background:#fff;border-radius:8px;padding:40px;text-align:center;
+            box-shadow:0 1px 3px rgba(0,0,0,.1);color:#888">
+    No rooms yet. <a href="{{ url_for('admin.add_room') }}" style="color:#7b2d2d">Add one</a>.
+</div>
+{% endif %}
+{% endblock %}

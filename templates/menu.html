@@ -98,56 +98,49 @@
 
 <body>
 
-    <div class="lang-toggle">
-        <form method="POST" action="/set_lang/{{ 'en' if lang == 'fil' else 'fil' }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit">{{ t("lang_toggle") }}</button>
-        </form>
-    </div>
-
-    <h1 class="title">{{ t("welcome") }}</h1>
+    <h1 class="title">WELCOME</h1>
 
     <div class="menu-container">
 
         <a href="/faculty">
             <div class="menu-card">
                 <img src="{{ url_for('static', filename='images/icon/faculty_sched.png') }}" alt="">
-                <h2>{{ t("faculty") }}</h2>
+                <h2>FACULTY</h2>
             </div>
         </a>
 
         <a href="/campus">
             <div class="menu-card">
                 <img src="{{ url_for('static', filename='images/icon/campus_map.png') }}" alt="">
-                <h2>{{ t("campus_map") }}</h2>
+                <h2>CAMPUS MAP</h2>
             </div>
         </a>
 
         <a href="/office-selection">
             <div class="menu-card">
                 <img src="{{ url_for('static', filename='images/icon/office_info.png') }}" alt="">
-                <h2>{{ t("office_info") }}</h2>
+                <h2>OFFICE INFORMATION</h2>
             </div>
         </a>
 
         <a href="/announcements">
             <div class="menu-card">
                 <img src="{{ url_for('static', filename='images/icon/digital_announcements.png') }}" alt="">
-                <h2>{{ t("announcements") }}</h2>
+                <h2>DIGITAL ANNOUNCEMENT</h2>
             </div>
         </a>
 
         <a href="/events">
             <div class="menu-card">
                 <img src="{{ url_for('static', filename='images/icon/events_and_acts.png') }}" alt="">
-                <h2>{{ t("events") }}</h2>
+                <h2>EVENTS AND ACTIVITIES</h2>
             </div>
         </a>
 
         <a href="/about">
             <div class="menu-card">
                 <img src="{{ url_for('static', filename='images/icon/about_us.png') }}" alt="">
-                <h2>{{ t("about") }}</h2>
+                <h2>ABOUT US</h2>
             </div>
         </a>
 

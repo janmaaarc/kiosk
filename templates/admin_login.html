@@ -1,8 +1,175 @@
-<h2>Admin Login</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Login — Kiosk CMS</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-<form method="POST">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <input name="username" placeholder="Username">
-    <input name="password" type="password" placeholder="Password">
-    <button type="submit">Login</button>
-</form>
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #1a0a0a;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+}
+
+.login-wrap {
+    width: 100%;
+    max-width: 400px;
+    padding: 24px;
+}
+
+.login-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 40px 36px 36px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+
+.brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 32px;
+    gap: 10px;
+}
+
+.brand-icon {
+    width: 52px;
+    height: 52px;
+    background: #7b2d2d;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.brand-icon svg {
+    width: 28px;
+    height: 28px;
+    fill: #fff;
+}
+
+.brand-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #7b2d2d;
+    letter-spacing: 2px;
+}
+
+.brand-sub {
+    font-size: 13px;
+    color: #888;
+    margin-top: -6px;
+}
+
+.flash {
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+.flash-error { background: #fdf0f0; color: #9b1c1c; border: 1px solid #fca5a5; }
+.flash-success { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+input[type=text],
+input[type=password] {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #ddd;
+    border-radius: 7px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #222;
+    transition: border-color .2s, box-shadow .2s;
+    outline: none;
+    background: #fafafa;
+}
+
+input[type=text]:focus,
+input[type=password]:focus {
+    border-color: #7b2d2d;
+    box-shadow: 0 0 0 3px rgba(123,45,45,.12);
+    background: #fff;
+}
+
+.btn-login {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    background: #7b2d2d;
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    cursor: pointer;
+    transition: background .2s, transform .1s;
+}
+
+.btn-login:hover { background: #9a3636; }
+.btn-login:active { transform: scale(.99); }
+</style>
+</head>
+<body>
+
+<div class="login-wrap">
+    <div class="login-card">
+
+        <div class="brand">
+            <div class="brand-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 4h16v2H4V4zm0 4h10v2H4V8zm0 4h16v2H4v-2zm0 4h10v2H4v-2z"/>
+                </svg>
+            </div>
+            <div class="brand-name">KIOSK CMS</div>
+            <div class="brand-sub">Content Management System</div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for cat, msg in messages %}
+                <div class="flash flash-{{ cat }}">{{ msg }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" autocomplete="username" autofocus>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn-login">Sign In</button>
+        </form>
+
+    </div>
+</div>
+
+</body>
+</html>

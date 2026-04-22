@@ -43,6 +43,7 @@ def _read_admin_password() -> str:
 
 
 def _create_tables(cur: sqlite3.Cursor) -> None:
+    cur.connection.execute("PRAGMA journal_mode=WAL")
     cur.executescript(
         """
         CREATE TABLE IF NOT EXISTS admins (
@@ -89,8 +90,30 @@ def _create_tables(cur: sqlite3.Cursor) -> None:
             hours        TEXT,
             desc         TEXT,
             files        TEXT DEFAULT '[]',
+            building_url TEXT,
             published_at TEXT DEFAULT (datetime('now')),
             expires_at   TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS building_floors (
+            id           INTEGER PRIMARY KEY AUTOINCREMENT,
+            building     TEXT NOT NULL,
+            floor_number INTEGER NOT NULL,
+            floor_label  TEXT NOT NULL,
+            floor_image  TEXT,
+            UNIQUE(building, floor_number)
+        );
+
+        CREATE TABLE IF NOT EXISTS faculty (
+            id             INTEGER PRIMARY KEY AUTOINCREMENT,
+            name           TEXT NOT NULL,
+            department     TEXT,
+            position       TEXT,
+            photo          TEXT,
+            schedule_image TEXT,
+            room           TEXT,
+            building       TEXT,
+            office_key     TEXT
         );
         """
     )
@@ -157,11 +180,55 @@ def _seed_offices(cur: sqlite3.Cursor) -> None:
         )
 
 
+def _migrate(conn: sqlite3.Connection) -> None:
+    """Non-destructive migrations for existing databases."""
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(offices)").fetchall()}
+    if "building_url" not in cols:
+        conn.execute("ALTER TABLE offices ADD COLUMN building_url TEXT")
+
+    room_cols = {r[1] for r in conn.execute("PRAGMA table_info(rooms)").fetchall()}
+    for col, defn in [
+        ("pos_left",   "INTEGER DEFAULT 0"),
+        ("pos_top",    "INTEGER DEFAULT 0"),
+        ("pos_width",  "INTEGER DEFAULT 10"),
+        ("pos_height", "INTEGER DEFAULT 10"),
+        ("office_key", "TEXT"),
+        ("room_color", "TEXT"),
+    ]:
+        if col not in room_cols:
+            conn.execute(f"ALTER TABLE rooms ADD COLUMN {col} {defn}")
+
+    conn.execute(
+        """CREATE TABLE IF NOT EXISTS building_floors (
+            id           INTEGER PRIMARY KEY AUTOINCREMENT,
+            building     TEXT NOT NULL,
+            floor_number INTEGER NOT NULL,
+            floor_label  TEXT NOT NULL,
+            floor_image  TEXT,
+            UNIQUE(building, floor_number)
+        )"""
+    )
+    conn.execute(
+        """CREATE TABLE IF NOT EXISTS faculty (
+            id             INTEGER PRIMARY KEY AUTOINCREMENT,
+            name           TEXT NOT NULL,
+            department     TEXT,
+            position       TEXT,
+            photo          TEXT,
+            schedule_image TEXT,
+            room           TEXT,
+            building       TEXT,
+            office_key     TEXT
+        )"""
+    )
+
+
 def main() -> None:
     bcrypt = Bcrypt()
     with sqlite3.connect(DB_PATH) as conn:
         cur = conn.cursor()
         _create_tables(cur)
+        _migrate(conn)
         conn.commit()
 
         _seed_events(cur)

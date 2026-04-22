@@ -259,9 +259,9 @@ def office_add():
         with db_connection() as conn:
             conn.execute(
                 """INSERT INTO offices
-                   (key, name, image, location, hours, desc, files,
+                   (key, name, image, location, hours, desc, files, building_url,
                     published_at, expires_at)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     request.form["key"],
                     request.form["name"],
@@ -270,6 +270,7 @@ def office_add():
                     request.form.get("hours", ""),
                     request.form.get("desc", ""),
                     "[]",
+                    request.form.get("building_url", ""),
                     _parse_dt(request.form.get("published_at", "")) or
                     datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
                     _parse_dt(request.form.get("expires_at", "")),
@@ -294,7 +295,7 @@ def office_edit(office_id: int):
             conn.execute(
                 """UPDATE offices
                    SET key=?, name=?, image=?, location=?, hours=?, desc=?,
-                       files=COALESCE(files, '[]'),
+                       files=COALESCE(files, '[]'), building_url=?,
                        published_at=?, expires_at=?
                    WHERE id=?""",
                 (
@@ -304,6 +305,7 @@ def office_edit(office_id: int):
                     request.form.get("location", ""),
                     request.form.get("hours", ""),
                     request.form.get("desc", ""),
+                    request.form.get("building_url", ""),
                     _parse_dt(request.form.get("published_at", "")) or
                     office["published_at"],
                     _parse_dt(request.form.get("expires_at", "")),
@@ -323,3 +325,157 @@ def office_delete(office_id: int):
         conn.execute("DELETE FROM offices WHERE id = ?", (office_id,))
         conn.commit()
     return redirect(url_for("content.offices_list"))
+
+
+# ---------------------------------------------------------------------------
+# Building Floors
+# ---------------------------------------------------------------------------
+
+@content_bp.route("/admin/building-floors")
+@login_required
+def building_floors_list():
+    with db_connection() as conn:
+        rows = conn.execute(
+            "SELECT * FROM building_floors ORDER BY building, floor_number"
+        ).fetchall()
+    return render_template("admin/building_floors.html", floors=rows)
+
+
+@content_bp.route("/admin/building-floors/add", methods=["GET", "POST"])
+@login_required
+def building_floor_add():
+    if request.method == "POST":
+        with db_connection() as conn:
+            conn.execute(
+                """INSERT OR REPLACE INTO building_floors
+                   (building, floor_number, floor_label, floor_image)
+                   VALUES (?, ?, ?, ?)""",
+                (
+                    request.form["building"],
+                    int(request.form["floor_number"]),
+                    request.form["floor_label"],
+                    request.form.get("floor_image", ""),
+                ),
+            )
+            conn.commit()
+        return redirect(url_for("content.building_floors_list"))
+    return render_template("admin/building_floor_form.html", floor=None)
+
+
+@content_bp.route("/admin/building-floors/<int:floor_id>/edit", methods=["GET", "POST"])
+@login_required
+def building_floor_edit(floor_id: int):
+    with db_connection() as conn:
+        floor = conn.execute(
+            "SELECT * FROM building_floors WHERE id = ?", (floor_id,)
+        ).fetchone()
+        if floor is None:
+            abort(404)
+
+        if request.method == "POST":
+            conn.execute(
+                """UPDATE building_floors
+                   SET building=?, floor_number=?, floor_label=?, floor_image=?
+                   WHERE id=?""",
+                (
+                    request.form["building"],
+                    int(request.form["floor_number"]),
+                    request.form["floor_label"],
+                    request.form.get("floor_image", ""),
+                    floor_id,
+                ),
+            )
+            conn.commit()
+            return redirect(url_for("content.building_floors_list"))
+
+    return render_template("admin/building_floor_form.html", floor=floor)
+
+
+@content_bp.route("/admin/building-floors/<int:floor_id>/delete", methods=["POST"])
+@login_required
+def building_floor_delete(floor_id: int):
+    with db_connection() as conn:
+        conn.execute("DELETE FROM building_floors WHERE id = ?", (floor_id,))
+        conn.commit()
+    return redirect(url_for("content.building_floors_list"))
+
+
+# ---------------------------------------------------------------------------
+# Faculty
+# ---------------------------------------------------------------------------
+
+@content_bp.route("/admin/faculty")
+@login_required
+def faculty_list():
+    with db_connection() as conn:
+        rows = conn.execute("SELECT * FROM faculty ORDER BY name").fetchall()
+    return render_template("admin/faculty_list.html", faculty=rows)
+
+
+@content_bp.route("/admin/faculty/add", methods=["GET", "POST"])
+@login_required
+def faculty_add():
+    if request.method == "POST":
+        with db_connection() as conn:
+            conn.execute(
+                """INSERT INTO faculty
+                   (name, department, position, photo, schedule_image,
+                    room, building, office_key)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    request.form["name"],
+                    request.form.get("department", ""),
+                    request.form.get("position", ""),
+                    request.form.get("photo", ""),
+                    request.form.get("schedule_image", ""),
+                    request.form.get("room", ""),
+                    request.form.get("building", ""),
+                    request.form.get("office_key", ""),
+                ),
+            )
+            conn.commit()
+        return redirect(url_for("content.faculty_list"))
+    return render_template("admin/faculty_form.html", member=None)
+
+
+@content_bp.route("/admin/faculty/<int:member_id>/edit", methods=["GET", "POST"])
+@login_required
+def faculty_edit(member_id: int):
+    with db_connection() as conn:
+        member = conn.execute(
+            "SELECT * FROM faculty WHERE id = ?", (member_id,)
+        ).fetchone()
+        if member is None:
+            abort(404)
+
+        if request.method == "POST":
+            conn.execute(
+                """UPDATE faculty
+                   SET name=?, department=?, position=?, photo=?,
+                       schedule_image=?, room=?, building=?, office_key=?
+                   WHERE id=?""",
+                (
+                    request.form["name"],
+                    request.form.get("department", ""),
+                    request.form.get("position", ""),
+                    request.form.get("photo", ""),
+                    request.form.get("schedule_image", ""),
+                    request.form.get("room", ""),
+                    request.form.get("building", ""),
+                    request.form.get("office_key", ""),
+                    member_id,
+                ),
+            )
+            conn.commit()
+            return redirect(url_for("content.faculty_list"))
+
+    return render_template("admin/faculty_form.html", member=member)
+
+
+@content_bp.route("/admin/faculty/<int:member_id>/delete", methods=["POST"])
+@login_required
+def faculty_delete(member_id: int):
+    with db_connection() as conn:
+        conn.execute("DELETE FROM faculty WHERE id = ?", (member_id,))
+        conn.commit()
+    return redirect(url_for("content.faculty_list"))

@@ -1,111 +1,128 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <style>
 @font-face {
   font-family: 'League Spartan';
-  src: url('/static/font/LeagueSpartan-VariableFont_wght.ttf');
+  src: url('/static/font/LeagueSpartan-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
 }
 
-:root {
-  --primary: #7b2d2d;   /* dark red */
-  --secondary: #b85757; /* lighter red */
-  --text-light: #b41919;
-  --text-dark: #111;
-}
-
-*{
-  font-family:'League Spartan', sans-serif;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  margin:0;
-  height:100vh;
-  overflow:hidden;
-  font-family:'League Spartan';
+  font-family: 'League Spartan', sans-serif;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  background: #111;
 }
 
-/* SLIDES */
+/* ── Slideshow ───────────────────────────────────── */
 .slide {
-  position:absolute;
-  width:100%;
-  height:100%;
-  background-size:cover;
-  background-position:center;
-  opacity:0;
-  transition:opacity 1s ease-in-out;
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1.4s ease-in-out;
 }
+.slide.active { opacity: 1; }
 
-.slide.active {
-  opacity:1;
-}
-
-/* DARK OVERLAY */
+/* Warm cream tint — matches the screenshot */
 .overlay {
-  position:absolute;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.4);
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 240, 190, 0.38);
 }
 
-/* TEXT */
-.text {
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  text-align:center;
-  color:white;
+/* ── Centered text block ─────────────────────────── */
+.hero {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  text-align: center;
+  padding: 0 40px;
 }
 
-.text h1 {
-  font-size:60px;
-  letter-spacing:10px;
+.hero-main {
+  font-size: clamp(72px, 12vw, 160px);
+  font-weight: 900;
+  letter-spacing: 6px;
+  line-height: 1;
+
+  color: #8b1a1a;
+  -webkit-text-stroke: 6px #1a0000;
+  paint-order: stroke fill;
+
+  /* subtle depth shadow */
+  filter: drop-shadow(4px 6px 0px rgba(0,0,0,0.45));
 }
 
-.text p {
-  margin-top:20px;
-  font-size:20px;
-  letter-spacing:5px;
-  animation:blink 1.5s infinite;
+.hero-sub {
+  font-size: clamp(18px, 2.4vw, 30px);
+  font-weight: 800;
+  letter-spacing: 8px;
+  color: #1e3010;
+  text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
 }
 
+/* Blink the subtitle */
 @keyframes blink {
-  0%,100%{opacity:1;}
-  50%{opacity:0.4;}
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
 }
+.hero-sub { animation: blink 1.8s ease-in-out infinite; }
 </style>
 </head>
 
-<body onclick="goToMenu()">
+<body onclick="window.location.href='/menu'">
 
-<!-- SLIDES -->
-<div class="slide active" style="background-image:url('/static/images/screensaver/slide1.png')"></div>
-<div class="slide" style="background-image:url('/static/images/screensaver/slide2.png')"></div>
-<div class="slide" style="background-image:url('/static/images/screensaver/slide3.png')"></div>
+  <div class="slide active" style="background-image:url('/static/images/screensaver/slide1.png')"></div>
+  <div class="slide"        style="background-image:url('/static/images/screensaver/slide2.png')"></div>
+  <div class="slide"        style="background-image:url('/static/images/screensaver/slide3.png')"></div>
+  <div class="slide"        style="background-image:url('/static/images/screensaver/slide4.png')"></div>
 
-<div class="overlay"></div>
+  <div class="overlay"></div>
 
-<div class="text">
-  <h1>WELCOME</h1>
-  <p>SCAN YOUR RFID TO ACCESS THE KIOSK</p>
-</div>
+  <div class="hero">
+    <div class="hero-main">SCAN YOUR RFID</div>
+    <div class="hero-sub">TO ACCESS THE KIOSK</div>
+  </div>
 
-<script>
-function goToMenu(){
-  window.location.href = "/menu";
-}
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    let idx = 0;
+    setInterval(() => {
+      slides[idx].classList.remove('active');
+      idx = (idx + 1) % slides.length;
+      slides[idx].classList.add('active');
+    }, 4000);
 
-/* SLIDESHOW */
-let slides = document.querySelectorAll(".slide");
-let index = 0;
-
-setInterval(() => {
-  slides[index].classList.remove("active");
-  index = (index + 1) % slides.length;
-  slides[index].classList.add("active");
-}, 3000); // change every 3 sec
-</script>
+    // RFID capture: accumulate rapid keystrokes, submit when Enter or 100ms timeout
+    let rfidBuffer = "";
+    let rfidTimer = null;
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        if (rfidBuffer.length > 4) window.location.href = '/rfid?uid=' + encodeURIComponent(rfidBuffer);
+        rfidBuffer = "";
+        clearTimeout(rfidTimer);
+        return;
+      }
+      if (e.key.length === 1) rfidBuffer += e.key;
+      clearTimeout(rfidTimer);
+      rfidTimer = setTimeout(() => {
+        if (rfidBuffer.length > 4) window.location.href = '/rfid?uid=' + encodeURIComponent(rfidBuffer);
+        rfidBuffer = "";
+      }, 100);
+    });
+  </script>
 
 </body>
 </html>

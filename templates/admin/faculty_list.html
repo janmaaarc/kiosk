@@ -1,0 +1,53 @@
+{% extends "admin/base.html" %}
+{% block title %}Faculty{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <h1 class="page-title" style="margin:0">Faculty</h1>
+    <a href="{{ url_for('content.faculty_add') }}" class="btn btn-primary">+ Add Faculty</a>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Photo</th>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Position</th>
+            <th>Room / Building</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for m in faculty %}
+        <tr>
+            <td>
+                {% if m['photo'] %}
+                <img src="{{ url_for('static', filename=m['photo']) }}"
+                     class="img-thumb" style="border-radius:50%" alt="">
+                {% else %}
+                <span style="color:#aaa;font-size:12px">—</span>
+                {% endif %}
+            </td>
+            <td>{{ m['name'] }}</td>
+            <td>{{ m['department'] or '—' }}</td>
+            <td>{{ m['position'] or '—' }}</td>
+            <td>{{ m['room'] or '' }}{% if m['room'] and m['building'] %} / {% endif %}{{ m['building'] or '' }}</td>
+            <td>
+                <a href="{{ url_for('content.faculty_edit', member_id=m['id']) }}"
+                   class="btn btn-secondary btn-sm">Edit</a>
+                <form method="POST"
+                      action="{{ url_for('content.faculty_delete', member_id=m['id']) }}"
+                      style="display:inline"
+                      onsubmit="return confirm('Delete this faculty member?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" style="text-align:center;color:#999;padding:20px">No faculty members yet.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

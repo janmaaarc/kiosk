@@ -6,7 +6,7 @@ from logging.handlers import RotatingFileHandler
 
 from datetime import datetime
 
-from flask import Flask, Response, render_template, session
+from flask import Flask, Response, render_template
 
 from kiosk_app.extensions import bcrypt, csrf, limiter
 from kiosk_app.blueprints.admin import admin_bp
@@ -16,11 +16,11 @@ from kiosk_app.blueprints.content import content_bp
 from kiosk_app.blueprints.events import events_bp
 from kiosk_app.blueprints.main import main_bp
 from kiosk_app.blueprints.offices import offices_bp
-from kiosk_app.i18n import get_translator
 
 _KIOSK_SCRIPTS = (
     '<script src="/static/js/kiosk-scale.js"></script>'
     '<script src="/static/js/kiosk-idle.js"></script>'
+    '<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js");</script>'
 )
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -121,10 +121,7 @@ def create_app() -> Flask:
 
     @app.context_processor
     def inject_globals():
-        lang = session.get("lang", "en")
         return {
-            "t": get_translator(lang),
-            "lang": lang,
             "now": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
         }
 

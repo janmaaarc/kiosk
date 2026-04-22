@@ -192,18 +192,22 @@
                 <div class="road"></div> 
                 <!-- BUILDINGS --> 
                  <!-- TOP ROW --> 
-                  <div class="building" 
-                    style="top:90px; left:250px; width:650px; height:20px;"> 
-                    RODRIGUEZ BUILDING 
+                  <div class="building"
+                    data-name="RODRIGUEZ BUILDING"
+                    data-page="/rodriguez_building"
+                    style="top:90px; left:250px; width:650px; height:20px;">
+                    RODRIGUEZ BUILDING
                   </div> 
                   
-                  <div class="building" data-name="MIST-NCESTD DORM" 
+                  <div class="building" data-name="MIST-NCESTD DORM"
+                    data-page="/mist_ncestd_dorm"
                     style="top:90px; left:965px; width:350px; height:130px;">
-                    MIST-NCESTD DORM 
+                    MIST-NCESTD DORM
                   </div>
-                      <div class="building" data-name="MULTI-PURPOSE BUILDING" 
-                      style="top:100px; left:1460px; width:170px; height:80px;"> 
-                      MULTI-PURPOSE BUILDING 
+                      <div class="building" data-name="MULTI-PURPOSE BUILDING"
+                      data-page="/multi_purpose_building"
+                      style="top:100px; left:1460px; width:170px; height:80px;">
+                      MULTI-PURPOSE BUILDING
                     </div> 
                       <div class="building" data-name="Ylagan Hall" 
                         style="top:220px; left:390px; width:170px; height:100px;" 
@@ -212,10 +216,11 @@
                     </div> 
                       
                     <!-- LEFT SIDE --> 
-                      <div class="building" 
-                        data-name="MIST-NCESTD BUILDING" 
-                        style="top:180px; left:50px; width:250px; height:185px;"> 
-                        MIST-NCESTD BUILDING 
+                      <div class="building"
+                        data-name="MIST-NCESTD BUILDING"
+                        data-page="/mist_ncestd_building"
+                        style="top:180px; left:50px; width:250px; height:185px;">
+                        MIST-NCESTD BUILDING
                       </div> 
                         
                       <div class="building" 
@@ -225,13 +230,12 @@
                         AUTOMOTIVE BUILDING 
                       </div> 
                         
-                      <!-- CENTER BIG --> 
-                       <div class="building" 
-                       data-name="ACADEMIC BUILDING" 
-                       style="top:185px; left:600px; width:280px; height:130px;" 
-                       data-page="/academic_building"
-                       onclick="openBuilding('ACADEMIC BUILDING')"> 
-                       ACADEMIC BLDG 
+                      <!-- CENTER BIG -->
+                       <div class="building"
+                       data-name="ACADEMIC BUILDING"
+                       style="top:185px; left:600px; width:280px; height:130px;"
+                       data-page="/academic_building">
+                       ACADEMIC BLDG
                       </div> 
                        
                        <!-- SMALL CLUSTERS (RIGHT) -->
@@ -253,10 +257,11 @@
                         data-page="/waf_&_rac_building">
                       </div> 
                         
-                      <div class="building" 
-                        data-name="POWER ROOM" 
-                        style="top:340px; left:1380px; width:70px; height:35px;"> 
-                        POWER ROOM 
+                      <div class="building"
+                        data-name="POWER ROOM"
+                        data-page="/power_room"
+                        style="top:340px; left:1380px; width:70px; height:35px;">
+                        POWER ROOM
                       </div> 
                         
                       <!-- BOTTOM LEFT --> 
@@ -522,13 +527,23 @@
                           }; 
                         } 
                         
-                        function drawGridPath(path){ 
-                          const converted = path.map(p => ({ 
-                            x: p.x * GRID_SIZE, 
-                            y: p.y * GRID_SIZE 
-                          })); 
-                          
-                          drawSmoothPath(converted); 
+                        function drawGridPath(path){
+                          const line = document.getElementById("routeLine");
+                          if(!line) return;
+                          let d = "";
+                          path.forEach((p, i) => {
+                            const x = p.x * GRID_SIZE;
+                            const y = p.y * GRID_SIZE;
+                            d += (i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
+                          });
+                          line.setAttribute("d", d);
+                          const len = line.getTotalLength();
+                          line.style.strokeDasharray = len;
+                          line.style.strokeDashoffset = len;
+                          setTimeout(() => {
+                            line.style.transition = "stroke-dashoffset 1.5s ease";
+                            line.style.strokeDashoffset = "0";
+                          }, 50);
                         } 
                         
                         function generateDirections(path){ 
@@ -868,21 +883,24 @@ function generateQR(){
   img.alt = "QR Code";
   document.getElementById("directionsBox").appendChild(img);
 }
-// CLICK BUILDING → NAVIGATE
+// CLICK BUILDING → SLIDE-IN PREVIEW PANEL
+let _pendingUrl = null;
 document.querySelectorAll('.building[data-page]').forEach(b => {
-  b.addEventListener('click', (e) => {
+  b.onclick = function(e) {
     e.stopPropagation();
-    console.log("CLICKED:", b.innerText); // 🔥 check if it triggers
-
     const page = b.getAttribute('data-page');
-    console.log("PAGE:", page);
-
-    if(page){
-      const location = b.getAttribute("data-name");
-
-window.location.href = page + "?from=gate&location=" + encodeURIComponent(location);
-    }
+    if (!page) return;
+    const name = b.getAttribute('data-name') || b.textContent.trim();
+    _pendingUrl = page + "?from=gate&location=" + encodeURIComponent(name);
+    document.getElementById('panelBuildingName').textContent = name;
+    document.getElementById('buildingPanel').style.right = '0';
+  };
 });
+function closeBuildingPanel() {
+  document.getElementById('buildingPanel').style.right = '-380px';
+}
+document.getElementById('panelEnterBtn').addEventListener('click', () => {
+  if (_pendingUrl) window.location.href = _pendingUrl;
 });
 
 // HOME / BACK
@@ -1014,6 +1032,36 @@ updateYouHere(150, 420); // MAIN GATE POSITION
 
 </script>
 <script src="{{ url_for('static', filename='js/kiosk.js') }}"></script>
+</div>
+
+<!-- Enter Building Preview Panel -->
+<div id="buildingPanel" style="
+  position:fixed;top:0;right:-380px;width:360px;height:100vh;
+  background:rgba(255,255,255,0.97);
+  box-shadow:-4px 0 24px rgba(0,0,0,0.25);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:40px 32px;z-index:2000;
+  transition:right 0.35s cubic-bezier(0.16,1,0.3,1);">
+  <div style="font-size:12px;letter-spacing:3px;color:#888;margin-bottom:12px">BUILDING</div>
+  <h2 id="panelBuildingName" style="font-size:22px;font-weight:900;color:#7b2d2d;
+    letter-spacing:2px;margin-bottom:28px;line-height:1.3"></h2>
+  <button id="panelEnterBtn" style="
+    background:#7b2d2d;color:#fff;border:none;border-radius:12px;
+    padding:16px 24px;font-size:15px;font-weight:900;letter-spacing:2px;
+    cursor:pointer;font-family:inherit;margin-bottom:12px;
+    transition:background 0.2s"
+    onmouseover="this.style.background='#5a1f1f'"
+    onmouseout="this.style.background='#7b2d2d'">
+    ENTER BUILDING
+  </button>
+  <button onclick="closeBuildingPanel()" style="
+    background:transparent;color:#555;border:2px solid #ddd;border-radius:12px;
+    padding:12px 24px;font-size:14px;font-weight:700;letter-spacing:1px;
+    cursor:pointer;font-family:inherit;transition:border-color 0.2s"
+    onmouseover="this.style.borderColor='#999'"
+    onmouseout="this.style.borderColor='#ddd'">
+    CANCEL
+  </button>
 </div>
 
 </body>

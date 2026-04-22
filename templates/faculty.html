@@ -238,11 +238,11 @@ body {
 
 <div class="top-icons">
     <img src="{{ url_for('static', filename='images/icon/home_button.png') }}" 
-         class="top-icon" onclick="goHome()">
+         class="top-icon" alt="Home" onclick="goHome()">
          
 
     <img src="{{ url_for('static', filename='images/icon/back_button.png') }}" 
-         class="top-icon" onclick="goBack()">
+         class="top-icon" alt="Back" onclick="goBack()">
 </div>
 
 <div class="sidebar">
@@ -268,46 +268,11 @@ body {
 
 
 <script>
-const data = [
-  {name:"MS. MARIEL BLANCA", dept:"Electronics Technology"},
-  {name:"MR. EDWIN SANTOS", dept:"Electrical Technology"},
-  {name:"MS. ALFIE CRUZ", dept:"Food and Service Management"},
-  {name:"MR. ROMMEL DE GUZMAN", dept:"Mechanical Technology"},
-  {name:"MS. BAULA", dept:"Entrepreneurship"},
-  {name:"MR. MICHAEL REYES", dept:"Automotive Technology"},
-  {name:"MR. CORREGIDOR", dept:"Electronics Technology"},
-  {name:"MS. ESTRADA", dept:"Civil Technology"},
-  {name:"MR. JOHN DOE", dept:"Drafting Technology"},
-  {name:"MS. JANE SMITH", dept:"Garments, Fashion and Design"},
-  {name:"MR. CARLOS RAMOS", dept:"Welding and Fabrication Technology"},
-  {name:"MS. ANGELA LOPEZ", dept:"Electronics Engineering"},
+const data = {{ faculty_list | tojson }};
 
-  // duplicates for grid testing
-  {name:"MR. LEO MARTIN", dept:"Mechanical Technology"},
-  {name:"MS. ANNA TORRES", dept:"Food and Service Management"},
-  {name:"MR. KEVIN LIM", dept:"Electrical Technology"},
-  {name:"MS. DIANA CRUZ", dept:"Entrepreneurship"},
-  {name:"MR. MARK TAN", dept:"Automotive Technology"},
-  {name:"MS. LIZA REYES", dept:"Civil Technology"},
-  {name:"MR. JOSHUA LEE", dept:"Drafting Technology"},
-  {name:"MS. KAREN ONG", dept:"Garments, Fashion and Design"}
-];
-
-const categories = [
-  "All",
-  "Automotive Technology",
-  "Civil Technology",
-  "Drafting Technology",
-  "Electrical Technology",
-  "Electronics Technology",
-  "Food and Service Management",
-  "Garments, Fashion and Design",
-  "Heating, Ventilating, Air-Conditioning and Refrigeration Technology",
-  "Mechanical Technology",
-  "Welding and Fabrication Technology",
-  "Electronics Engineering",
-  "Entrepreneurship"
-];
+// Build department list dynamically from DB data, plus "All"
+const deptSet = new Set(data.map(d => d.department).filter(Boolean));
+const categories = ["All", ...Array.from(deptSet).sort()];
 
 
 const grid = document.getElementById("grid");
@@ -337,25 +302,56 @@ function render(){
   const text = search.value.toLowerCase();
   
 
-  data
-  .filter(d=>active==="All" || d.dept===active)
-  .filter(d=>d.name.toLowerCase().includes(text))
-  .forEach(d=>{
-    const div=document.createElement("div");
-    div.className="card";
+  const filtered = data
+    .filter(d => active === "All" || d.department === active)
+    .filter(d => d.name.toLowerCase().includes(text));
 
-    div.innerHTML=`
-      <img src="https://i.pravatar.cc/150?img=${Math.floor(Math.random()*70)}">
-      <p>${d.name}</p>
-    `;
+  if (filtered.length === 0) {
+    const msg = document.createElement("p");
+    msg.style.cssText = "color:#888;font-size:16px;letter-spacing:1px;margin-top:20px;width:100%";
+    msg.textContent = "NO RESULTS FOUND";
+    grid.appendChild(msg);
+    return;
+  }
 
-   div.onclick = () => {
-      selectCard(div); // highlight first
-      setTimeout(() => {
-        goToProfile(d);
-      }, 200); // small delay so user sees effect
+  filtered.forEach(d => {
+    const div = document.createElement("div");
+    div.className = "card";
+
+    const img = document.createElement("img");
+    img.src = d.photo
+      ? "/static/" + d.photo
+      : "https://ui-avatars.com/api/?name=" + encodeURIComponent(d.name) + "&size=110&background=8b2e2e&color=fff&bold=true";
+    img.alt = "";
+
+    const nameEl = document.createElement("p");
+    nameEl.textContent = d.name;
+
+    const deptEl = document.createElement("small");
+    deptEl.style.cssText = "color:#666;font-size:12px;letter-spacing:.5px;display:block";
+    deptEl.textContent = d.department || "";
+
+    div.appendChild(img);
+    div.appendChild(nameEl);
+    div.appendChild(deptEl);
+
+    if (d.building && d.room) {
+      const btn = document.createElement("button");
+      btn.textContent = "FIND ON MAP";
+      btn.style.cssText = "margin-top:6px;background:#8b2e2e;color:#fff;border:none;"
+        + "border-radius:10px;padding:4px 10px;font-size:11px;letter-spacing:1px;"
+        + "cursor:pointer;font-family:inherit";
+      btn.addEventListener("click", e => {
+        e.stopPropagation();
+        findOnMap(d.building, d.room);
+      });
+      div.appendChild(btn);
+    }
+
+    div.onclick = () => {
+      selectCard(div);
+      setTimeout(() => goToProfile(d), 200);
     };
-
 
     grid.appendChild(div);
   });
@@ -363,32 +359,43 @@ function render(){
 
 search.addEventListener("input", render);
 
-function showModal(d){
-  const modal=document.getElementById("modal");
-  const content=document.getElementById("modalContent");
-
-  content.innerHTML=`
-    <h3>${d.name}</h3>
-    <p>${d.dept} Department</p>
-    <p>IT Building, Room 202</p>
-    <div class="close" onclick="closeModal()">Close</div>
-  `;
-
-  modal.style.display="flex";
-}
-
 function goToProfile(d) {
   const query = new URLSearchParams({
     name: d.name,
-    dept: d.dept,
-    room: JSON.stringify([
-      "IT Building Room 202",
-      "Engineering Building Room 105"
-    ]),
-    img: "https://i.pravatar.cc/150"
+    dept: d.department || "",
+    room: JSON.stringify(d.room ? [d.room] : []),
+    img: d.photo ? "/static/" + d.photo : ""
   }).toString();
+  window.location.href = "/profile?" + query;
+}
 
-window.location.href = "/profile?" + query  
+function findOnMap(building, room) {
+  const buildingSlug = {
+    "Rodriguez Building": "/rodriguez_building",
+    "MIST-NCESTD Dorm": "/mist_ncestd_dorm",
+    "MIST-NCESTD Building": "/mist_ncestd_building",
+    "Multi-Purpose Building": "/multi_purpose_building",
+    "Power Room": "/power_room",
+    "Ylagan Hall": "/ylagan_hall",
+    "Automotive Building": "/automotive_building",
+    "Academic Building": "/academic_building",
+    "WAF & RAC Building": "/waf_&_rac_building",
+    "New Admin Building": "/new_admin_building",
+    "Old Admin Building": "/old_admin_building",
+    "FSM Building": "/fsm_building",
+    "Civil Tech Building": "/civil_tech_building",
+    "WAF & FSM Building": "/waf_&_fsm_building",
+    "Tech Building": "/tech_building",
+    "Graduate School Building": "/graduate_school_building",
+    "Mechanical Building": "/mechanical_building",
+    "TE Building": "/te_building",
+    "Science Building": "/science_building",
+    "IT Building": "/it_building",
+  };
+  const url = buildingSlug[building];
+  if (url) {
+    window.location.href = url + "?location=" + encodeURIComponent(room);
+  }
 }
 
 function goToMap(location){

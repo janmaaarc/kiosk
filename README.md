@@ -11,21 +11,24 @@ kiosk/
 ├── app.py                   # entry point — create_app() + dev server
 ├── init_db.py               # first-time setup: create tables, seed admin user
 ├── admin.py                 # deprecated shim (points at init_db.py + scripts)
-├── database.db              # SQLite store (rooms, admins)
+├── database.db              # SQLite store (rooms, admins, analytics, …)
 ├── requirements.txt
+├── Dockerfile               # production container (non-root kiosk user)
+├── docker-compose.yml       # single-service compose with volume mounts
 ├── kiosk_app/               # application package
 │   ├── __init__.py          # create_app() factory, blueprint registration,
 │   │                        # logging, error handlers, kiosk-scale injection
+│   ├── analytics.py         # log_page_view() after_request hook
 │   ├── extensions.py        # bcrypt, CSRFProtect, Limiter instances
 │   ├── db.py                # get_db_connection(), db_connection() ctxmgr
 │   ├── auth.py              # login_required decorator
 │   ├── blueprints/
-│   │   ├── main.py          # /, /menu, /about, /profile, /faculty, /search, /api/rooms
+│   │   ├── main.py          # /, /menu, /about, /profile, /faculty, /search, /api/rooms, /healthz
 │   │   ├── campus.py        # /campus/*, /floor/*, per-building pages
 │   │   ├── announcements.py # /announcements, /announcement-view
 │   │   ├── events.py        # /events, /event/<id>
 │   │   ├── offices.py       # /office-selection, /office
-│   │   ├── admin.py         # /admin (rate-limited), /dashboard, /rooms, etc.
+│   │   ├── admin.py         # /admin (rate-limited), /dashboard, /rooms, /analytics, etc.
 │   │   └── content.py       # /admin/events|announcements|offices CRUD, /admin/upload
 │   ├── i18n.py              # EN / FIL string table + get_translator()
 │   └── data/                # legacy hardcoded data (superseded by DB in Phase 3)
@@ -39,6 +42,7 @@ kiosk/
 ├── deploy/
 │   ├── kiosk.service        # systemd unit (gunicorn)
 │   └── kiosk.env.example    # env var template for production
+├── tests/                   # pytest suite (35 tests — public routes, auth, admin)
 ├── REFERENCE/               # design references + kiosk_s/ archive
 └── ROADMAP.md
 ```
@@ -146,8 +150,41 @@ are uploaded via the drag-drop fields (stored under `static/uploads/`).
 Setting `expires_at` on any record hides it automatically on the public-facing
 pages once the timestamp passes — no redeploy required.
 
+## Running tests
+
+```bash
+.venv/bin/pytest tests/ -q
+```
+
+35 tests cover public page routes, auth flow (login / logout / protected routes),
+admin CRUD, and the analytics endpoint. Each test run uses a fresh temp database.
+
+## Docker deploy
+
+```bash
+cp deploy/kiosk.env.example .env
+# edit .env → set KIOSK_SECRET_KEY
+
+docker compose up -d
+# → http://localhost:8000/
+```
+
+The container runs as a non-root `kiosk` user. Volumes mount `database.db`,
+`static/uploads/`, `static/files/`, and `logs/` from the host so data
+survives container restarts.
+
+Health check: `curl http://localhost:8000/healthz` → `{"status":"ok"}`.
+
+## Usage analytics
+
+Every HTML page visit is recorded in the `page_views` table (path + timestamp).
+View the report at `/analytics` in the admin dashboard.
+
+`/static/`, `/healthz`, and `/api/` paths are excluded from tracking.
+
 ## Known limitations
 
-- No automated test suite yet (Phase 4).
+- Base template refactor (`{% extends "base.html" %}`) is deferred — all pages
+  work today; it's a cosmetic cleanup with high merge-conflict risk.
 - `kiosk_app/data/*.py` files are kept as a reference but are no longer read
   at runtime; the DB is the source of truth after `init_db.py` has run.

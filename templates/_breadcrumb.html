@@ -1,0 +1,15 @@
+{% if crumbs %}
+<nav style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;
+            letter-spacing:1px;color:#888;margin-bottom:16px;flex-wrap:wrap">
+  {% for crumb in crumbs %}
+    {% if not loop.last %}
+      <a href="{{ crumb.url }}" style="color:#8b2e2e;text-decoration:none;
+         transition:opacity 0.15s" onmouseover="this.style.opacity='.7'"
+         onmouseout="this.style.opacity='1'">{{ crumb.label | upper }}</a>
+      <span style="color:#ccc">›</span>
+    {% else %}
+      <span style="color:#555">{{ crumb.label | upper }}</span>
+    {% endif %}
+  {% endfor %}
+</nav>
+{% endif %}
