@@ -364,7 +364,10 @@ function goToProfile(d) {
     name: d.name,
     dept: d.department || "",
     room: JSON.stringify(d.room ? [d.room] : []),
-    img: d.photo ? "/static/" + d.photo : ""
+    img: d.photo ? "/static/" + d.photo : "",
+    building: d.building || "",
+    office_key: d.office_key || "",
+    office_name: d.office_name || ""
   }).toString();
   window.location.href = "/profile?" + query;
 }

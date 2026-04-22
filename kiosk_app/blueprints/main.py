@@ -24,7 +24,12 @@ def menu():
 @main_bp.route("/faculty")
 def faculty():
     with db_connection() as conn:
-        rows = conn.execute("SELECT * FROM faculty ORDER BY name").fetchall()
+        rows = conn.execute("""
+            SELECT f.*, o.name AS office_name
+            FROM faculty f
+            LEFT JOIN offices o ON COALESCE(f.office_key, '') = o.key
+            ORDER BY f.name
+        """).fetchall()
     return render_template("faculty.html", faculty_list=[dict(r) for r in rows])
 
 

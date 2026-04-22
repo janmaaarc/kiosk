@@ -192,6 +192,46 @@ body{
   font-weight:bold;
 }
 
+.location-links{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  margin-top:10px;
+}
+
+.location-links a{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:1px;
+  padding:6px 14px;
+  border-radius:20px;
+  cursor:pointer;
+  text-decoration:none;
+  width:fit-content;
+}
+
+.location-links .building-link{
+  background:#7b2d2d;
+  color:#fff;
+}
+
+.location-links .building-link:hover{
+  background:#a03a3a;
+}
+
+.location-links .office-link{
+  background:rgba(123,45,45,0.12);
+  color:#7b2d2d;
+  border:2px solid #7b2d2d;
+}
+
+.location-links .office-link:hover{
+  background:rgba(123,45,45,0.22);
+}
+
 .dept-title{
   position:absolute;
   top:80px;
@@ -458,29 +498,67 @@ function loadFromURL(){
   }
 
   document.querySelector(".header-text h2").innerText = name;
-document.querySelector(".header-text p").innerText = dept + " DEPARTMENT";
+  document.querySelector(".header-text p").innerText = dept + " DEPARTMENT";
 
-// 🔥 FIND FACULTY DATA
-const faculty = facultyData.find(f => f.name === name);
+  const building   = params.get("building") || "";
+  const officeKey  = params.get("office_key") || "";
+  const officeName = params.get("office_name") || "";
 
-// 🔥 RENDER ROOMS (CLICKABLE LINKS)
-const roomsDiv = document.querySelector(".rooms");
-roomsDiv.innerHTML = "";
+  const existing = document.querySelector(".location-links");
+  if(existing) existing.remove();
 
-if(faculty && faculty.rooms){
-  faculty.rooms.forEach(room => {
+  const locDiv = document.createElement("div");
+  locDiv.className = "location-links";
+
+  const ALLOWED_BUILDINGS = new Set([
+    "Academic Building","IT Building","FSM Building","Civil Tech Building",
+    "Tech Building","Mechanical Building","Automotive Building",
+    "WAF & RAC Building","Science Building","Graduate School Building",
+    "Rodriguez Building","MIST-NCESTD Dorm","MIST-NCESTD Building",
+    "Multi-Purpose Building","Power Room","Ylagan Hall","TE Building",
+    "New Admin Building","Old Admin Building","WAF & FSM Building"
+  ]);
+  const SAFE_KEY = /^[A-Za-z0-9 _\-]+$/;
+
+  if(building && ALLOWED_BUILDINGS.has(building)){
     const a = document.createElement("a");
-    a.innerText = room;
-
-    // 🔥 CLICK → GO TO MAP WITH LOCATION
+    a.className = "building-link";
+    a.textContent = building;
     a.onclick = () => {
-      const building = room.split(" Room")[0]; // extract building name
       window.location.href = "/campus_map?location=" + encodeURIComponent(building);
     };
+    locDiv.appendChild(a);
+  }
 
-    roomsDiv.appendChild(a);
-  });
-}
+  if(officeKey && SAFE_KEY.test(officeKey)){
+    const a = document.createElement("a");
+    a.className = "office-link";
+    a.textContent = officeName || officeKey;
+    a.onclick = () => {
+      window.location.href = "/office?name=" + encodeURIComponent(officeKey);
+    };
+    locDiv.appendChild(a);
+  }
+
+  if(locDiv.children.length){
+    document.querySelector(".header-text").appendChild(locDiv);
+  }
+
+  const faculty = facultyData.find(f => f.name === name);
+  const roomsDiv = document.querySelector(".rooms");
+  roomsDiv.innerHTML = "";
+
+  if(faculty && faculty.rooms){
+    faculty.rooms.forEach(room => {
+      const a = document.createElement("a");
+      a.textContent = room;
+      a.onclick = () => {
+        const b = room.split(" Room")[0];
+        window.location.href = "/campus_map?location=" + encodeURIComponent(b);
+      };
+      roomsDiv.appendChild(a);
+    });
+  }
 
   renderSchedule(name);
 }
