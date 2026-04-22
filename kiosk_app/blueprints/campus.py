@@ -82,9 +82,7 @@ _VALID_LOCATIONS = {
 
 @campus_bp.route("/directions")
 def directions_mobile():
-    raw = request.args.get("location", "").strip().upper()
-    location = raw if raw in _VALID_LOCATIONS else ""
-    html = render_template("directions_mobile.html", location=location)
+    html = render_template("directions_mobile.html")
     return Response(html, headers={
         "Content-Type": "text/html; charset=utf-8",
         "X-Content-Type-Options": "nosniff",

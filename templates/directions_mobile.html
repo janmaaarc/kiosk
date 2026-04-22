@@ -25,6 +25,10 @@ li {
   margin-top: 24px; padding: 16px; border-radius: 12px;
   background: rgba(255,255,255,0.15); font-size: 17px; font-weight: 700;
 }
+.error {
+  margin-top: 24px; padding: 16px; border-radius: 12px;
+  background: rgba(0,0,0,0.2); font-size: 15px; opacity: .8;
+}
 </style>
 </head>
 <body>
@@ -33,12 +37,15 @@ li {
 <div class="sub">Directions from the main entrance</div>
 <ul id="steps"></ul>
 <div class="arrive" id="arrive-msg" style="display:none"></div>
+<div class="error"  id="error-msg"  style="display:none"></div>
 
 <script>
-const DEST = {{ location | upper | tojson }};
-document.getElementById("dest-name").textContent = DEST;
+var DEST = (new URLSearchParams(window.location.search).get("location") || "").trim().toUpperCase();
 
-const edges = {
+var destEl = document.getElementById("dest-name");
+destEl.textContent = DEST ? titleCase(DEST) : "Unknown";
+
+var edges = {
   "GATE": ["LAST HORIZONTAL ROAD"],
   "LAST HORIZONTAL ROAD": ["GATE","MAIN HORIZONTAL ROAD","NEW ADMIN BUILDING","FSM BUILDING"],
   "MAIN HORIZONTAL ROAD": ["LAST HORIZONTAL ROAD","SECOND HORIZONTAL ROAD","1ST VERTICAL ROAD","2ND VERTICAL ROAD","3RD VERTICAL ROAD","4TH VERTICAL ROAD","5TH VERTICAL ROAD","6TH VERTICAL ROAD","7TH VERTICAL ROAD","8TH VERTICAL ROAD"],
@@ -69,54 +76,66 @@ const edges = {
   "TE BUILDING": ["8TH VERTICAL ROAD"],
   "POWER ROOM": ["8TH VERTICAL ROAD"],
   "GRADUATE SCHOOL BUILDING": ["8TH VERTICAL ROAD"],
-  "MIST-NCESTD BUILDING": ["SECOND HORIZONTAL ROAD"],
+  "MIST-NCESTD BUILDING": ["SECOND HORIZONTAL ROAD"]
 };
 
 function bfs(start, end) {
-  const q = [[start]], seen = new Set([start]);
+  var q = [[start]], seen = {};
+  seen[start] = true;
   while (q.length) {
-    const path = q.shift();
-    const node = path[path.length - 1];
+    var path = q.shift();
+    var node = path[path.length - 1];
     if (node === end) return path;
-    for (const n of (edges[node] || [])) {
-      if (!seen.has(n)) { seen.add(n); q.push([...path, n]); }
+    var neighbors = edges[node] || [];
+    for (var i = 0; i < neighbors.length; i++) {
+      var n = neighbors[i];
+      if (!seen[n]) { seen[n] = true; q.push(path.concat(n)); }
     }
   }
   return null;
 }
 
 function titleCase(s) {
-  return s.split(" ").filter(Boolean).map(w => w[0].toUpperCase() + w.slice(1).toLowerCase()).join(" ");
+  return s.split(" ").filter(function(w){ return w.length > 0; }).map(function(w){
+    return w[0].toUpperCase() + w.slice(1).toLowerCase();
+  }).join(" ");
 }
 
-const ul = document.getElementById("steps");
-const path = bfs("GATE", DEST);
+var ul = document.getElementById("steps");
 
-if (path && path.length > 1) {
-  path.slice(1, -1).forEach((step, i) => {
-    const li = document.createElement("li");
-    const num = document.createElement("span");
+if (!DEST) {
+  var errEl = document.getElementById("error-msg");
+  errEl.textContent = "No destination specified.";
+  errEl.style.display = "block";
+} else {
+  var path = bfs("GATE", DEST);
+  if (path && path.length > 1) {
+    var middle = path.slice(1, -1);
+    for (var i = 0; i < middle.length; i++) {
+      var li  = document.createElement("li");
+      var num = document.createElement("span");
+      num.className = "num";
+      num.textContent = i + 1;
+      var txt = document.createElement("span");
+      txt.textContent = "Head toward " + titleCase(middle[i]);
+      li.appendChild(num);
+      li.appendChild(txt);
+      ul.appendChild(li);
+    }
+    var arrive = document.getElementById("arrive-msg");
+    arrive.textContent = "You have arrived at " + titleCase(DEST);
+    arrive.style.display = "block";
+  } else {
+    var li  = document.createElement("li");
+    var num = document.createElement("span");
     num.className = "num";
-    num.textContent = i + 1;
-    const txt = document.createElement("span");
-    txt.textContent = "Head toward " + titleCase(step);
+    num.textContent = "1";
+    var txt = document.createElement("span");
+    txt.textContent = "Walk straight from the main entrance toward " + titleCase(DEST);
     li.appendChild(num);
     li.appendChild(txt);
     ul.appendChild(li);
-  });
-  const arrive = document.getElementById("arrive-msg");
-  arrive.textContent = "You have arrived at " + titleCase(DEST);
-  arrive.style.display = "block";
-} else {
-  const li = document.createElement("li");
-  const num = document.createElement("span");
-  num.className = "num";
-  num.textContent = "1";
-  const txt = document.createElement("span");
-  txt.textContent = "Walk straight from the main entrance toward " + titleCase(DEST);
-  li.appendChild(num);
-  li.appendChild(txt);
-  ul.appendChild(li);
+  }
 }
 </script>
 </body>
