@@ -1,8 +1,10 @@
-<!DOCTYPE html> 
-<html> 
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> 
-  <head> 
-    <title>Campus Map</title>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <title>Campus Map</title>
      <style> 
      
      body { 
@@ -1100,7 +1102,7 @@ function generateQR(){
     loc = document.getElementById("destName").textContent;
   }
   if(!loc) return;
-  const url = LAN_BASE_URL + "/directions?location=" + encodeURIComponent(loc);
+  const url = LAN_BASE_URL + "/campus_map?location=" + encodeURIComponent(loc);
   document.getElementById("qrCardImage").src = "/qr?size=260&data=" + encodeURIComponent(url);
   document.getElementById("qrCard").classList.add("visible");
 }

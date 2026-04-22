@@ -6,14 +6,14 @@
 <title>Directions</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-html, body { background: #7b2d2d; }
+html, body {
+  background: #7b2d2d;
+  width: 100%;
+  min-height: 100dvh;
+}
 body {
   color: #fff;
-  min-height: 100dvh;
   padding: max(48px, env(safe-area-inset-top)) 24px max(32px, env(safe-area-inset-bottom));
-  width: 100%;
-  max-width: 480px;
-  margin: 0 auto;
 }
 .label { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; opacity: .6; margin-bottom: 8px; }
 .dest  { font-size: clamp(28px, 8vw, 40px); font-weight: 900; margin-bottom: 6px; line-height: 1.15; }
