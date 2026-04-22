@@ -1092,7 +1092,7 @@ function generateQR(){
     loc = document.getElementById("destName").textContent;
   }
   if(!loc) return;
-  const url = LAN_BASE_URL + "/campus_map?location=" + encodeURIComponent(loc) + "&mobile=1";
+  const url = LAN_BASE_URL + "/directions?location=" + encodeURIComponent(loc);
   document.getElementById("qrCardImage").src = "/qr?size=260&data=" + encodeURIComponent(url);
   document.getElementById("qrCard").classList.add("visible");
 }

@@ -59,21 +59,6 @@ def campus_map():
     port = request.host.split(":")[-1] if ":" in request.host else "5000"
     lan_base_url = f"http://{_lan_ip()}:{port}"
 
-    if request.args.get("mobile") == "1":
-        _valid = {
-            "GATE","LAST HORIZONTAL ROAD","MAIN HORIZONTAL ROAD","SECOND HORIZONTAL ROAD",
-            "1ST VERTICAL ROAD","2ND VERTICAL ROAD","3RD VERTICAL ROAD","4TH VERTICAL ROAD",
-            "5TH VERTICAL ROAD","6TH VERTICAL ROAD","7TH VERTICAL ROAD","8TH VERTICAL ROAD",
-            "ACADEMIC BUILDING","IT BUILDING","FSM BUILDING","CIVIL TECH BUILDING",
-            "TECH BUILDING","MECHANICAL BUILDING","AUTOMOTIVE BUILDING","WAF & RAC BUILDING",
-            "SCIENCE BUILDING","NEW ADMIN BUILDING","OLD ADMIN BUILDING","YLAGAN HALL",
-            "RODRIGUEZ BUILDING","MIST-NCESTD DORM","MULTI-PURPOSE BUILDING",
-            "MIST-NCESTD BUILDING","TE BUILDING","POWER ROOM","GRADUATE SCHOOL BUILDING",
-        }
-        raw = request.args.get("location", "").strip().upper()
-        location = raw if raw in _valid else ""
-        html = render_template("directions_mobile.html", location=location)
-        return Response(html, content_type="text/html; charset=utf-8")
 
     return render_template(
         "campus.html",
@@ -81,6 +66,29 @@ def campus_map():
         room_placements=room_placements,
         lan_base_url=lan_base_url,
     )
+
+
+_VALID_LOCATIONS = {
+    "GATE","LAST HORIZONTAL ROAD","MAIN HORIZONTAL ROAD","SECOND HORIZONTAL ROAD",
+    "1ST VERTICAL ROAD","2ND VERTICAL ROAD","3RD VERTICAL ROAD","4TH VERTICAL ROAD",
+    "5TH VERTICAL ROAD","6TH VERTICAL ROAD","7TH VERTICAL ROAD","8TH VERTICAL ROAD",
+    "ACADEMIC BUILDING","IT BUILDING","FSM BUILDING","CIVIL TECH BUILDING",
+    "TECH BUILDING","MECHANICAL BUILDING","AUTOMOTIVE BUILDING","WAF & RAC BUILDING",
+    "SCIENCE BUILDING","NEW ADMIN BUILDING","OLD ADMIN BUILDING","YLAGAN HALL",
+    "RODRIGUEZ BUILDING","MIST-NCESTD DORM","MULTI-PURPOSE BUILDING",
+    "MIST-NCESTD BUILDING","TE BUILDING","POWER ROOM","GRADUATE SCHOOL BUILDING",
+}
+
+
+@campus_bp.route("/directions")
+def directions_mobile():
+    raw = request.args.get("location", "").strip().upper()
+    location = raw if raw in _VALID_LOCATIONS else ""
+    html = render_template("directions_mobile.html", location=location)
+    return Response(html, headers={
+        "Content-Type": "text/html; charset=utf-8",
+        "X-Content-Type-Options": "nosniff",
+    })
 
 
 def _floor_plan(building_name: str, floor_count: int = 3, base_url: str = "",
