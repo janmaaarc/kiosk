@@ -1,3 +1,4 @@
+import json
 import socket
 
 from flask import Blueprint, Response, render_template, request
@@ -91,6 +92,47 @@ def directions_mobile():
         "Content-Type": "text/html; charset=utf-8",
         "X-Content-Type-Options": "nosniff",
     })
+
+
+_ENTRANCE_BY_FLOOR = {
+    1: {"x": 50, "y": 96, "hY": 50},
+    2: {"x": 38, "y": 54, "hY": 50},
+    3: {"x": 38, "y": 54, "hY": 50},
+    4: {"x": 12, "y": 37, "hY": 45},
+    5: {"x": 12, "y": 37, "hY": 45},
+}
+
+@campus_bp.route("/api/floor_rooms")
+def api_floor_rooms():
+    building = request.args.get("building", "").strip().title()
+    try:
+        floor_num = int(request.args.get("floor", 1))
+    except (ValueError, TypeError):
+        floor_num = 1
+
+    floors_map = {
+        "Academic Building": _ACADEMIC_FLOORS,
+    }
+    floors = floors_map.get(building)
+    if not floors or floor_num not in floors:
+        return Response(json.dumps({"rooms": [], "entrance": _ENTRANCE_BY_FLOOR.get(1)}),
+                        content_type="application/json")
+
+    floor_data = floors[floor_num]
+    rooms = [
+        {
+            "name": r["name"],
+            "left": r["left"],
+            "top": r["top"],
+            "width": r["width"],
+            "height": r["height"],
+            "desc": r.get("desc", ""),
+        }
+        for r in floor_data.get("rooms", [])
+    ]
+    entrance = _ENTRANCE_BY_FLOOR.get(floor_num, _ENTRANCE_BY_FLOOR[1])
+    data = {"rooms": rooms, "entrance": entrance}
+    return Response(json.dumps(data), content_type="application/json")
 
 
 def _floor_plan(building_name: str, floor_count: int = 3, base_url: str = "",

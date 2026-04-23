@@ -62,6 +62,29 @@ html, body { width:100%; height:100%; margin:0; background:#1a0a0a; overflow:hid
   font-weight:900; letter-spacing:1px; cursor:pointer; white-space:nowrap; flex-shrink:0;
 }
 .floor-btn.active { background:var(--red); color:#fff; }
+.room-lbl {
+  position:absolute;
+  display:flex; align-items:center; justify-content:center;
+  text-align:center;
+  font-family:var(--f);
+  font-size:clamp(4px,1vw,7px);
+  font-weight:800;
+  line-height:1.1;
+  color:#1a1a1a;
+  background:transparent;
+  border:1px solid transparent;
+  border-radius:3px;
+  padding:1px 2px;
+  cursor:pointer;
+  text-transform:uppercase;
+  letter-spacing:0.3px;
+  transition:background 0.15s, color 0.15s;
+}
+.room-lbl:hover, .room-lbl.active {
+  background:rgba(139,46,46,0.85);
+  border-color:#fff;
+  color:#fff;
+}
 
 /* Centered white card */
 .map-card {
@@ -183,8 +206,20 @@ html, body { width:100%; height:100%; margin:0; background:#1a0a0a; overflow:hid
         <div id="floor-tabs" style="display:flex;gap:4px;padding:3px 8px 5px;background:#fff;
              overflow-x:auto;flex-shrink:0;border-bottom:1px solid #eee;"></div>
         <div style="flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:6px;">
-          <img id="floor-img" src="" alt="Floor Plan"
-               style="max-width:100%;max-height:100%;object-fit:contain;display:none;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.1);">
+          <!-- Floor plan wrapper: image + room overlays + route line -->
+          <div id="plan-wrap" style="display:none;position:relative;width:100%;height:100%;">
+            <img id="floor-img" src="" alt="Floor Plan"
+                 style="width:100%;height:100%;object-fit:contain;display:block;border-radius:6px;
+                        box-shadow:0 2px 10px rgba(0,0,0,.1);">
+            <!-- Room overlays (positioned as % of plan-wrap) -->
+            <div id="room-overlays" style="position:absolute;inset:0;pointer-events:auto;"></div>
+            <!-- Static route line SVG -->
+            <svg id="route-svg" viewBox="0 0 100 100" preserveAspectRatio="none"
+                 style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:none;">
+              <path id="route-path" fill="none" stroke="#8e44ad" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
           <div id="no-floor" style="display:none;flex-direction:column;align-items:center;
                justify-content:center;gap:4px;color:#bbb;text-align:center;">
             <div style="font-size:clamp(8px,3vw,13px);font-weight:900;letter-spacing:2px;">FLOOR PLAN</div>
@@ -323,16 +358,76 @@ function buildFloorTabs() {
   showFloor(0);
 }
 
+var _currentEntrance = {x:50, y:96, hY:50};
+
 function showFloor(idx) {
   var floors = FLOOR_PLANS[DEST];
   if (!floors || !floors[idx]) return;
-  var imgEl = document.getElementById("floor-img");
+
+  var imgEl  = document.getElementById("floor-img");
+  var planWrap = document.getElementById("plan-wrap");
   imgEl.src = floors[idx];
-  imgEl.style.display = "block";
+  planWrap.style.display = "block";
+
+  // Clear previous overlays and route
+  var overlays = document.getElementById("room-overlays");
+  while (overlays.firstChild) overlays.removeChild(overlays.firstChild);
+  document.getElementById("route-path").setAttribute("d", "");
+  document.getElementById("route-svg").style.display = "none";
+
+  // Highlight active floor button
   var btns = document.querySelectorAll(".floor-btn");
   for (var j = 0; j < btns.length; j++) {
     btns[j].className = "floor-btn" + (j === idx ? " active" : "");
   }
+
+  // Fetch room data for this floor
+  var floorNum = idx + 1;
+  var bldgName = DEST.charAt(0) + DEST.slice(1).toLowerCase();
+  fetch("/api/floor_rooms?building=" + encodeURIComponent(bldgName) + "&floor=" + floorNum)
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      _currentEntrance = data.entrance || {x:50, y:96, hY:50};
+      renderRooms(data.rooms || []);
+    })
+    .catch(function(){});
+}
+
+function renderRooms(rooms) {
+  var overlays = document.getElementById("room-overlays");
+  for (var i = 0; i < rooms.length; i++) {
+    (function(room) {
+      var div = document.createElement("div");
+      div.className = "room-lbl";
+      div.style.left   = room.left + "%";
+      div.style.top    = room.top  + "%";
+      div.style.width  = room.width  + "%";
+      div.style.height = room.height + "%";
+      div.textContent  = room.name;
+      div.onclick = function() { selectRoom(div, room); };
+      overlays.appendChild(div);
+    })(rooms[i]);
+  }
+}
+
+function selectRoom(el, room) {
+  // Clear previous active
+  var all = document.querySelectorAll(".room-lbl");
+  for (var i = 0; i < all.length; i++) all[i].classList.remove("active");
+  el.classList.add("active");
+
+  // Draw static route: entrance → hallway → room center
+  var e = _currentEntrance;
+  var rCx = room.left + room.width  / 2;
+  var rCy = room.top  + room.height / 2;
+  var hY  = e.hY;
+  var d = "M " + e.x + " " + e.y +
+          " L " + e.x + " " + hY +
+          " L " + rCx + " " + hY +
+          " L " + rCx + " " + rCy;
+
+  document.getElementById("route-path").setAttribute("d", d);
+  document.getElementById("route-svg").style.display = "block";
 }
 </script>
 
