@@ -6,189 +6,76 @@
 <title>Directions</title>
 <style>
 :root {
-  --red:    #7b2d2d;
+  --red: #7b2d2d;
   --red-dk: #5a1f1f;
   --f: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 * { margin:0; padding:0; box-sizing:border-box; }
 html, body { width:100%; height:100%; background:#1a0a0a; font-family:var(--f); }
 
-/* ── Outer shell — always fills screen ───────────── */
 .wrap {
-  position: fixed; inset: 0;
-  display: flex;
-  overflow: hidden;
+  position:fixed; inset:0;
+  display:flex; overflow:hidden;
 }
 
-/* ════════════════════════════════════════════════
-   LEFT PANEL
-════════════════════════════════════════════════ */
+/* ── LEFT PANEL ── */
 .panel {
-  width: 27%;
-  flex-shrink: 0;
-  background: linear-gradient(175deg, var(--red) 0%, var(--red-dk) 100%);
-  color: #fff;
-  padding: max(40px, env(safe-area-inset-top)) 11px 18px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  width:27%; flex-shrink:0;
+  background:linear-gradient(175deg, var(--red) 0%, var(--red-dk) 100%);
+  color:#fff;
+  padding:max(40px,env(safe-area-inset-top)) 11px 18px;
+  display:flex; flex-direction:column; overflow:hidden;
 }
-.p-header {
-  font-size: clamp(5px,1.6vw,10px);
-  font-weight: 900;
-  letter-spacing: 3px;
-  color: rgba(255,255,255,.42);
-  margin-bottom: 8px;
-}
-.p-dest-label {
-  font-size: clamp(5px,1.4vw,8px);
-  letter-spacing: 2px;
-  color: rgba(255,255,255,.55);
-  margin-bottom: 2px;
-}
-.p-dest-name {
-  font-size: clamp(8px,2.4vw,14px);
-  font-weight: 900;
-  letter-spacing: 0.5px;
-  line-height: 1.2;
-  margin-bottom: 14px;
-}
-.p-dir-heading {
-  font-size: clamp(7px,2vw,12px);
-  font-weight: 900;
-  letter-spacing: 1px;
-  margin-bottom: 8px;
-}
-.panel ul {
-  list-style: disc;
-  padding-left: 13px;
-  flex: 1;
-}
-.panel ul li {
-  font-size: clamp(5.5px,1.6vw,9.5px);
-  line-height: 1.6;
-  margin-bottom: 3px;
-  color: rgba(255,255,255,.88);
-}
-.p-inside {
-  font-size: clamp(7px,2vw,12px);
-  font-weight: 900;
-  letter-spacing: 1px;
-  margin-top: 12px;
-  color: rgba(255,255,255,.9);
-}
+.p-hdr  { font-size:clamp(5px,1.6vw,10px); font-weight:900; letter-spacing:3px; color:rgba(255,255,255,.4); margin-bottom:8px; }
+.p-lbl  { font-size:clamp(5px,1.4vw,8px);  letter-spacing:2px; color:rgba(255,255,255,.55); margin-bottom:2px; }
+.p-name { font-size:clamp(8px,2.4vw,14px); font-weight:900; letter-spacing:.5px; line-height:1.2; margin-bottom:14px; }
+.p-dhd  { font-size:clamp(7px,2vw,12px); font-weight:900; letter-spacing:1px; margin-bottom:8px; }
+.panel ul { list-style:disc; padding-left:13px; flex:1; }
+.panel ul li { font-size:clamp(5.5px,1.6vw,9.5px); line-height:1.6; margin-bottom:3px; color:rgba(255,255,255,.88); }
+.p-inside { font-size:clamp(7px,2vw,12px); font-weight:900; letter-spacing:1px; margin-top:12px; color:rgba(255,255,255,.9); }
 
-/* ════════════════════════════════════════════════
-   RIGHT SIDE
-════════════════════════════════════════════════ */
-.right {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
+/* ── RIGHT ── */
+.right { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 
-/* ── Map section (top 60%) ─────────────────────── */
-.map-section {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-}
-.map-bg {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  opacity: 0.32;
-}
-/* top-right badges */
+/* Map section */
+.map-sect { flex:1; position:relative; overflow:hidden; background:#ede5d8; }
+.map-bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.28; }
+
 .map-badge {
-  position: absolute;
-  top: 8px; right: 8px;
-  background: rgba(123,45,45,.95);
-  color: #fff;
-  font-size: clamp(4px,1.2vw,7px);
-  font-weight: 900;
-  letter-spacing: 1.5px;
-  padding: 3px 6px;
-  border-radius: 4px;
+  position:absolute; top:6px; right:6px;
+  background:rgba(123,45,45,.95); color:#fff;
+  font-size:clamp(4px,1.1vw,7px); font-weight:900; letter-spacing:1.5px;
+  padding:3px 6px; border-radius:4px;
 }
 .map-toggle {
-  position: absolute;
-  top: 26px; right: 8px;
-  display: flex;
-  border-radius: 6px;
-  overflow: hidden;
-  font-size: clamp(4px,1.2vw,7px);
-  font-weight: 900;
-  letter-spacing: 1px;
+  position:absolute; top:23px; right:6px;
+  display:flex; border-radius:6px; overflow:hidden;
+  font-size:clamp(4px,1.1vw,7px); font-weight:900; letter-spacing:1px;
 }
-.map-toggle span {
-  padding: 3px 6px;
-  background: rgba(255,255,255,.92);
-  color: #888;
-}
-.map-toggle span.on {
-  background: var(--red);
-  color: #fff;
-}
+.map-toggle span { padding:3px 6px; background:rgba(255,255,255,.92); color:#888; }
+.map-toggle span.on { background:var(--red); color:#fff; }
 
-/* ── White card (centered in map section) ────────── */
+/* Centered white card */
 .map-card {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center; padding:8px;
 }
 .card-inner {
-  background: rgba(255,255,255,.97);
-  border-radius: 10px;
-  box-shadow: 0 6px 28px rgba(0,0,0,.22);
-  padding: 10px 10px 8px;
-  width: 100%;
-  max-width: 340px;
+  background:rgba(255,255,255,.97);
+  border-radius:10px;
+  box-shadow:0 6px 28px rgba(0,0,0,.22);
+  padding:8px 8px 6px; width:100%; max-width:360px;
 }
-.card-title {
-  font-size: clamp(7px,2vw,12px);
-  font-weight: 900;
-  letter-spacing: 3px;
-  color: var(--red);
-  margin-bottom: 2px;
-}
-.card-dest {
-  font-size: clamp(5.5px,1.5vw,9px);
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  color: #666;
-  margin-bottom: 8px;
-}
-/* Mini campus map SVG wrapper */
-.mini-map {
-  width: 100%;
-  border-radius: 6px;
-  overflow: hidden;
-  background: #f0ebe3;
-}
-.mini-map svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
+.card-title { font-size:clamp(7px,2vw,12px); font-weight:900; letter-spacing:3px; color:var(--red); margin-bottom:1px; }
+.card-dest  { font-size:clamp(5px,1.4vw,9px); font-weight:700; letter-spacing:1.5px; color:#666; margin-bottom:6px; }
 
-/* ── Photo section (bottom 40%) ─────────────────── */
-.photo-section {
-  height: 40%;
-  flex-shrink: 0;
-  overflow: hidden;
-  background: #c8b8a0;
-  position: relative;
-}
-.photo-section img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  display: block;
-}
+/* Campus map replica — same layout as campus.html, scaled via viewBox */
+.mini-map { width:100%; border-radius:6px; overflow:hidden; background:#f0ebe3; }
+.mini-map svg { display:block; width:100%; height:auto; }
+
+/* Photo */
+.photo-sect { height:40%; flex-shrink:0; overflow:hidden; background:#c8b8a0; }
+.photo-sect img { width:100%; height:100%; object-fit:cover; display:block; }
 </style>
 </head>
 <body>
@@ -196,71 +83,80 @@ html, body { width:100%; height:100%; background:#1a0a0a; font-family:var(--f); 
 
   <!-- LEFT PANEL -->
   <div class="panel">
-    <div class="p-header">CAMPUS MAP</div>
-    <div class="p-dest-label">DESTINATION:</div>
-    <div class="p-dest-name" id="dest-name"></div>
-    <div class="p-dir-heading">Directions</div>
+    <div class="p-hdr">CAMPUS MAP</div>
+    <div class="p-lbl">DESTINATION:</div>
+    <div class="p-name" id="dest-name"></div>
+    <div class="p-dhd">Directions</div>
     <ul id="steps"></ul>
     <div class="p-inside" id="inside-lbl" style="display:none">Inside the Building:</div>
   </div>
 
   <!-- RIGHT -->
   <div class="right">
-
-    <!-- Map section -->
-    <div class="map-section">
+    <div class="map-sect">
       <img class="map-bg" src="/static/images/KIOSK BACKGROUND.png" alt="">
       <div class="map-badge">STEP 2: BUILDING LAYOUT</div>
-      <div class="map-toggle">
-        <span class="on">OUTSIDE</span><span>INSIDE</span>
-      </div>
+      <div class="map-toggle"><span class="on">OUTSIDE</span><span>INSIDE</span></div>
 
-      <!-- Centered white card with mini-map -->
       <div class="map-card">
         <div class="card-inner">
           <div class="card-title">CAMPUS MAP</div>
-          <div class="card-dest" id="card-dest">DESTINATION: —</div>
+          <div class="card-dest" id="card-dest"></div>
           <div class="mini-map">
-            <!-- Static simplified campus map SVG -->
-            <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg">
-              <rect width="320" height="180" fill="#f0ebe3"/>
-              <!-- roads -->
-              <rect x="0" y="100" width="280" height="12" fill="#d8cfc4"/>
-              <rect x="40" y="0"  width="8"   height="180" fill="#d8cfc4"/>
-              <rect x="80" y="40" width="6"   height="130" fill="#d8cfc4"/>
-              <rect x="120" y="40" width="6"  height="130" fill="#d8cfc4"/>
-              <rect x="160" y="40" width="6"  height="130" fill="#d8cfc4"/>
-              <rect x="200" y="40" width="6"  height="130" fill="#d8cfc4"/>
-              <rect x="240" y="40" width="6"  height="130" fill="#d8cfc4"/>
-              <rect x="280" y="0"  width="6"  height="180" fill="#d8cfc4"/>
-              <rect x="0"  y="40"  width="280" height="6" fill="#d8cfc4"/>
-              <!-- Buildings - yellow -->
-              <rect x="50" y="8"  width="120" height="6"  rx="2" fill="#f4d35e"/><!-- Rodriguez -->
-              <rect x="180" y="8" width="60"  height="28" rx="2" fill="#f4d35e"/><!-- MIST Dorm -->
-              <rect x="10" y="46" width="28"  height="48" rx="2" fill="#f4d35e"/><!-- MIST Building -->
-              <rect x="50" y="48" width="26"  height="44" rx="2" fill="#f4d35e"/><!-- Ylagan -->
-              <!-- ACADEMIC BUILDING — highlighted -->
-              <rect x="86" y="46" width="56"  height="48" rx="2" fill="#ff5722" stroke="#fff" stroke-width="1.5"/>
-              <text x="114" y="73" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="5" font-weight="700" fill="#fff">ACADEMIC</text>
-              <text x="114" y="80" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="5" font-weight="700" fill="#fff">BLDG</text>
-              <rect x="180" y="50" width="50"  height="24" rx="2" fill="#f4d35e"/>
-              <rect x="180" y="68" width="26"  height="12" rx="1" fill="#f4d35e"/>
-              <rect x="10"  y="110" width="26" height="52" rx="2" fill="#f4d35e"/><!-- New Admin -->
-              <rect x="50"  y="118" width="16" height="42" rx="2" fill="#f4d35e"/><!-- Old Admin -->
-              <rect x="86"  y="118" width="36" height="42" rx="2" fill="#f4d35e"/><!-- FSM -->
-              <rect x="130" y="110" width="14" height="52" rx="2" fill="#f4d35e"/>
-              <rect x="148" y="110" width="14" height="52" rx="2" fill="#f4d35e"/>
-              <rect x="166" y="110" width="14" height="52" rx="2" fill="#f4d35e"/>
-              <rect x="186" y="110" width="74" height="42" rx="2" fill="#f4d35e"/><!-- Tech -->
-              <rect x="290" y="8"  width="26"  height="36" rx="2" fill="#f4d35e"/>
-              <rect x="290" y="48" width="26"  height="36" rx="2" fill="#f4d35e"/>
-              <rect x="290" y="88" width="26"  height="84" rx="2" fill="#f4d35e"/>
-              <!-- Route line -->
-              <polyline points="4,100 4,112 96,112 96,94" fill="none" stroke="#8e44ad" stroke-width="2" stroke-dasharray="4,2" stroke-linecap="round"/>
-              <!-- YOU ARE HERE dot -->
-              <circle cx="4" cy="100" r="4" fill="#8b1a1a"/>
-              <text x="4" y="88" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="4" fill="#8b1a1a" font-weight="900">YOU</text>
-              <text x="4" y="93" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="4" fill="#8b1a1a" font-weight="900">HERE</text>
+            <!-- Campus map — exact building positions from campus.html, viewBox 0 0 1920 1080, scaled by SVG -->
+            <svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+              <rect width="1920" height="1080" fill="#f0ebe3"/>
+
+              <!-- ROADS (lightgray) -->
+              <rect x="150" y="400" width="1500" height="80"  fill="#ccc"/><!-- MAIN HORIZONTAL -->
+              <rect x="150" y="140" width="800"  height="35"  fill="#ccc"/><!-- SECOND HORIZONTAL -->
+              <rect x="150" y="730" width="1500" height="45"  fill="#ccc"/><!-- LAST HORIZONTAL -->
+              <rect x="210" y="480" width="140"  height="340" fill="#ccc"/><!-- 1ST VERTICAL -->
+              <rect x="305" y="150" width="40"   height="340" fill="#ccc"/><!-- 2ND VERTICAL -->
+              <rect x="565" y="140" width="30"   height="635" fill="#ccc"/><!-- 3RD VERTICAL -->
+              <rect x="895" y="140" width="40"   height="600" fill="#ccc"/><!-- 3RD VERTICAL B -->
+              <rect x="1190" y="300" width="20"  height="150" fill="#ccc"/><!-- 4TH VERTICAL -->
+              <rect x="1345" y="90"  width="30"  height="390" fill="#ccc"/><!-- 5TH VERTICAL -->
+              <rect x="1650" y="100" width="50"  height="700" fill="#ccc"/><!-- LAST VERTICAL -->
+
+              <!-- BUILDINGS (yellow) — exact positions from campus.html -->
+              <rect data-name="RODRIGUEZ BUILDING"       x="250"  y="90"  w="650"  h="20"  width="650"  height="20"  rx="8" fill="#f4d35e" stroke="rgba(0,0,0,.15)" stroke-width="2"/>
+              <rect data-name="MIST-NCESTD DORM"         x="965"  y="90"  w="350"  h="130" width="350"  height="130" rx="8" fill="#f4d35e" stroke="rgba(0,0,0,.15)" stroke-width="2"/>
+              <rect data-name="MULTI-PURPOSE BUILDING"   x="1460" y="100" w="170"  h="80"  width="170"  height="80"  rx="8" fill="#f4d35e" stroke="rgba(0,0,0,.15)" stroke-width="2"/>
+              <rect data-name="YLAGAN HALL"              x="390"  y="220" w="170"  h="100" width="170"  height="100" rx="8" fill="#f4d35e" stroke="rgba(0,0,0,.15)" stroke-width="2"/>
+              <rect data-name="MIST-NCESTD BUILDING"     x="50"   y="180" w="250"  h="185" width="250"  height="185" rx="8" fill="#f4d35e" stroke="rgba(0,0,0,.15)" stroke-width="2"/>
+              <rect data-name="AUTOMOTIVE BUILDING"      x="1460" y="210" w="170"  h="130" width="170"  height="130" rx="8" fill="#f4d35e" stroke="rgba(0,0,0,.15)" stroke-width="2"/>
+              <!-- ACADEMIC BUILDING — highlighted, will be overridden by JS for other destinations -->
+              <rect id="bldg-ACADEMIC-BUILDING"
+                    data-name="ACADEMIC BUILDING"        x="600"  y="185" w="280"  h="130" width="280"  height="130" rx="8" fill="#ff5722" stroke="#fff" stroke-width="3"/>
+              <text x="740" y="258" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="28" font-weight="800" fill="#fff">ACADEMIC BLDG</text>
+              <rect data-name="WAF &amp; RAC BUILDING"   x="935"  y="290" w="250"  h="75"  width="250"  height="75"  rx="8" fill="#f4d35e" stroke="rgba(0,0,0,.15)" stroke-width="2"/>
+              <rect data-name="POWER ROOM"               x="1380" y="340" w="70"   h="35"  width="70"   height="35"  rx="8" fill="#f4d35e" stroke="rgba(0,0,0,.15)" stroke-width="2"/>
+              <rect id="bldg-NEW-ADMIN-BUILDING"
+                    data-name="NEW ADMIN BUILDING"       x="50"   y="500" w="150"  h="200" width="150"  height="200" rx="8" fill="#f4d35e" stroke="rgba(0,0,0,.15)" stroke-width="2"/>
+              <text x="125" y="604" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="22" font-weight="700" fill="#555">NEW ADMIN</text>
+              <rect id="bldg-OLD-ADMIN-BUILDING"
+                    data-name="OLD ADMIN BUILDING"       x="355"  y="550" w="80"   h="150" width="80"   height="150" rx="8" fill="#f4d35e" stroke="rgba(0,0,0,.15)" stroke-width="2"/>
+              <rect data-name="FSM BUILDING"             x="600"  y="550" w="200"  h="150" width="200"  height="150" rx="8" fill="#f4d35e" stroke="rgba(0,0,0,.15)" stroke-width="2"/>
+              <rect data-name="CIVIL TECH BUILDING"      x="810"  y="480" w="80"   h="220" width="80"   height="220" rx="8" fill="#f4d35e" stroke="rgba(0,0,0,.15)" stroke-width="2"/>
+              <rect data-name="WAF &amp; FSM BUILDING"   x="680"  y="780" w="600"  h="30"  width="600"  height="30"  rx="8" fill="#f4d35e" stroke="rgba(0,0,0,.15)" stroke-width="2"/>
+              <rect data-name="TECH BUILDING"            x="1205" y="550" w="410"  h="150" width="410"  height="150" rx="8" fill="#f4d35e" stroke="rgba(0,0,0,.15)" stroke-width="2"/>
+              <rect data-name="GRADUATE SCHOOL BUILDING" x="950"  y="480" w="90"   h="220" width="90"   height="220" rx="8" fill="#f4d35e" stroke="rgba(0,0,0,.15)" stroke-width="2"/>
+              <rect data-name="MECHANICAL BUILDING"      x="1080" y="480" w="105"  h="220" width="105"  height="220" rx="8" fill="#f4d35e" stroke="rgba(0,0,0,.15)" stroke-width="2"/>
+              <rect data-name="IT BUILDING"              x="1720" y="100" w="120"  h="150" width="120"  height="150" rx="8" fill="#f4d35e" stroke="rgba(0,0,0,.15)" stroke-width="2"/>
+              <rect data-name="SCIENCE BUILDING"         x="1720" y="270" w="120"  h="150" width="120"  height="150" rx="8" fill="#f4d35e" stroke="rgba(0,0,0,.15)" stroke-width="2"/>
+              <rect data-name="TE BUILDING"              x="1720" y="445" w="120"  h="340" width="120"  height="340" rx="8" fill="#f4d35e" stroke="rgba(0,0,0,.15)" stroke-width="2"/>
+
+              <!-- YOU ARE HERE pin at gate -->
+              <circle cx="150" cy="420" r="22" fill="#8b1a1a"/>
+              <text x="150" y="415" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="14" font-weight="900" fill="#fff">YOU</text>
+              <text x="150" y="432" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="14" font-weight="900" fill="#fff">HERE</text>
+
+              <!-- Route line to Academic Building -->
+              <polyline id="route-line"
+                points="150,420 580,420 580,315 600,315"
+                fill="none" stroke="#8e44ad" stroke-width="10"
+                stroke-dasharray="20,10" stroke-linecap="round"/>
             </svg>
           </div>
         </div>
@@ -268,8 +164,7 @@ html, body { width:100%; height:100%; background:#1a0a0a; font-family:var(--f); 
     </div>
 
     <!-- Building photo -->
-    <div class="photo-section" id="photo-section"></div>
-
+    <div class="photo-sect" id="photo-sect"></div>
   </div>
 </div>
 
@@ -279,19 +174,36 @@ var DEST = (p.get("location") || "").trim().toUpperCase();
 var IMG  = p.get("img") || "";
 
 function tc(s) {
-  return s.split(" ").filter(function(w){ return w.length > 0; }).map(function(w){
-    return w[0].toUpperCase() + w.slice(1).toLowerCase();
+  return s.split(" ").filter(function(w){return w.length>0;}).map(function(w){
+    return w[0].toUpperCase()+w.slice(1).toLowerCase();
   }).join(" ");
 }
 
 var name = DEST ? tc(DEST) : "Unknown";
-document.getElementById("dest-name").textContent = name;
-document.getElementById("card-dest").textContent  = "DESTINATION: " + DEST;
+document.getElementById("dest-name").textContent  = name;
+document.getElementById("card-dest").textContent   = "DESTINATION: " + DEST;
+
+// Highlight correct building in SVG
+var BUILDING_IDS = {
+  "ACADEMIC BUILDING":  "bldg-ACADEMIC-BUILDING",
+  "NEW ADMIN BUILDING": "bldg-NEW-ADMIN-BUILDING",
+  "OLD ADMIN BUILDING": "bldg-OLD-ADMIN-BUILDING"
+};
+// Reset Academic to yellow if destination is different
+if (DEST && DEST !== "ACADEMIC BUILDING") {
+  var acad = document.getElementById("bldg-ACADEMIC-BUILDING");
+  if (acad) { acad.setAttribute("fill","#f4d35e"); acad.setAttribute("stroke","rgba(0,0,0,.15)"); acad.setAttribute("stroke-width","2"); }
+  var targetId = BUILDING_IDS[DEST];
+  if (targetId) {
+    var el = document.getElementById(targetId);
+    if (el) { el.setAttribute("fill","#ff5722"); el.setAttribute("stroke","#fff"); el.setAttribute("stroke-width","3"); }
+  }
+}
 
 if (IMG && IMG.startsWith("/static/")) {
   var img = document.createElement("img");
   img.src = IMG; img.alt = name;
-  document.getElementById("photo-section").appendChild(img);
+  document.getElementById("photo-sect").appendChild(img);
 }
 
 var CUSTOM = {
@@ -311,20 +223,10 @@ var EDGES = {
 };
 function bfs(s,e){var q=[[s]],seen={};seen[s]=true;while(q.length){var path=q.shift(),node=path[path.length-1];if(node===e)return path;var nb=EDGES[node]||[];for(var i=0;i<nb.length;i++){if(!seen[nb[i]]){seen[nb[i]]=true;q.push(path.concat(nb[i]));}}}return null;}
 
-var steps = DEST ? (CUSTOM[DEST] || (function(){
-  var path = bfs("GATE", DEST);
-  return (path && path.length > 1)
-    ? path.slice(1,-1).map(function(n){ return "Head toward " + tc(n); })
-    : ["Walk straight from the main entrance toward " + tc(DEST)];
-})()) : [];
-
+var steps = DEST ? (CUSTOM[DEST]||(function(){var path=bfs("GATE",DEST);return(path&&path.length>1)?path.slice(1,-1).map(function(n){return"Head toward "+tc(n);}):["Walk straight from the main entrance toward "+tc(DEST)];})()):[];
 var ul = document.getElementById("steps");
-for (var i = 0; i < steps.length; i++) {
-  var li = document.createElement("li");
-  li.textContent = steps[i];
-  ul.appendChild(li);
-}
-if (steps.length) document.getElementById("inside-lbl").style.display = "block";
+for (var i=0;i<steps.length;i++){var li=document.createElement("li");li.textContent=steps[i];ul.appendChild(li);}
+if (steps.length) document.getElementById("inside-lbl").style.display="block";
 </script>
 </body>
 </html>
