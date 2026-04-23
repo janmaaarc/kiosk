@@ -255,7 +255,7 @@ function bfs(s,e){var q=[[s]],seen={};seen[s]=true;while(q.length){var path=q.sh
 var steps = DEST ? (CUSTOM[DEST]||(function(){var path=bfs("GATE",DEST);return(path&&path.length>1)?path.slice(1,-1).map(function(n){return"Head toward "+tc(n);}):["Walk straight from the main entrance toward "+tc(DEST)];})()):[];
 var ul = document.getElementById("steps");
 for (var i=0;i<steps.length;i++){var li=document.createElement("li");li.textContent=steps[i];ul.appendChild(li);}
-if (steps.length) document.getElementById("inside-lbl").style.display="block";
+// "Inside the Building:" only shows when INSIDE view is active
 
 // ── OUTSIDE / INSIDE toggle ────────────────────────────
 var FLOOR_PLANS = {
@@ -279,16 +279,19 @@ function setView(view) {
   var btnOut    = document.getElementById("btn-outside");
   var btnIn     = document.getElementById("btn-inside");
 
+  var insideLbl = document.getElementById("inside-lbl");
   if (view === "outside") {
     outsideEl.style.display = "flex";
     insideEl.style.display  = "none";
     btnOut.className = "on";
     btnIn.className  = "";
+    if (insideLbl) insideLbl.style.display = "none";
   } else {
     outsideEl.style.display = "none";
     insideEl.style.display  = "flex";
     btnOut.className = "";
     btnIn.className  = "on";
+    if (insideLbl) insideLbl.style.display = "block";
     if (!_floorsBuilt) { buildFloorTabs(); _floorsBuilt = true; }
   }
 }
