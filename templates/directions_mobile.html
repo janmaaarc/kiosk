@@ -205,12 +205,14 @@ html, body { width:100%; height:100%; margin:0; background:#1a0a0a; overflow:hid
         </div>
         <div id="floor-tabs" style="display:flex;gap:4px;padding:3px 8px 5px;background:#fff;
              overflow-x:auto;flex-shrink:0;border-bottom:1px solid #eee;"></div>
-        <div style="flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:6px;">
-          <!-- Floor plan wrapper: image + room overlays + route line -->
-          <div id="plan-wrap" style="display:none;position:relative;width:100%;height:100%;">
+        <div style="flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:6px;">
+          <!-- Floor plan wrapper: locked to SVG aspect ratio 1200:700 so overlays align -->
+          <div id="plan-wrap" style="display:none;position:relative;
+               width:100%;aspect-ratio:1200/700;flex-shrink:0;border-radius:6px;
+               box-shadow:0 2px 10px rgba(0,0,0,.1);overflow:hidden;">
             <img id="floor-img" src="" alt="Floor Plan"
-                 style="width:100%;height:100%;object-fit:contain;display:block;border-radius:6px;
-                        box-shadow:0 2px 10px rgba(0,0,0,.1);">
+                 style="position:absolute;inset:0;width:100%;height:100%;
+                        object-fit:fill;display:block;">
             <!-- Room overlays (positioned as % of plan-wrap) -->
             <div id="room-overlays" style="position:absolute;inset:0;pointer-events:auto;"></div>
             <!-- Static route line SVG -->
