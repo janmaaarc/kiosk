@@ -5,82 +5,134 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Directions</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html, body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  width: 100%; height: 100dvh; overflow: hidden; display: flex;
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; background:#000; }
+.wrap {
+  position:fixed; inset:0;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  display:flex;
 }
+
+/* ── Left dark-red panel ─────────────────────── */
 .panel {
-  width: 38%; flex-shrink: 0;
-  background: linear-gradient(180deg, #7b2d2d 0%, #5a1f1f 100%);
-  color: #fff;
-  padding: max(44px, env(safe-area-inset-top)) 14px 20px;
-  display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden;
+  width:28%;
+  flex-shrink:0;
+  background:linear-gradient(180deg,#7b2d2d 0%,#5a1f1f 100%);
+  color:#fff;
+  padding:max(36px,env(safe-area-inset-top)) 10px 16px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
 }
-.ph { font-size: clamp(8px,2.2vw,12px); font-weight:900; letter-spacing:3px; color:rgba(255,255,255,0.55); margin-bottom:6px; }
-.pl { font-size: clamp(7px,1.8vw,10px); letter-spacing:2px; color:rgba(255,255,255,0.6); margin-bottom:2px; }
-.pn { font-size: clamp(10px,2.8vw,15px); font-weight:900; letter-spacing:1px; margin-bottom:14px; line-height:1.2; }
-.pd { font-size: clamp(9px,2.2vw,12px); font-weight:900; letter-spacing:1px; margin-bottom:8px; }
-.panel ul { list-style:disc; padding-left:14px; margin-bottom:16px; }
-.panel ul li { font-size:clamp(7px,1.9vw,11px); line-height:1.5; margin-bottom:4px; color:rgba(255,255,255,0.92); }
-.pi { font-size:clamp(9px,2.2vw,12px); font-weight:900; letter-spacing:1px; margin-top:8px; }
-.right { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-.map-area { flex:1; position:relative; background:#e8e0d8; overflow:hidden; }
-.map-bg { width:100%; height:100%; object-fit:cover; opacity:0.45; }
+.p-campus  { font-size:clamp(6px,1.8vw,11px); font-weight:900; letter-spacing:3px; color:rgba(255,255,255,.5); margin-bottom:6px; }
+.p-dlabel  { font-size:clamp(6px,1.6vw,9px);  letter-spacing:2px; color:rgba(255,255,255,.6); margin-bottom:1px; }
+.p-dest    { font-size:clamp(8px,2.2vw,13px); font-weight:900; letter-spacing:1px; margin-bottom:12px; line-height:1.2; }
+.p-dhead   { font-size:clamp(7px,1.9vw,11px); font-weight:900; letter-spacing:1px; margin-bottom:7px; }
+.panel ul  { list-style:disc; padding-left:12px; }
+.panel ul li { font-size:clamp(6px,1.7vw,10px); line-height:1.55; margin-bottom:3px; color:rgba(255,255,255,.9); }
+.p-inside  { font-size:clamp(7px,1.9vw,11px); font-weight:900; letter-spacing:1px; margin-top:10px; }
+
+/* ── Right side ──────────────────────────────── */
+.right {
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  position:relative;
+}
+
+/* Map section */
+.map-section {
+  flex:1;
+  position:relative;
+  overflow:hidden;
+  background:#ede5d8;
+}
+.map-bg {
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  object-fit:cover;
+}
 .map-badge {
-  position:absolute; top:8px; right:8px;
-  background:rgba(139,46,46,0.9); color:#fff;
-  font-size:clamp(6px,1.6vw,9px); font-weight:900; letter-spacing:1.5px;
-  padding:3px 7px; border-radius:4px;
+  position:absolute; top:6px; right:6px;
+  background:rgba(139,46,46,.92); color:#fff;
+  font-size:clamp(5px,1.4vw,8px); font-weight:900; letter-spacing:1.5px;
+  padding:3px 6px; border-radius:4px;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 }
 .map-toggle {
-  position:absolute; top:28px; right:8px;
-  display:flex; background:rgba(255,255,255,0.9); border-radius:10px; overflow:hidden;
-  font-size:clamp(6px,1.6vw,9px); font-weight:900; letter-spacing:1px;
+  position:absolute; top:22px; right:6px;
+  display:flex; border-radius:8px; overflow:hidden;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-size:clamp(5px,1.4vw,8px); font-weight:900; letter-spacing:1px;
 }
-.map-toggle span { padding:3px 7px; color:#888; }
+.map-toggle span { padding:3px 7px; background:rgba(255,255,255,.88); color:#666; }
 .map-toggle span.on { background:#7b2d2d; color:#fff; }
 .map-overlay {
-  position:absolute; inset:0; display:flex; flex-direction:column;
-  align-items:center; justify-content:center; gap:6px;
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:4px;
 }
-.map-title { font-size:clamp(10px,3vw,16px); font-weight:900; letter-spacing:4px; color:#7b2d2d; text-shadow:0 1px 0 rgba(255,255,255,0.6); }
-.map-dest-txt { font-size:clamp(8px,2.2vw,12px); font-weight:700; letter-spacing:2px; color:#5a1f1f; }
-.photo-wrap { height:42%; flex-shrink:0; overflow:hidden; background:#d4c5b0; }
-.photo-wrap img { width:100%; height:100%; object-fit:cover; }
+.map-title-txt {
+  font-size:clamp(8px,2.5vw,14px); font-weight:900;
+  letter-spacing:4px; color:#7b2d2d;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  text-shadow:0 1px 0 rgba(255,255,255,.7);
+}
+.map-dest-txt {
+  font-size:clamp(6px,1.8vw,10px); font-weight:700;
+  letter-spacing:2px; color:#5a1f1f;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+
+/* Building photo section */
+.photo-section {
+  height:40%;
+  flex-shrink:0;
+  overflow:hidden;
+  background:#c8b8a0;
+}
+.photo-section img { width:100%; height:100%; object-fit:cover; display:block; }
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<div class="panel">
-  <div class="ph">CAMPUS MAP</div>
-  <div class="pl">DESTINATION:</div>
-  <div class="pn" id="dest-name"></div>
-  <div class="pd">Directions</div>
-  <ul id="steps"></ul>
-  <div class="pi" id="inside-lbl" style="display:none">Inside the Building:</div>
-</div>
-
-<div class="right">
-  <div class="map-area">
-    <img class="map-bg" src="/static/images/KIOSK BACKGROUND.png" alt="">
-    <div class="map-badge">STEP 2: BUILDING LAYOUT</div>
-    <div class="map-toggle"><span class="on">OUTSIDE</span><span>INSIDE</span></div>
-    <div class="map-overlay">
-      <div class="map-title">CAMPUS MAP</div>
-      <div class="map-dest-txt" id="map-dest"></div>
-    </div>
+  <!-- Left panel -->
+  <div class="panel">
+    <div class="p-campus">CAMPUS MAP</div>
+    <div class="p-dlabel">DESTINATION:</div>
+    <div class="p-dest" id="dest-name"></div>
+    <div class="p-dhead">Directions</div>
+    <ul id="steps"></ul>
+    <div class="p-inside" id="inside-lbl" style="display:none">Inside the Building:</div>
   </div>
-  <div class="photo-wrap" id="photo-wrap"></div>
+
+  <!-- Right -->
+  <div class="right">
+    <div class="map-section">
+      <img class="map-bg" src="/static/images/KIOSK BACKGROUND.png" alt="">
+      <div class="map-badge">STEP 2: BUILDING LAYOUT</div>
+      <div class="map-toggle">
+        <span class="on">OUTSIDE</span><span>INSIDE</span>
+      </div>
+      <div class="map-overlay">
+        <div class="map-title-txt">CAMPUS MAP</div>
+        <div class="map-dest-txt" id="map-dest"></div>
+      </div>
+    </div>
+    <div class="photo-section" id="photo-section"></div>
+  </div>
+
 </div>
 
 <script>
-var p = new URLSearchParams(window.location.search);
+var p    = new URLSearchParams(window.location.search);
 var DEST = (p.get("location") || "").trim().toUpperCase();
 var IMG  = p.get("img") || "";
 
 function tc(s) {
-  return s.split(" ").filter(function(w){ return w.length>0; }).map(function(w){
+  return s.split(" ").filter(function(w){return w.length>0;}).map(function(w){
     return w[0].toUpperCase()+w.slice(1).toLowerCase();
   }).join(" ");
 }
@@ -92,37 +144,29 @@ document.getElementById("map-dest").textContent = "DESTINATION: " + DEST;
 if (IMG && IMG.startsWith("/static/")) {
   var img = document.createElement("img");
   img.src = IMG;
-  document.getElementById("photo-wrap").appendChild(img);
+  img.alt = name;
+  document.getElementById("photo-section").appendChild(img);
 }
 
 var CUSTOM = {
-  "ACADEMIC BUILDING": ["You are currently here.","Walk straight ahead.","At the intersection, turn left.","The Academic Building is on your right.","Enter through the main entrance."],
-  "NEW ADMIN BUILDING": ["Exit through the main gate.","Turn left immediately after the gate.","The New Admin Building is on your right."],
-  "OLD ADMIN BUILDING": ["Exit through the main gate.","Turn left after the gate.","Walk past the New Admin Building.","The Old Admin Building is on your left."]
+  "ACADEMIC BUILDING":["You are currently here.","Walk straight ahead.","At the intersection, turn left.","The Academic Building is on your right.","Enter through the main entrance."],
+  "NEW ADMIN BUILDING":["Exit through the main gate.","Turn left immediately after the gate.","The New Admin Building is on your right."],
+  "OLD ADMIN BUILDING":["Exit through the main gate.","Turn left after the gate.","Walk past the New Admin Building.","The Old Admin Building is on your left."]
 };
 var EDGES = {
   "GATE":["LAST HORIZONTAL ROAD"],
   "LAST HORIZONTAL ROAD":["GATE","MAIN HORIZONTAL ROAD","NEW ADMIN BUILDING","FSM BUILDING"],
   "MAIN HORIZONTAL ROAD":["LAST HORIZONTAL ROAD","SECOND HORIZONTAL ROAD","1ST VERTICAL ROAD","2ND VERTICAL ROAD","3RD VERTICAL ROAD","4TH VERTICAL ROAD","5TH VERTICAL ROAD","6TH VERTICAL ROAD","7TH VERTICAL ROAD","8TH VERTICAL ROAD"],
-  "4TH VERTICAL ROAD":["MAIN HORIZONTAL ROAD","SECOND HORIZONTAL ROAD","ACADEMIC BUILDING"],
+  "4TH VERTICAL ROAD":["MAIN HORIZONTAL ROAD","ACADEMIC BUILDING"],
   "ACADEMIC BUILDING":["4TH VERTICAL ROAD"]
 };
 function bfs(s,e){var q=[[s]],seen={};seen[s]=true;while(q.length){var path=q.shift(),node=path[path.length-1];if(node===e)return path;var nb=EDGES[node]||[];for(var i=0;i<nb.length;i++){if(!seen[nb[i]]){seen[nb[i]]=true;q.push(path.concat(nb[i]));}}}return null;}
 
-var steps = DEST ? (CUSTOM[DEST] || (function(){
-  var path = bfs("GATE", DEST);
-  return (path && path.length > 1)
-    ? path.slice(1,-1).map(function(n){return "Head toward "+tc(n);})
-    : ["Walk straight from the main entrance toward "+tc(DEST)];
-})()) : [];
+var steps = DEST ? (CUSTOM[DEST]||(function(){var path=bfs("GATE",DEST);return(path&&path.length>1)?path.slice(1,-1).map(function(n){return"Head toward "+tc(n);}):["Walk straight from the main entrance toward "+tc(DEST)];})()):[];
 
 var ul = document.getElementById("steps");
-for (var i = 0; i < steps.length; i++) {
-  var li = document.createElement("li");
-  li.textContent = steps[i];
-  ul.appendChild(li);
-}
-if (steps.length) document.getElementById("inside-lbl").style.display = "block";
+for (var i=0;i<steps.length;i++){var li=document.createElement("li");li.textContent=steps[i];ul.appendChild(li);}
+if (steps.length) document.getElementById("inside-lbl").style.display="block";
 </script>
 </body>
 </html>
