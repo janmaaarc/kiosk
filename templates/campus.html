@@ -1113,7 +1113,9 @@ function generateQR(){
   let loc = new URLSearchParams(window.location.search).get("location");
   if(!loc && _directionsActive){ loc = document.getElementById("destName").textContent; }
   if(!loc) return;
-  const url = LAN_BASE_URL + "/campus_map?location=" + encodeURIComponent(loc);
+  let url = LAN_BASE_URL + "/directions?location=" + encodeURIComponent(loc);
+  const photo = BUILDING_PHOTOS[loc.toUpperCase()];
+  if (photo) url += "&img=" + encodeURIComponent(photo);
   document.getElementById("qrCardImage").src = "/qr?size=260&data=" + encodeURIComponent(url);
   document.getElementById("qrCard").classList.add("visible");
 }

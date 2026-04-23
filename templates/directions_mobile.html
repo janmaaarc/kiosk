@@ -8,276 +8,121 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #f5f0f0;
-  width: 100%;
-  min-height: 100dvh;
-  color: #222;
+  width: 100%; height: 100dvh; overflow: hidden; display: flex;
 }
-
-/* ── Top section (white) ─────────────────────────── */
-.top {
-  background: #fff;
-  padding: max(36px, env(safe-area-inset-top)) 24px 24px;
-}
-.bldg-label {
-  font-size: 11px;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: #aaa;
-  margin-bottom: 8px;
-}
-.bldg-name {
-  font-size: clamp(22px, 7vw, 34px);
-  font-weight: 900;
-  color: #7b2d2d;
-  letter-spacing: 2px;
-  line-height: 1.2;
-  margin-bottom: 18px;
-}
-.bldg-photo {
-  width: 100%;
-  height: clamp(150px, 42vw, 210px);
-  object-fit: cover;
-  border-radius: 12px;
-  display: none;
-  margin-bottom: 18px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.13);
-}
-.btn-enter {
-  display: none;
-  width: 100%;
-  background: #7b2d2d;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 14px 20px;
-  font-size: clamp(13px, 4vw, 15px);
-  font-weight: 900;
-  letter-spacing: 2px;
-  text-align: center;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-/* ── Divider ─────────────────────────────────────── */
-.divider { height: 6px; background: #f5f0f0; }
-
-/* ── Directions section (dark red) ──────────────── */
-.dir {
+.panel {
+  width: 38%; flex-shrink: 0;
   background: linear-gradient(180deg, #7b2d2d 0%, #5a1f1f 100%);
-  padding: 28px 24px max(28px, env(safe-area-inset-bottom));
-  min-height: 40dvh;
-}
-.dir-label {
-  font-size: 11px;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.55);
-  margin-bottom: 6px;
-}
-.dir-heading {
-  font-size: clamp(17px, 5vw, 21px);
-  font-weight: 900;
   color: #fff;
-  letter-spacing: 1px;
-  margin-bottom: 22px;
+  padding: max(44px, env(safe-area-inset-top)) 14px 20px;
+  display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden;
 }
-ul.steps { list-style: none; padding: 0; margin: 0; }
-ul.steps li {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  font-size: clamp(14px, 4vw, 17px);
-  line-height: 1.5;
-  color: #fff;
-  margin-bottom: 16px;
+.ph { font-size: clamp(8px,2.2vw,12px); font-weight:900; letter-spacing:3px; color:rgba(255,255,255,0.55); margin-bottom:6px; }
+.pl { font-size: clamp(7px,1.8vw,10px); letter-spacing:2px; color:rgba(255,255,255,0.6); margin-bottom:2px; }
+.pn { font-size: clamp(10px,2.8vw,15px); font-weight:900; letter-spacing:1px; margin-bottom:14px; line-height:1.2; }
+.pd { font-size: clamp(9px,2.2vw,12px); font-weight:900; letter-spacing:1px; margin-bottom:8px; }
+.panel ul { list-style:disc; padding-left:14px; margin-bottom:16px; }
+.panel ul li { font-size:clamp(7px,1.9vw,11px); line-height:1.5; margin-bottom:4px; color:rgba(255,255,255,0.92); }
+.pi { font-size:clamp(9px,2.2vw,12px); font-weight:900; letter-spacing:1px; margin-top:8px; }
+.right { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.map-area { flex:1; position:relative; background:#e8e0d8; overflow:hidden; }
+.map-bg { width:100%; height:100%; object-fit:cover; opacity:0.45; }
+.map-badge {
+  position:absolute; top:8px; right:8px;
+  background:rgba(139,46,46,0.9); color:#fff;
+  font-size:clamp(6px,1.6vw,9px); font-weight:900; letter-spacing:1.5px;
+  padding:3px 7px; border-radius:4px;
 }
-.num {
-  min-width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.18);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: clamp(11px, 3.5vw, 13px);
-  font-weight: 700;
-  flex-shrink: 0;
-  margin-top: 2px;
+.map-toggle {
+  position:absolute; top:28px; right:8px;
+  display:flex; background:rgba(255,255,255,0.9); border-radius:10px; overflow:hidden;
+  font-size:clamp(6px,1.6vw,9px); font-weight:900; letter-spacing:1px;
 }
-.arrive {
-  margin-top: 22px;
-  padding: 16px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.13);
-  font-size: clamp(14px, 4vw, 17px);
-  font-weight: 700;
-  color: #fff;
+.map-toggle span { padding:3px 7px; color:#888; }
+.map-toggle span.on { background:#7b2d2d; color:#fff; }
+.map-overlay {
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:6px;
 }
-.error-msg {
-  margin-top: 22px;
-  padding: 16px;
-  border-radius: 10px;
-  background: rgba(0,0,0,0.18);
-  font-size: clamp(13px, 3.8vw, 16px);
-  color: rgba(255,255,255,0.8);
-}
+.map-title { font-size:clamp(10px,3vw,16px); font-weight:900; letter-spacing:4px; color:#7b2d2d; text-shadow:0 1px 0 rgba(255,255,255,0.6); }
+.map-dest-txt { font-size:clamp(8px,2.2vw,12px); font-weight:700; letter-spacing:2px; color:#5a1f1f; }
+.photo-wrap { height:42%; flex-shrink:0; overflow:hidden; background:#d4c5b0; }
+.photo-wrap img { width:100%; height:100%; object-fit:cover; }
 </style>
 </head>
 <body>
 
-<!-- Building info -->
-<div class="top">
-  <div class="bldg-label">BUILDING</div>
-  <div class="bldg-name" id="bldg-name"></div>
-  <img class="bldg-photo" id="bldg-photo" src="" alt="">
-  <a class="btn-enter" id="btn-enter" href="#">ENTER BUILDING</a>
+<div class="panel">
+  <div class="ph">CAMPUS MAP</div>
+  <div class="pl">DESTINATION:</div>
+  <div class="pn" id="dest-name"></div>
+  <div class="pd">Directions</div>
+  <ul id="steps"></ul>
+  <div class="pi" id="inside-lbl" style="display:none">Inside the Building:</div>
 </div>
 
-<div class="divider"></div>
-
-<!-- Directions -->
-<div class="dir">
-  <div class="dir-label">FROM MAIN ENTRANCE</div>
-  <div class="dir-heading">Directions</div>
-  <ul class="steps" id="steps"></ul>
-  <div class="arrive" id="arrive" style="display:none"></div>
-  <div class="error-msg" id="error" style="display:none"></div>
+<div class="right">
+  <div class="map-area">
+    <img class="map-bg" src="/static/images/KIOSK BACKGROUND.png" alt="">
+    <div class="map-badge">STEP 2: BUILDING LAYOUT</div>
+    <div class="map-toggle"><span class="on">OUTSIDE</span><span>INSIDE</span></div>
+    <div class="map-overlay">
+      <div class="map-title">CAMPUS MAP</div>
+      <div class="map-dest-txt" id="map-dest"></div>
+    </div>
+  </div>
+  <div class="photo-wrap" id="photo-wrap"></div>
 </div>
 
 <script>
-var p      = new URLSearchParams(window.location.search);
-var DEST   = (p.get("location") || "").trim().toUpperCase();
-var IMG    = p.get("img")  || "";
-var BURL   = p.get("burl") || "";
+var p = new URLSearchParams(window.location.search);
+var DEST = (p.get("location") || "").trim().toUpperCase();
+var IMG  = p.get("img") || "";
 
-// --- Populate building info ---
-document.getElementById("bldg-name").textContent = DEST ? titleCase(DEST) : "Unknown";
-
-// Only allow relative paths to prevent open redirect and SSRF
-if (IMG && IMG.startsWith("/static/")) {
-  var ph = document.getElementById("bldg-photo");
-  ph.src = IMG;
-  ph.style.display = "block";
-}
-if (BURL && BURL.startsWith("/")) {
-  var eb = document.getElementById("btn-enter");
-  eb.href = BURL;
-  eb.style.display = "block";
-}
-
-// --- Campus graph for BFS ---
-var EDGES = {
-  "GATE": ["LAST HORIZONTAL ROAD"],
-  "LAST HORIZONTAL ROAD": ["GATE","MAIN HORIZONTAL ROAD","NEW ADMIN BUILDING","FSM BUILDING"],
-  "MAIN HORIZONTAL ROAD": ["LAST HORIZONTAL ROAD","SECOND HORIZONTAL ROAD","1ST VERTICAL ROAD","2ND VERTICAL ROAD","3RD VERTICAL ROAD","4TH VERTICAL ROAD","5TH VERTICAL ROAD","6TH VERTICAL ROAD","7TH VERTICAL ROAD","8TH VERTICAL ROAD"],
-  "SECOND HORIZONTAL ROAD": ["MAIN HORIZONTAL ROAD","MULTI-PURPOSE BUILDING","MIST-NCESTD BUILDING"],
-  "1ST VERTICAL ROAD": ["MAIN HORIZONTAL ROAD","NEW ADMIN BUILDING","OLD ADMIN BUILDING"],
-  "2ND VERTICAL ROAD": ["MAIN HORIZONTAL ROAD","SECOND HORIZONTAL ROAD","MIST-NCESTD DORM","RODRIGUEZ BUILDING","MULTI-PURPOSE BUILDING","YLAGAN HALL"],
-  "3RD VERTICAL ROAD": ["MAIN HORIZONTAL ROAD","SECOND HORIZONTAL ROAD","AUTOMOTIVE BUILDING","CIVIL TECH BUILDING"],
-  "4TH VERTICAL ROAD": ["MAIN HORIZONTAL ROAD","SECOND HORIZONTAL ROAD","ACADEMIC BUILDING"],
-  "5TH VERTICAL ROAD": ["MAIN HORIZONTAL ROAD","SECOND HORIZONTAL ROAD","TECH BUILDING"],
-  "6TH VERTICAL ROAD": ["MAIN HORIZONTAL ROAD","SECOND HORIZONTAL ROAD","IT BUILDING"],
-  "7TH VERTICAL ROAD": ["MAIN HORIZONTAL ROAD","SECOND HORIZONTAL ROAD","MECHANICAL BUILDING"],
-  "8TH VERTICAL ROAD": ["MAIN HORIZONTAL ROAD","SECOND HORIZONTAL ROAD","WAF & RAC BUILDING","SCIENCE BUILDING","TE BUILDING","POWER ROOM","GRADUATE SCHOOL BUILDING"],
-  "NEW ADMIN BUILDING": ["1ST VERTICAL ROAD","LAST HORIZONTAL ROAD"],
-  "OLD ADMIN BUILDING": ["1ST VERTICAL ROAD"],
-  "FSM BUILDING": ["LAST HORIZONTAL ROAD"],
-  "YLAGAN HALL": ["2ND VERTICAL ROAD"],
-  "RODRIGUEZ BUILDING": ["2ND VERTICAL ROAD"],
-  "MIST-NCESTD DORM": ["2ND VERTICAL ROAD"],
-  "MULTI-PURPOSE BUILDING": ["2ND VERTICAL ROAD","SECOND HORIZONTAL ROAD"],
-  "AUTOMOTIVE BUILDING": ["3RD VERTICAL ROAD"],
-  "CIVIL TECH BUILDING": ["3RD VERTICAL ROAD"],
-  "ACADEMIC BUILDING": ["4TH VERTICAL ROAD"],
-  "TECH BUILDING": ["5TH VERTICAL ROAD"],
-  "IT BUILDING": ["6TH VERTICAL ROAD"],
-  "MECHANICAL BUILDING": ["7TH VERTICAL ROAD"],
-  "WAF & RAC BUILDING": ["8TH VERTICAL ROAD"],
-  "SCIENCE BUILDING": ["8TH VERTICAL ROAD"],
-  "TE BUILDING": ["8TH VERTICAL ROAD"],
-  "POWER ROOM": ["8TH VERTICAL ROAD"],
-  "GRADUATE SCHOOL BUILDING": ["8TH VERTICAL ROAD"],
-  "MIST-NCESTD BUILDING": ["SECOND HORIZONTAL ROAD"]
-};
-
-var CUSTOM = {
-  "ACADEMIC BUILDING": [
-    "Exit through the main gate.",
-    "Walk straight along the main road.",
-    "Turn left at the 4th intersection.",
-    "The Academic Building is ahead on your right.",
-    "Enter through the main building entrance."
-  ],
-  "NEW ADMIN BUILDING": [
-    "Exit through the main gate.",
-    "Turn left immediately after the gate.",
-    "The New Admin Building is on your right."
-  ],
-  "OLD ADMIN BUILDING": [
-    "Exit through the main gate.",
-    "Turn left immediately after the gate.",
-    "Walk past the New Admin Building.",
-    "The Old Admin Building is on your left."
-  ]
-};
-
-function bfs(start, end) {
-  var q = [[start]], seen = {};
-  seen[start] = true;
-  while (q.length) {
-    var path = q.shift();
-    var node = path[path.length - 1];
-    if (node === end) return path;
-    var nbrs = EDGES[node] || [];
-    for (var i = 0; i < nbrs.length; i++) {
-      if (!seen[nbrs[i]]) {
-        seen[nbrs[i]] = true;
-        q.push(path.concat(nbrs[i]));
-      }
-    }
-  }
-  return null;
-}
-
-function titleCase(s) {
-  return s.split(" ").filter(function(w){ return w.length > 0; }).map(function(w){
-    return w[0].toUpperCase() + w.slice(1).toLowerCase();
+function tc(s) {
+  return s.split(" ").filter(function(w){ return w.length>0; }).map(function(w){
+    return w[0].toUpperCase()+w.slice(1).toLowerCase();
   }).join(" ");
 }
 
-// --- Render directions ---
-var ul = document.getElementById("steps");
+var name = DEST ? tc(DEST) : "Unknown";
+document.getElementById("dest-name").textContent = name;
+document.getElementById("map-dest").textContent = "DESTINATION: " + DEST;
 
-if (!DEST) {
-  var errEl = document.getElementById("error");
-  errEl.textContent = "No destination specified.";
-  errEl.style.display = "block";
-} else {
-  var steps = CUSTOM[DEST];
-  if (!steps) {
-    var path = bfs("GATE", DEST);
-    steps = (path && path.length > 1)
-      ? path.slice(1, -1).map(function(n){ return "Head toward " + titleCase(n); })
-      : ["Walk straight from the main entrance toward " + titleCase(DEST)];
-  }
-
-  for (var i = 0; i < steps.length; i++) {
-    var li = document.createElement("li");
-    var num = document.createElement("span");
-    num.className = "num";
-    num.textContent = i + 1;
-    var txt = document.createElement("span");
-    txt.textContent = steps[i];
-    li.appendChild(num);
-    li.appendChild(txt);
-    ul.appendChild(li);
-  }
-
-  var arr = document.getElementById("arrive");
-  arr.textContent = "You have arrived at " + titleCase(DEST) + ".";
-  arr.style.display = "block";
+if (IMG && IMG.startsWith("/static/")) {
+  var img = document.createElement("img");
+  img.src = IMG;
+  document.getElementById("photo-wrap").appendChild(img);
 }
+
+var CUSTOM = {
+  "ACADEMIC BUILDING": ["You are currently here.","Walk straight ahead.","At the intersection, turn left.","The Academic Building is on your right.","Enter through the main entrance."],
+  "NEW ADMIN BUILDING": ["Exit through the main gate.","Turn left immediately after the gate.","The New Admin Building is on your right."],
+  "OLD ADMIN BUILDING": ["Exit through the main gate.","Turn left after the gate.","Walk past the New Admin Building.","The Old Admin Building is on your left."]
+};
+var EDGES = {
+  "GATE":["LAST HORIZONTAL ROAD"],
+  "LAST HORIZONTAL ROAD":["GATE","MAIN HORIZONTAL ROAD","NEW ADMIN BUILDING","FSM BUILDING"],
+  "MAIN HORIZONTAL ROAD":["LAST HORIZONTAL ROAD","SECOND HORIZONTAL ROAD","1ST VERTICAL ROAD","2ND VERTICAL ROAD","3RD VERTICAL ROAD","4TH VERTICAL ROAD","5TH VERTICAL ROAD","6TH VERTICAL ROAD","7TH VERTICAL ROAD","8TH VERTICAL ROAD"],
+  "4TH VERTICAL ROAD":["MAIN HORIZONTAL ROAD","SECOND HORIZONTAL ROAD","ACADEMIC BUILDING"],
+  "ACADEMIC BUILDING":["4TH VERTICAL ROAD"]
+};
+function bfs(s,e){var q=[[s]],seen={};seen[s]=true;while(q.length){var path=q.shift(),node=path[path.length-1];if(node===e)return path;var nb=EDGES[node]||[];for(var i=0;i<nb.length;i++){if(!seen[nb[i]]){seen[nb[i]]=true;q.push(path.concat(nb[i]));}}}return null;}
+
+var steps = DEST ? (CUSTOM[DEST] || (function(){
+  var path = bfs("GATE", DEST);
+  return (path && path.length > 1)
+    ? path.slice(1,-1).map(function(n){return "Head toward "+tc(n);})
+    : ["Walk straight from the main entrance toward "+tc(DEST)];
+})()) : [];
+
+var ul = document.getElementById("steps");
+for (var i = 0; i < steps.length; i++) {
+  var li = document.createElement("li");
+  li.textContent = steps[i];
+  ul.appendChild(li);
+}
+if (steps.length) document.getElementById("inside-lbl").style.display = "block";
 </script>
 </body>
 </html>
