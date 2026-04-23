@@ -52,8 +52,15 @@ html, body { width:100%; height:100%; margin:0; background:#1a0a0a; overflow:hid
   display:flex; border-radius:6px; overflow:hidden;
   font-size:clamp(4px,1.1vw,7px); font-weight:900; letter-spacing:1px;
 }
-.map-toggle span { padding:3px 6px; background:rgba(255,255,255,.92); color:#888; }
+.map-toggle span { padding:3px 6px; background:rgba(255,255,255,.92); color:#888; cursor:pointer; }
 .map-toggle span.on { background:var(--red); color:#fff; }
+.floor-btn {
+  padding:3px 8px; border:none; border-radius:10px;
+  background:rgba(123,45,45,.12); color:var(--red);
+  font-family:var(--f); font-size:clamp(7px,2vw,11px);
+  font-weight:900; letter-spacing:1px; cursor:pointer; white-space:nowrap; flex-shrink:0;
+}
+.floor-btn.active { background:var(--red); color:#fff; }
 
 /* Centered white card */
 .map-card {
@@ -96,9 +103,13 @@ html, body { width:100%; height:100%; margin:0; background:#1a0a0a; overflow:hid
     <div class="map-sect">
       <img class="map-bg" src="/static/images/KIOSK BACKGROUND.png" alt="">
       <div class="map-badge">STEP 2: BUILDING LAYOUT</div>
-      <div class="map-toggle"><span class="on">OUTSIDE</span><span>INSIDE</span></div>
+      <div class="map-toggle">
+        <span class="on" id="btn-outside" onclick="setView('outside')">OUTSIDE</span>
+        <span id="btn-inside" onclick="setView('inside')">INSIDE</span>
+      </div>
 
-      <div class="map-card">
+      <!-- OUTSIDE view: campus map card -->
+      <div class="map-card" id="outside-view">
         <div class="card-inner">
           <div class="card-title">CAMPUS MAP</div>
           <div class="card-dest" id="card-dest"></div>
@@ -158,6 +169,24 @@ html, body { width:100%; height:100%; margin:0; background:#1a0a0a; overflow:hid
                 fill="none" stroke="#8e44ad" stroke-width="10"
                 stroke-dasharray="20,10" stroke-linecap="round"/>
             </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- INSIDE view: floor plan -->
+      <div id="inside-view" style="display:none;position:absolute;top:40px;left:0;right:0;bottom:0;
+           background:rgba(255,255,255,0.97);flex-direction:column;z-index:5;">
+        <div id="floor-tabs" style="display:flex;gap:4px;padding:6px 8px;background:#f5f0f0;
+             overflow-x:auto;flex-shrink:0;"></div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;
+             padding:8px;overflow:hidden;">
+          <img id="floor-img" src="" alt="Floor Plan"
+               style="max-width:100%;max-height:100%;object-fit:contain;border-radius:6px;
+                      box-shadow:0 2px 12px rgba(0,0,0,0.12);">
+          <div id="no-floor" style="display:none;flex-direction:column;align-items:center;
+               justify-content:center;gap:6px;color:#aaa;text-align:center;">
+            <div style="font-size:clamp(8px,3vw,14px);font-weight:900;letter-spacing:2px;">FLOOR PLAN</div>
+            <div style="font-size:clamp(7px,2.5vw,11px);letter-spacing:1px;">COMING SOON</div>
           </div>
         </div>
       </div>
@@ -227,6 +256,74 @@ var steps = DEST ? (CUSTOM[DEST]||(function(){var path=bfs("GATE",DEST);return(p
 var ul = document.getElementById("steps");
 for (var i=0;i<steps.length;i++){var li=document.createElement("li");li.textContent=steps[i];ul.appendChild(li);}
 if (steps.length) document.getElementById("inside-lbl").style.display="block";
+
+// ── OUTSIDE / INSIDE toggle ────────────────────────────
+var FLOOR_PLANS = {
+  "ACADEMIC BUILDING": [
+    {label:"1F", img:"/static/images/floor_plans/academic_ground.svg"},
+    {label:"2F", img:"/static/images/floor_plans/academic_2nd.svg"},
+    {label:"3F", img:"/static/images/floor_plans/academic_3rd.svg"},
+    {label:"4F", img:"/static/images/floor_plans/academic_4th.svg"},
+    {label:"5F", img:"/static/images/floor_plans/academic_5th.svg"}
+  ],
+  "NEW ADMIN BUILDING": [
+    {label:"1F", img:"/static/images/floor_plans/new_admin_f1.png"}
+  ]
+};
+
+var _floorsBuilt = false;
+
+function setView(view) {
+  var outsideEl = document.getElementById("outside-view");
+  var insideEl  = document.getElementById("inside-view");
+  var btnOut    = document.getElementById("btn-outside");
+  var btnIn     = document.getElementById("btn-inside");
+
+  if (view === "outside") {
+    outsideEl.style.display = "flex";
+    insideEl.style.display  = "none";
+    btnOut.className = "on";
+    btnIn.className  = "";
+  } else {
+    outsideEl.style.display = "none";
+    insideEl.style.display  = "flex";
+    btnOut.className = "";
+    btnIn.className  = "on";
+    if (!_floorsBuilt) { buildFloorTabs(); _floorsBuilt = true; }
+  }
+}
+
+function buildFloorTabs() {
+  var floors  = FLOOR_PLANS[DEST];
+  var tabsEl  = document.getElementById("floor-tabs");
+  var imgEl   = document.getElementById("floor-img");
+  var noEl    = document.getElementById("no-floor");
+
+  if (!floors || !floors.length) {
+    imgEl.style.display = "none";
+    noEl.style.display  = "flex";
+    return;
+  }
+
+  floors.forEach(function(f, i) {
+    var btn = document.createElement("button");
+    btn.className = "floor-btn" + (i === 0 ? " active" : "");
+    btn.textContent = f.label;
+    btn.onclick = function(){ showFloor(i); };
+    tabsEl.appendChild(btn);
+  });
+  showFloor(0);
+}
+
+function showFloor(idx) {
+  var floors = FLOOR_PLANS[DEST];
+  if (!floors || !floors[idx]) return;
+  document.getElementById("floor-img").src = floors[idx].img;
+  var btns = document.querySelectorAll(".floor-btn");
+  for (var j = 0; j < btns.length; j++) {
+    btns[j].className = "floor-btn" + (j === idx ? " active" : "");
+  }
+}
 </script>
 
 </body>
