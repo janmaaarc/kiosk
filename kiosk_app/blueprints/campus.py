@@ -154,6 +154,7 @@ def _floor_plan(building_name: str, floor_count: int = 3, base_url: str = "",
 
     floor_data = floors[floor_number]
     highlight = request.args.get("location")
+    entrance = floor_data.get("entrance", {"x": 50, "y": 96, "hallway_y": 50})
 
     all_rooms_index = [
         {
@@ -179,6 +180,9 @@ def _floor_plan(building_name: str, floor_count: int = 3, base_url: str = "",
         ],
         all_rooms_index=all_rooms_index,
         highlight=highlight,
+        entrance_x=entrance["x"],
+        entrance_y=entrance["y"],
+        hallway_y=entrance.get("hallway_y", 50),
     )
 
 
@@ -463,11 +467,16 @@ _ACADEMIC_5TH_ROOMS = [
 ]
 
 _ACADEMIC_FLOORS = {
-    1: {"label": "1st floor", "image": "images/floor_plans/academic_ground.svg", "rooms": _ACADEMIC_GROUND_ROOMS},
-    2: {"label": "2nd floor", "image": "images/floor_plans/academic_2nd.svg",    "rooms": _ACADEMIC_2ND_ROOMS},
-    3: {"label": "3rd floor", "image": "images/floor_plans/academic_3rd.svg",    "rooms": _ACADEMIC_3RD_ROOMS},
-    4: {"label": "4th floor", "image": "images/floor_plans/academic_4th.svg",    "rooms": _ACADEMIC_4TH_ROOMS},
-    5: {"label": "5th floor", "image": "images/floor_plans/academic_5th.svg",    "rooms": _ACADEMIC_5TH_ROOMS},
+    1: {"label": "1st floor", "image": "images/floor_plans/academic_ground.svg", "rooms": _ACADEMIC_GROUND_ROOMS,
+        "entrance": {"x": 50, "y": 96, "hallway_y": 50}},
+    2: {"label": "2nd floor", "image": "images/floor_plans/academic_2nd.svg",    "rooms": _ACADEMIC_2ND_ROOMS,
+        "entrance": {"x": 38, "y": 54, "hallway_y": 50}},
+    3: {"label": "3rd floor", "image": "images/floor_plans/academic_3rd.svg",    "rooms": _ACADEMIC_3RD_ROOMS,
+        "entrance": {"x": 38, "y": 54, "hallway_y": 50}},
+    4: {"label": "4th floor", "image": "images/floor_plans/academic_4th.svg",    "rooms": _ACADEMIC_4TH_ROOMS,
+        "entrance": {"x": 12, "y": 37, "hallway_y": 45}},
+    5: {"label": "5th floor", "image": "images/floor_plans/academic_5th.svg",    "rooms": _ACADEMIC_5TH_ROOMS,
+        "entrance": {"x": 12, "y": 37, "hallway_y": 45}},
 }
 
 _IT_FLOORS = {

@@ -426,6 +426,9 @@ function switchFloor(url) {
 const BUILDING_URL  = '{{ request.path }}';
 const FLOOR_NUMBER  = {{ floor_number }};
 const BUILDING_NAME = {{ building_name | tojson }};
+const ENTRANCE_X    = {{ entrance_x | default(50) }};
+const ENTRANCE_Y    = {{ entrance_y | default(96) }};
+const HALLWAY_Y     = {{ hallway_y | default(50) }};
 
 function handleRoomClick(btn) {
   document.querySelectorAll('.room-label').forEach(b => b.classList.remove('highlighted'));
@@ -567,19 +570,15 @@ function drawIndoorRoute(targetBtn) {
 
   const roomCx = left + width / 2;
   const roomCy = top + height / 2;
-  const entranceX = 50;
-  const entranceY = 96;
-  const hallwayY = 50;
-  const corridorX = roomCx;
-  const d = `M ${entranceX} ${entranceY} L ${entranceX} ${hallwayY} L ${corridorX} ${hallwayY} L ${corridorX} ${roomCy}`;
+  const d = `M ${ENTRANCE_X} ${ENTRANCE_Y} L ${ENTRANCE_X} ${HALLWAY_Y} L ${roomCx} ${HALLWAY_Y} L ${roomCx} ${roomCy}`;
 
   const line = document.getElementById('indoorRouteLine');
   line.setAttribute('d', d);
   line.style.display = 'block';
 
   const pin = document.getElementById('indoorYouHere');
-  pin.style.left = entranceX + '%';
-  pin.style.top = entranceY + '%';
+  pin.style.left = ENTRANCE_X + '%';
+  pin.style.top = ENTRANCE_Y + '%';
   pin.style.display = 'block';
 }
 
