@@ -97,9 +97,9 @@ def directions_mobile():
 _ENTRANCE_BY_FLOOR = {
     # x/y = staircase center (so route visibly comes FROM stairs)
     # hY = corridor level (horizontal hallway between room rows)
-    1: {"x": 38, "y": 67, "hY": 50},   # stairs at x=420-505, y=380-560 → center 67%
-    2: {"x": 38, "y": 67, "hY": 50},   # same staircase position as floor 1
-    3: {"x": 38, "y": 67, "hY": 50},   # same staircase position
+    1: {"x": 50, "y": 67, "hY": 50},   # stairs at x=420-505, y=380-560 → center 67%
+    2: {"x": 50, "y": 67, "hY": 50},   # same staircase position as floor 1
+    3: {"x": 50, "y": 67, "hY": 50},   # same staircase position
     4: {"x": 12, "y": 20, "hY": 45},   # top-left stairs x=80-210, y=60-260 → center 23%
     5: {"x": 12, "y": 20, "hY": 45},   # same as floor 4
 }
@@ -514,9 +514,9 @@ _ACADEMIC_FLOORS = {
     1: {"label": "1st floor", "image": "images/floor_plans/academic_ground.svg", "rooms": _ACADEMIC_GROUND_ROOMS,
         "entrance": {"x": 50, "y": 96, "hallway_y": 50}},
     2: {"label": "2nd floor", "image": "images/floor_plans/academic_2nd.svg",    "rooms": _ACADEMIC_2ND_ROOMS,
-        "entrance": {"x": 38, "y": 54, "hallway_y": 50}},
+        "entrance": {"x": 50, "y": 96, "hallway_y": 50}},
     3: {"label": "3rd floor", "image": "images/floor_plans/academic_3rd.svg",    "rooms": _ACADEMIC_3RD_ROOMS,
-        "entrance": {"x": 38, "y": 54, "hallway_y": 50}},
+        "entrance": {"x": 50, "y": 96, "hallway_y": 50}},
     4: {"label": "4th floor", "image": "images/floor_plans/academic_4th.svg",    "rooms": _ACADEMIC_4TH_ROOMS,
         "entrance": {"x": 12, "y": 37, "hallway_y": 45}},
     5: {"label": "5th floor", "image": "images/floor_plans/academic_5th.svg",    "rooms": _ACADEMIC_5TH_ROOMS,
