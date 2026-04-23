@@ -1114,10 +1114,7 @@ function generateQR(){
   let loc = new URLSearchParams(window.location.search).get("location");
   if(!loc && _directionsActive){ loc = document.getElementById("destName").textContent; }
   if(!loc) return;
-  let url = LAN_BASE_URL + "/directions?location=" + encodeURIComponent(loc);
-  const photo = BUILDING_PHOTOS[loc.toUpperCase()];
-  if (photo) url += "&img=" + encodeURIComponent(photo);
-  if (_pendingUrl) url += "&burl=" + encodeURIComponent(_pendingUrl.split("?")[0]);
+  const url = LAN_BASE_URL + "/campus_map?location=" + encodeURIComponent(loc);
   document.getElementById("qrCardImage").src = "/qr?size=260&data=" + encodeURIComponent(url);
   document.getElementById("qrCard").classList.add("visible");
 }
