@@ -96,7 +96,6 @@ html, body { width:100%; height:100%; margin:0; background:#1a0a0a; overflow:hid
     <div class="p-name" id="dest-name"></div>
     <div class="p-dhd">Directions</div>
     <ul id="steps"></ul>
-    <div class="p-inside" id="inside-lbl" style="display:none">Inside the Building:</div>
   </div>
 
   <!-- RIGHT -->
@@ -176,17 +175,21 @@ html, body { width:100%; height:100%; margin:0; background:#1a0a0a; overflow:hid
 
       <!-- INSIDE view: floor plan -->
       <div id="inside-view" style="display:none;position:absolute;top:40px;left:0;right:0;bottom:0;
-           background:rgba(255,255,255,0.97);flex-direction:column;z-index:5;">
-        <div style="padding:6px 8px 2px;background:#fff;flex-shrink:0;
-             font-size:clamp(7px,2vw,10px);font-weight:900;letter-spacing:3px;color:#7b2d2d;">
+           background:#fff;flex-direction:column;z-index:5;">
+        <div style="padding:5px 8px 2px;background:#fff;flex-shrink:0;
+             font-size:clamp(6px,1.8vw,9px);font-weight:900;letter-spacing:3px;color:#7b2d2d;">
           INSIDE THE BUILDING
         </div>
-        <div id="floor-tabs" style="display:flex;gap:4px;padding:4px 8px 6px;background:#fff;
+        <div id="floor-tabs" style="display:flex;gap:4px;padding:3px 8px 5px;background:#fff;
              overflow-x:auto;flex-shrink:0;border-bottom:1px solid #eee;"></div>
-        <div id="no-floor" style="display:none;flex:1;flex-direction:column;align-items:center;
-             justify-content:center;gap:6px;color:#aaa;text-align:center;">
-          <div style="font-size:clamp(8px,3vw,14px);font-weight:900;letter-spacing:2px;">FLOOR PLAN</div>
-          <div style="font-size:clamp(7px,2.5vw,11px);letter-spacing:1px;">COMING SOON</div>
+        <div style="flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:6px;">
+          <img id="floor-img" src="" alt="Floor Plan"
+               style="max-width:100%;max-height:100%;object-fit:contain;display:none;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.1);">
+          <div id="no-floor" style="display:none;flex-direction:column;align-items:center;
+               justify-content:center;gap:4px;color:#bbb;text-align:center;">
+            <div style="font-size:clamp(8px,3vw,13px);font-weight:900;letter-spacing:2px;">FLOOR PLAN</div>
+            <div style="font-size:clamp(7px,2.5vw,10px);letter-spacing:1px;">COMING SOON</div>
+          </div>
         </div>
       </div>
     </div>
@@ -257,12 +260,22 @@ for (var i=0;i<steps.length;i++){var li=document.createElement("li");li.textCont
 // "Inside the Building:" only shows when INSIDE view is active
 
 // ── OUTSIDE / INSIDE toggle ────────────────────────────
-var BUILDING_ROUTES = {
-  "ACADEMIC BUILDING":  {url:"/academic_building",  floors:5},
-  "NEW ADMIN BUILDING": {url:"/new_admin_building",  floors:1},
-  "OLD ADMIN BUILDING": {url:"/old_admin_building",  floors:1},
-  "IT BUILDING":        {url:"/it_building",         floors:3},
-  "TECH BUILDING":      {url:"/tech_building",       floors:3}
+var FLOOR_PLANS = {
+  "ACADEMIC BUILDING": [
+    "/static/images/floor_plans/academic_ground.svg",
+    "/static/images/floor_plans/academic_2nd.svg",
+    "/static/images/floor_plans/academic_3rd.svg",
+    "/static/images/floor_plans/academic_4th.svg",
+    "/static/images/floor_plans/academic_5th.svg"
+  ],
+  "NEW ADMIN BUILDING": [
+    "/static/images/floor_plans/new_admin_f1.png"
+  ],
+  "IT BUILDING": [
+    "/static/images/floor_plans/IT_1ST.JPG",
+    "/static/images/floor_plans/IT_2ND.JPG",
+    "/static/images/floor_plans/IT_3RD.JPG"
+  ]
 };
 
 var _floorsBuilt = false;
@@ -272,44 +285,54 @@ function setView(view) {
   var insideEl  = document.getElementById("inside-view");
   var btnOut    = document.getElementById("btn-outside");
   var btnIn     = document.getElementById("btn-inside");
-  var insideLbl = document.getElementById("inside-lbl");
   if (view === "outside") {
     outsideEl.style.display = "flex";
     insideEl.style.display  = "none";
     btnOut.className = "on";
     btnIn.className  = "";
-    if (insideLbl) insideLbl.style.display = "none";
   } else {
     outsideEl.style.display = "none";
     insideEl.style.display  = "flex";
     btnOut.className = "";
     btnIn.className  = "on";
-    if (insideLbl) insideLbl.style.display = "block";
     if (!_floorsBuilt) { buildFloorTabs(); _floorsBuilt = true; }
   }
 }
 
 function buildFloorTabs() {
-  var bldg   = BUILDING_ROUTES[DEST];
+  var floors = FLOOR_PLANS[DEST];
   var tabsEl = document.getElementById("floor-tabs");
   var noEl   = document.getElementById("no-floor");
-  if (!bldg) { noEl.style.display = "flex"; return; }
-  var labels = ["1F","2F","3F","4F","5F"];
-  for (var i = 0; i < bldg.floors; i++) {
-    (function(n) {
-      var btn = document.createElement("button");
-      btn.className = "floor-btn" + (n === 1 ? " active" : "");
-      btn.textContent = labels[n - 1];
-      btn.onclick = function() { goToFloor(n); };
-      tabsEl.appendChild(btn);
-    })(i + 1);
+  var imgEl  = document.getElementById("floor-img");
+
+  if (!floors || !floors.length) {
+    noEl.style.display = "flex";
+    return;
   }
+
+  var labels = ["1F","2F","3F","4F","5F"];
+  for (var i = 0; i < floors.length; i++) {
+    (function(idx) {
+      var btn = document.createElement("button");
+      btn.className = "floor-btn" + (idx === 0 ? " active" : "");
+      btn.textContent = labels[idx];
+      btn.onclick = function() { showFloor(idx); };
+      tabsEl.appendChild(btn);
+    })(i);
+  }
+  showFloor(0);
 }
 
-function goToFloor(floorNum) {
-  var bldg = BUILDING_ROUTES[DEST];
-  if (!bldg) return;
-  window.location.href = bldg.url + "?floor=" + floorNum;
+function showFloor(idx) {
+  var floors = FLOOR_PLANS[DEST];
+  if (!floors || !floors[idx]) return;
+  var imgEl = document.getElementById("floor-img");
+  imgEl.src = floors[idx];
+  imgEl.style.display = "block";
+  var btns = document.querySelectorAll(".floor-btn");
+  for (var j = 0; j < btns.length; j++) {
+    btns[j].className = "floor-btn" + (j === idx ? " active" : "");
+  }
 }
 </script>
 
