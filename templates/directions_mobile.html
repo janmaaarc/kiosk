@@ -5,118 +5,120 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Directions</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-html, body { width: 100%; min-height: 100dvh; background: #f5f0f0; }
-
-/* TOP SECTION — white, matches TV building panel */
-.top-section {
-  background: #fff;
-  padding: max(40px, env(safe-area-inset-top)) 28px 28px;
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f5f0f0;
+  width: 100%;
+  min-height: 100dvh;
+  color: #222;
 }
-.building-label {
+
+/* ── Top section (white) ─────────────────────────── */
+.top {
+  background: #fff;
+  padding: max(36px, env(safe-area-inset-top)) 24px 24px;
+}
+.bldg-label {
   font-size: 11px;
   letter-spacing: 4px;
   text-transform: uppercase;
-  color: #999;
-  margin-bottom: 10px;
+  color: #aaa;
+  margin-bottom: 8px;
 }
-.building-name {
-  font-size: clamp(24px, 7vw, 36px);
+.bldg-name {
+  font-size: clamp(22px, 7vw, 34px);
   font-weight: 900;
   color: #7b2d2d;
   letter-spacing: 2px;
   line-height: 1.2;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
-.building-photo {
+.bldg-photo {
   width: 100%;
-  height: clamp(160px, 45vw, 220px);
+  height: clamp(150px, 42vw, 210px);
   object-fit: cover;
-  border-radius: 14px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  border-radius: 12px;
   display: none;
+  margin-bottom: 18px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.13);
 }
 .btn-enter {
-  display: block;
+  display: none;
   width: 100%;
   background: #7b2d2d;
   color: #fff;
   border: none;
-  border-radius: 12px;
-  padding: 16px 24px;
-  font-size: clamp(14px, 4vw, 16px);
+  border-radius: 10px;
+  padding: 14px 20px;
+  font-size: clamp(13px, 4vw, 15px);
   font-weight: 900;
   letter-spacing: 2px;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
-  margin-bottom: 0;
 }
 
-/* DIVIDER */
-.section-divider {
-  height: 6px;
-  background: #f5f0f0;
-}
+/* ── Divider ─────────────────────────────────────── */
+.divider { height: 6px; background: #f5f0f0; }
 
-/* DIRECTIONS SECTION — dark red, matches TV directions panel */
-.dir-section {
+/* ── Directions section (dark red) ──────────────── */
+.dir {
   background: linear-gradient(180deg, #7b2d2d 0%, #5a1f1f 100%);
-  padding: 32px 28px max(32px, env(safe-area-inset-bottom));
+  padding: 28px 24px max(28px, env(safe-area-inset-bottom));
   min-height: 40dvh;
 }
 .dir-label {
   font-size: 11px;
   letter-spacing: 4px;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.6);
-  margin-bottom: 8px;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 6px;
 }
 .dir-heading {
-  font-size: clamp(18px, 5vw, 22px);
+  font-size: clamp(17px, 5vw, 21px);
   font-weight: 900;
   color: #fff;
   letter-spacing: 1px;
-  margin-bottom: 24px;
+  margin-bottom: 22px;
 }
-ul.steps { list-style: none; padding: 0; }
+ul.steps { list-style: none; padding: 0; margin: 0; }
 ul.steps li {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
-  font-size: clamp(15px, 4.2vw, 18px);
+  gap: 12px;
+  font-size: clamp(14px, 4vw, 17px);
   line-height: 1.5;
   color: #fff;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 .num {
-  min-width: 32px;
-  height: 32px;
+  min-width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.18);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(12px, 3.5vw, 14px);
+  font-size: clamp(11px, 3.5vw, 13px);
   font-weight: 700;
   flex-shrink: 0;
   margin-top: 2px;
 }
 .arrive {
-  margin-top: 24px;
-  padding: 18px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.15);
-  font-size: clamp(15px, 4.2vw, 18px);
+  margin-top: 22px;
+  padding: 16px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.13);
+  font-size: clamp(14px, 4vw, 17px);
   font-weight: 700;
   color: #fff;
 }
-.error {
-  margin-top: 24px;
-  padding: 18px;
-  border-radius: 12px;
-  background: rgba(0,0,0,0.2);
+.error-msg {
+  margin-top: 22px;
+  padding: 16px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.18);
   font-size: clamp(13px, 3.8vw, 16px);
   color: rgba(255,255,255,0.8);
 }
@@ -124,45 +126,48 @@ ul.steps li {
 </head>
 <body>
 
-<div class="top-section">
-  <div class="building-label">BUILDING</div>
-  <div class="building-name" id="dest-name"></div>
-  <img class="building-photo" id="building-photo" src="" alt="">
-  <a class="btn-enter" id="enter-btn" href="#" style="display:none">ENTER BUILDING</a>
+<!-- Building info -->
+<div class="top">
+  <div class="bldg-label">BUILDING</div>
+  <div class="bldg-name" id="bldg-name"></div>
+  <img class="bldg-photo" id="bldg-photo" src="" alt="">
+  <a class="btn-enter" id="btn-enter" href="#">ENTER BUILDING</a>
 </div>
 
-<div class="section-divider"></div>
+<div class="divider"></div>
 
-<div class="dir-section">
+<!-- Directions -->
+<div class="dir">
   <div class="dir-label">FROM MAIN ENTRANCE</div>
   <div class="dir-heading">Directions</div>
   <ul class="steps" id="steps"></ul>
-  <div class="arrive" id="arrive-msg" style="display:none"></div>
-  <div class="error" id="error-msg" style="display:none"></div>
+  <div class="arrive" id="arrive" style="display:none"></div>
+  <div class="error-msg" id="error" style="display:none"></div>
 </div>
 
 <script>
-var params = new URLSearchParams(window.location.search);
-var DEST  = (params.get("location") || "").trim().toUpperCase();
-var IMG   = params.get("img") || "";
-var BURL  = params.get("burl") || "";
+var p      = new URLSearchParams(window.location.search);
+var DEST   = (p.get("location") || "").trim().toUpperCase();
+var IMG    = p.get("img")  || "";
+var BURL   = p.get("burl") || "";
 
-var destEl = document.getElementById("dest-name");
-destEl.textContent = DEST ? titleCase(DEST) : "Unknown";
+// --- Populate building info ---
+document.getElementById("bldg-name").textContent = DEST ? titleCase(DEST) : "Unknown";
 
-if (IMG) {
-  var photo = document.getElementById("building-photo");
-  photo.src = IMG;
-  photo.style.display = "block";
+// Only allow relative paths to prevent open redirect and SSRF
+if (IMG && IMG.startsWith("/static/")) {
+  var ph = document.getElementById("bldg-photo");
+  ph.src = IMG;
+  ph.style.display = "block";
+}
+if (BURL && BURL.startsWith("/")) {
+  var eb = document.getElementById("btn-enter");
+  eb.href = BURL;
+  eb.style.display = "block";
 }
 
-if (BURL) {
-  var btn = document.getElementById("enter-btn");
-  btn.href = BURL;
-  btn.style.display = "block";
-}
-
-var edges = {
+// --- Campus graph for BFS ---
+var EDGES = {
   "GATE": ["LAST HORIZONTAL ROAD"],
   "LAST HORIZONTAL ROAD": ["GATE","MAIN HORIZONTAL ROAD","NEW ADMIN BUILDING","FSM BUILDING"],
   "MAIN HORIZONTAL ROAD": ["LAST HORIZONTAL ROAD","SECOND HORIZONTAL ROAD","1ST VERTICAL ROAD","2ND VERTICAL ROAD","3RD VERTICAL ROAD","4TH VERTICAL ROAD","5TH VERTICAL ROAD","6TH VERTICAL ROAD","7TH VERTICAL ROAD","8TH VERTICAL ROAD"],
@@ -196,29 +201,7 @@ var edges = {
   "MIST-NCESTD BUILDING": ["SECOND HORIZONTAL ROAD"]
 };
 
-function bfs(start, end) {
-  var q = [[start]], seen = {};
-  seen[start] = true;
-  while (q.length) {
-    var path = q.shift();
-    var node = path[path.length - 1];
-    if (node === end) return path;
-    var neighbors = edges[node] || [];
-    for (var i = 0; i < neighbors.length; i++) {
-      var n = neighbors[i];
-      if (!seen[n]) { seen[n] = true; q.push(path.concat(n)); }
-    }
-  }
-  return null;
-}
-
-function titleCase(s) {
-  return s.split(" ").filter(function(w){ return w.length > 0; }).map(function(w){
-    return w[0].toUpperCase() + w.slice(1).toLowerCase();
-  }).join(" ");
-}
-
-var CUSTOM_DIRECTIONS = {
+var CUSTOM = {
   "ACADEMIC BUILDING": [
     "Exit through the main gate.",
     "Walk straight along the main road.",
@@ -239,25 +222,48 @@ var CUSTOM_DIRECTIONS = {
   ]
 };
 
+function bfs(start, end) {
+  var q = [[start]], seen = {};
+  seen[start] = true;
+  while (q.length) {
+    var path = q.shift();
+    var node = path[path.length - 1];
+    if (node === end) return path;
+    var nbrs = EDGES[node] || [];
+    for (var i = 0; i < nbrs.length; i++) {
+      if (!seen[nbrs[i]]) {
+        seen[nbrs[i]] = true;
+        q.push(path.concat(nbrs[i]));
+      }
+    }
+  }
+  return null;
+}
+
+function titleCase(s) {
+  return s.split(" ").filter(function(w){ return w.length > 0; }).map(function(w){
+    return w[0].toUpperCase() + w.slice(1).toLowerCase();
+  }).join(" ");
+}
+
+// --- Render directions ---
 var ul = document.getElementById("steps");
 
 if (!DEST) {
-  var errEl = document.getElementById("error-msg");
+  var errEl = document.getElementById("error");
   errEl.textContent = "No destination specified.";
   errEl.style.display = "block";
 } else {
-  var steps = CUSTOM_DIRECTIONS[DEST];
+  var steps = CUSTOM[DEST];
   if (!steps) {
     var path = bfs("GATE", DEST);
-    if (path && path.length > 1) {
-      steps = path.slice(1, -1).map(function(n) { return "Head toward " + titleCase(n); });
-    } else {
-      steps = ["Walk straight from the main entrance toward " + titleCase(DEST)];
-    }
+    steps = (path && path.length > 1)
+      ? path.slice(1, -1).map(function(n){ return "Head toward " + titleCase(n); })
+      : ["Walk straight from the main entrance toward " + titleCase(DEST)];
   }
 
   for (var i = 0; i < steps.length; i++) {
-    var li  = document.createElement("li");
+    var li = document.createElement("li");
     var num = document.createElement("span");
     num.className = "num";
     num.textContent = i + 1;
@@ -268,9 +274,9 @@ if (!DEST) {
     ul.appendChild(li);
   }
 
-  var arrive = document.getElementById("arrive-msg");
-  arrive.textContent = "You have arrived at " + titleCase(DEST);
-  arrive.style.display = "block";
+  var arr = document.getElementById("arrive");
+  arr.textContent = "You have arrived at " + titleCase(DEST) + ".";
+  arr.style.display = "block";
 }
 </script>
 </body>
