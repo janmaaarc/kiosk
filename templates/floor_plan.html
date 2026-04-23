@@ -261,6 +261,39 @@ body {
 }
 #indoorRouteLine { animation: dash-march 0.8s linear infinite; }
 
+/* ── Mobile responsive ────────────────────────── */
+@media (max-width: 768px) {
+  body { overflow: auto; }
+  .side-panel {
+    width: 90px;
+    padding: max(36px, env(safe-area-inset-top)) 8px 16px;
+  }
+  .side-panel h1 { font-size: 9px; letter-spacing: 2px; margin-bottom: 14px; }
+  .floor-btn { font-size: 10px; padding: 6px 8px; letter-spacing: 0; }
+  .main { padding: 8px 10px 12px; }
+  .top-bar { gap: 8px; margin-bottom: 8px; }
+  .top-bar img { width: 28px; }
+  .top-bar h2 { font-size: 14px; letter-spacing: 2px; }
+  .top-bar .show-dir { display: none; }
+  .top-bar .room-search { width: 140px; }
+  .top-bar .room-search input { font-size: 11px; padding: 7px 12px 7px 34px; }
+  .info-panel { padding: 12px 16px; }
+  .info-panel h3 { font-size: 15px; }
+  .info-panel p { font-size: 13px; }
+  .mobile-inside-label {
+    display: block !important;
+  }
+}
+.mobile-inside-label {
+  display: none;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  color: #7b2d2d;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
 /* Highlighted (e.g. from search) */
 .room-label.highlighted {
   background: rgba(255, 220, 0, 0.9);
@@ -344,6 +377,7 @@ body {
       SHOW DIRECTION
     </a>
   </div>
+  <div class="mobile-inside-label">INSIDE THE BUILDING</div>
   <div class="plan-wrapper" id="planWrapper">
 
     {% if floor_image %}

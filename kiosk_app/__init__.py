@@ -28,7 +28,21 @@ _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _BODY_CLOSE_RE = re.compile(r"</body>", re.IGNORECASE)
 
 
-_MOBILE_PATHS = {"/directions"}
+_MOBILE_PATHS = {
+    "/directions",
+    "/academic_building",
+    "/new_admin_building",
+    "/old_admin_building",
+    "/it_building",
+    "/tech_building",
+    "/civil_tech_building",
+    "/fsm_building",
+    "/rodriguez_building",
+    "/mist_ncestd_dorm",
+    "/mist_ncestd_building",
+    "/ylagan_hall",
+    "/waf_&_rac_building",
+}
 
 
 def _inject_kiosk_scripts(response: Response) -> Response:
