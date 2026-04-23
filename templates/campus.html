@@ -2,7 +2,7 @@
 <html> 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> 
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=1344">
     <title>Campus Map</title>
      <style> 
      
@@ -1165,7 +1165,6 @@ document.querySelectorAll('.building[data-page]').forEach(b => {
     }
     const p = document.getElementById('buildingPanel');
     p.style.right = '0px';
-    p.style.width = window.innerWidth < 1024 ? '100%' : '360px';
     p.style.pointerEvents = 'auto';
     document.getElementById('viewToggle').style.display = 'none';
     document.getElementById('qrBtnFloat').style.display = 'none';
@@ -1173,7 +1172,7 @@ document.querySelectorAll('.building[data-page]').forEach(b => {
 });
 function closeBuildingPanel() {
   const p = document.getElementById('buildingPanel');
-  p.style.right = window.innerWidth < 1024 ? '-110%' : '-500px';
+  p.style.right = '-500px';
   p.style.pointerEvents = 'none';
   if (_directionsActive) {
     document.getElementById('viewToggle').style.display = 'flex';
@@ -1328,32 +1327,6 @@ updateYouHere(150, 420); // MAIN GATE POSITION
 
 <script>
 var _mapScale = 0.7;
-
-function applyMapScale() {
-  var mc = document.querySelector('.map-container');
-  var mw = document.querySelector('.map-wrapper');
-  if (!mc || !mw) return;
-  var vw = window.innerWidth;
-  var vh = window.innerHeight;
-  if (vw < 1024) {
-    // Mobile: fit the whole map into the viewport
-    _mapScale = Math.min(vw / 1920, vh / 1080);
-    mc.style.transform = 'scale(' + _mapScale + ')';
-    mc.style.transformOrigin = 'top left';
-    mw.style.width  = (1920 * _mapScale) + 'px';
-    mw.style.height = (1080 * _mapScale) + 'px';
-  } else {
-    // Desktop: keep the original designed scale
-    _mapScale = 0.7;
-    mc.style.transform = 'scale(0.7)';
-    mc.style.transformOrigin = 'top left';
-    mw.style.width  = '';
-    mw.style.height = '';
-  }
-}
-
-applyMapScale();
-window.addEventListener('resize', applyMapScale);
 </script>
 
 <!-- Enter Building Preview Panel -->
