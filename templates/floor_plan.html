@@ -263,26 +263,36 @@ body {
 
 /* ── Mobile responsive ────────────────────────── */
 @media (max-width: 768px) {
-  body { overflow: auto; }
+  body { height: auto; overflow: auto; }
   .side-panel {
     width: 90px;
     padding: max(36px, env(safe-area-inset-top)) 8px 16px;
+    position: sticky; top: 0; height: 100vh;
   }
   .side-panel h1 { font-size: 9px; letter-spacing: 2px; margin-bottom: 14px; }
   .floor-btn { font-size: 10px; padding: 6px 8px; letter-spacing: 0; }
-  .main { padding: 8px 10px 12px; }
-  .top-bar { gap: 8px; margin-bottom: 8px; }
+  .main { padding: 8px 10px 12px; overflow: auto; }
+  .top-bar { gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
   .top-bar img { width: 28px; }
-  .top-bar h2 { font-size: 14px; letter-spacing: 2px; }
+  .top-bar h2 { font-size: 13px; letter-spacing: 1px; }
   .top-bar .show-dir { display: none; }
-  .top-bar .room-search { width: 140px; }
-  .top-bar .room-search input { font-size: 11px; padding: 7px 12px 7px 34px; }
+  .top-bar .room-search { display: none; }
+
+  /* Fix floor plan aspect ratio — SVG viewBox is 1200x700 */
+  .plan-wrapper {
+    flex: none;
+    width: 100%;
+    /* 700/1200 = 58.33% */
+    aspect-ratio: 1200 / 700;
+    min-height: 0;
+    height: auto;
+    border-radius: 10px;
+  }
+
   .info-panel { padding: 12px 16px; }
   .info-panel h3 { font-size: 15px; }
   .info-panel p { font-size: 13px; }
-  .mobile-inside-label {
-    display: block !important;
-  }
+  .mobile-inside-label { display: block !important; }
 }
 .mobile-inside-label {
   display: none;
