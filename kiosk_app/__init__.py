@@ -28,7 +28,13 @@ _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _BODY_CLOSE_RE = re.compile(r"</body>", re.IGNORECASE)
 
 
+_MOBILE_PATHS = {"/directions"}
+
+
 def _inject_kiosk_scripts(response: Response) -> Response:
+    from flask import request as _req
+    if _req.path in _MOBILE_PATHS:
+        return response
     ctype = response.content_type or ""
     if not ctype.startswith("text/html") or response.direct_passthrough:
         return response
