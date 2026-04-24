@@ -222,6 +222,10 @@ def _migrate(conn: sqlite3.Connection) -> None:
     if "building_url" not in cols:
         conn.execute("ALTER TABLE offices ADD COLUMN building_url TEXT")
 
+    faculty_cols = {r[1] for r in conn.execute("PRAGMA table_info(faculty)").fetchall()}
+    if "schedule" not in faculty_cols:
+        conn.execute("ALTER TABLE faculty ADD COLUMN schedule TEXT DEFAULT '[]'")
+
     room_cols = {r[1] for r in conn.execute("PRAGMA table_info(rooms)").fetchall()}
     for col, defn in [
         ("pos_left",   "INTEGER DEFAULT 0"),

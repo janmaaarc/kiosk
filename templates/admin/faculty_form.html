@@ -4,77 +4,195 @@
 {% block content %}
 <h1 class="page-title">{{ 'Edit' if member else 'Add' }} Faculty Member</h1>
 
-<div class="form-card">
+<div class="form-card" style="max-width:900px">
 <form method="POST">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    <div class="form-group">
-        <label>Name *</label>
-        <input type="text" name="name"
-               value="{{ member['name'] if member else '' }}" required>
-    </div>
-
-    <div class="form-group">
-        <label>Department</label>
-        <input type="text" name="department"
-               value="{{ member['department'] if member else '' }}"
-               placeholder="e.g. College of Engineering">
-    </div>
-
-    <div class="form-group">
-        <label>Position</label>
-        <input type="text" name="position"
-               value="{{ member['position'] if member else '' }}"
-               placeholder="e.g. Instructor I">
-    </div>
-
-    <div class="form-group">
-        <label>Photo</label>
-        <div class="upload-row">
-            <input type="text" id="photo-path" name="photo"
-                   value="{{ member['photo'] if member else '' }}"
-                   placeholder="e.g. images/faculty/juan.jpg">
-            <input type="file" id="photo-file" accept="image/*"
-                   onchange="previewUpload('photo-file','photo-path')">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="form-group">
+            <label>Name *</label>
+            <input type="text" name="name"
+                   value="{{ member['name'] if member else '' }}" required>
+        </div>
+        <div class="form-group">
+            <label>Department</label>
+            <input type="text" name="department"
+                   value="{{ member['department'] if member else '' }}"
+                   placeholder="e.g. Electrical Technology">
+        </div>
+        <div class="form-group">
+            <label>Position</label>
+            <input type="text" name="position"
+                   value="{{ member['position'] if member else '' }}"
+                   placeholder="e.g. Instructor I">
+        </div>
+        <div class="form-group">
+            <label>Office Key <span style="font-weight:400;color:#888">(links to office info)</span></label>
+            <input type="text" name="office_key"
+                   value="{{ member['office_key'] if member else '' }}"
+                   placeholder="e.g. Registrar">
+        </div>
+        <div class="form-group">
+            <label>Room</label>
+            <input type="text" name="room"
+                   value="{{ member['room'] if member else '' }}"
+                   placeholder="e.g. Room 201">
+        </div>
+        <div class="form-group">
+            <label>Building</label>
+            <input type="text" name="building"
+                   value="{{ member['building'] if member else '' }}"
+                   placeholder="e.g. IT Building">
         </div>
     </div>
 
-    <div class="form-group">
-        <label>Schedule Image</label>
-        <div class="upload-row">
-            <input type="text" id="schedule-path" name="schedule_image"
-                   value="{{ member['schedule_image'] if member else '' }}"
-                   placeholder="e.g. images/schedules/juan_sched.png">
-            <input type="file" id="schedule-file" accept="image/*"
-                   onchange="previewUpload('schedule-file','schedule-path')">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px">
+        <div class="form-group">
+            <label>Photo</label>
+            <div class="upload-row">
+                <input type="text" id="photo-path" name="photo"
+                       value="{{ member['photo'] if member else '' }}"
+                       placeholder="e.g. images/faculty/juan.jpg">
+                <input type="file" id="photo-file" accept="image/*"
+                       onchange="previewUpload('photo-file','photo-path')">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Schedule Image <span style="font-weight:400;color:#888">(optional override)</span></label>
+            <div class="upload-row">
+                <input type="text" id="schedule-path" name="schedule_image"
+                       value="{{ member['schedule_image'] if member else '' }}"
+                       placeholder="e.g. images/schedules/juan.png">
+                <input type="file" id="schedule-file" accept="image/*"
+                       onchange="previewUpload('schedule-file','schedule-path')">
+            </div>
         </div>
     </div>
 
-    <div class="form-group">
-        <label>Room <span style="font-weight:400;color:#888">(for "Find on Map")</span></label>
-        <input type="text" name="room"
-               value="{{ member['room'] if member else '' }}"
-               placeholder="e.g. Room 201">
+    <!-- ── SCHEDULE EDITOR ─────────────────────────────── -->
+    <div style="margin-top:24px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <label style="font-size:16px;font-weight:700;margin:0">Weekly Schedule</label>
+            <button type="button" onclick="addRow()" class="btn btn-primary btn-sm">+ Add Row</button>
+        </div>
+
+        <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1)">
+            <thead>
+                <tr>
+                    <th style="background:#7b2d2d;color:#fff;padding:10px 12px;font-size:13px;text-align:left">Day</th>
+                    <th style="background:#7b2d2d;color:#fff;padding:10px 12px;font-size:13px;text-align:left">Start</th>
+                    <th style="background:#7b2d2d;color:#fff;padding:10px 12px;font-size:13px;text-align:left">End</th>
+                    <th style="background:#7b2d2d;color:#fff;padding:10px 12px;font-size:13px;text-align:left">Subject</th>
+                    <th style="background:#7b2d2d;color:#fff;padding:10px 12px;font-size:13px;text-align:left">Room</th>
+                    <th style="background:#7b2d2d;color:#fff;padding:10px 12px;font-size:13px;text-align:left">Color</th>
+                    <th style="background:#7b2d2d;color:#fff;padding:10px 12px;font-size:13px"></th>
+                </tr>
+            </thead>
+            <tbody id="schedBody">
+                {% if member and member['schedule'] %}
+                    {% set entries = member['schedule'] | from_json %}
+                    {% for e in entries %}
+                    <tr>
+                        <td style="padding:8px 10px;border-bottom:1px solid #eee">
+                            <select name="sched_day" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:13px">
+                                {% for d in ['MON','TUE','WED','THU','FRI','SAT'] %}
+                                <option value="{{ d }}" {{ 'selected' if e.day == d }}>{{ d }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td style="padding:8px 10px;border-bottom:1px solid #eee">
+                            <select name="sched_start" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:13px">
+                                {% for t in ['7:00','8:00','9:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'] %}
+                                <option value="{{ t }}" {{ 'selected' if e.start == t }}>{{ t }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td style="padding:8px 10px;border-bottom:1px solid #eee">
+                            <select name="sched_end" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:13px">
+                                {% for t in ['8:00','9:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'] %}
+                                <option value="{{ t }}" {{ 'selected' if e.end == t }}>{{ t }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td style="padding:8px 10px;border-bottom:1px solid #eee">
+                            <input type="text" name="sched_subject" value="{{ e.subject }}"
+                                   placeholder="e.g. MATH101" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:13px">
+                        </td>
+                        <td style="padding:8px 10px;border-bottom:1px solid #eee">
+                            <input type="text" name="sched_room" value="{{ e.room }}"
+                                   placeholder="Room 201" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:13px">
+                        </td>
+                        <td style="padding:8px 10px;border-bottom:1px solid #eee">
+                            <select name="sched_color" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:13px">
+                                {% for col in ['yellow','green','blue','teal','red','purple'] %}
+                                <option value="{{ col }}" {{ 'selected' if e.color == col }}>{{ col }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td style="padding:8px 10px;border-bottom:1px solid #eee;text-align:center">
+                            <button type="button" onclick="this.closest('tr').remove()" class="btn btn-danger btn-sm">✕</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+        <p style="font-size:12px;color:#888;margin-top:8px">Time uses 24h: 13:00 = 1:00 PM, 7:00 = 7:00 AM</p>
     </div>
 
-    <div class="form-group">
-        <label>Building</label>
-        <input type="text" name="building"
-               value="{{ member['building'] if member else '' }}"
-               placeholder="e.g. IT Building">
-    </div>
-
-    <div class="form-group">
-        <label>Office Key <span style="font-weight:400;color:#888">(links to office info)</span></label>
-        <input type="text" name="office_key"
-               value="{{ member['office_key'] if member else '' }}"
-               placeholder="e.g. Registrar">
-    </div>
-
-    <div style="display:flex;gap:10px;margin-top:8px">
+    <div style="display:flex;gap:10px;margin-top:20px">
         <button type="submit" class="btn btn-primary">Save</button>
         <a href="{{ url_for('content.faculty_list') }}" class="btn btn-secondary">Cancel</a>
     </div>
 </form>
 </div>
+
+<template id="rowTpl">
+<tr>
+    <td style="padding:8px 10px;border-bottom:1px solid #eee">
+        <select name="sched_day" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:13px">
+            <option>MON</option><option>TUE</option><option>WED</option>
+            <option>THU</option><option>FRI</option><option>SAT</option>
+        </select>
+    </td>
+    <td style="padding:8px 10px;border-bottom:1px solid #eee">
+        <select name="sched_start" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:13px">
+            <option>7:00</option><option>8:00</option><option>9:00</option><option>10:00</option>
+            <option>11:00</option><option>12:00</option><option>13:00</option><option>14:00</option>
+            <option>15:00</option><option>16:00</option><option>17:00</option><option>18:00</option>
+        </select>
+    </td>
+    <td style="padding:8px 10px;border-bottom:1px solid #eee">
+        <select name="sched_end" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:13px">
+            <option>8:00</option><option>9:00</option><option>10:00</option><option>11:00</option>
+            <option>12:00</option><option>13:00</option><option>14:00</option><option>15:00</option>
+            <option>16:00</option><option>17:00</option><option>18:00</option><option>19:00</option>
+        </select>
+    </td>
+    <td style="padding:8px 10px;border-bottom:1px solid #eee">
+        <input type="text" name="sched_subject" placeholder="e.g. MATH101"
+               style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:13px">
+    </td>
+    <td style="padding:8px 10px;border-bottom:1px solid #eee">
+        <input type="text" name="sched_room" placeholder="Room 201"
+               style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:13px">
+    </td>
+    <td style="padding:8px 10px;border-bottom:1px solid #eee">
+        <select name="sched_color" style="width:100%;padding:6px;border:1px solid #ddd;border-radius:4px;font-family:inherit;font-size:13px">
+            <option>yellow</option><option>green</option><option>blue</option>
+            <option>teal</option><option>red</option><option>purple</option>
+        </select>
+    </td>
+    <td style="padding:8px 10px;border-bottom:1px solid #eee;text-align:center">
+        <button type="button" onclick="this.closest('tr').remove()" class="btn btn-danger btn-sm">✕</button>
+    </td>
+</tr>
+</template>
+
+<script>
+function addRow(){
+    const tpl = document.getElementById('rowTpl').content.cloneNode(true);
+    document.getElementById('schedBody').appendChild(tpl);
+}
+</script>
 {% endblock %}

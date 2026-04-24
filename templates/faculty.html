@@ -377,6 +377,7 @@ search.addEventListener("input", render);
 
 function goToProfile(d) {
   const query = new URLSearchParams({
+    id: d.id || "",
     name: d.name,
     dept: d.department || "",
     room: JSON.stringify(d.room ? [d.room] : []),

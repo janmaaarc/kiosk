@@ -20,6 +20,38 @@ from kiosk_app.extensions import limiter
 
 content_bp = Blueprint("content", __name__)
 
+_DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT"]
+_TIMES = ["7:00","8:00","9:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00"]
+
+_VALID_DAYS   = {"MON","TUE","WED","THU","FRI","SAT"}
+_VALID_COLORS = {"yellow","green","blue","teal","red","purple"}
+
+def _parse_schedule_form(form) -> list:
+    entries = []
+    days    = form.getlist("sched_day")
+    starts  = form.getlist("sched_start")
+    ends    = form.getlist("sched_end")
+    subjs   = form.getlist("sched_subject")
+    rooms   = form.getlist("sched_room")
+    colors  = form.getlist("sched_color")
+    for i, day in enumerate(days):
+        if day not in _VALID_DAYS:
+            continue
+        if i >= len(subjs) or not subjs[i].strip():
+            continue
+        color = colors[i] if i < len(colors) else "yellow"
+        if color not in _VALID_COLORS:
+            color = "yellow"
+        entries.append({
+            "day":     day,
+            "start":   starts[i] if i < len(starts) else "",
+            "end":     ends[i]   if i < len(ends)   else "",
+            "subject": subjs[i].strip(),
+            "room":    rooms[i].strip() if i < len(rooms) else "",
+            "color":   color,
+        })
+    return entries
+
 _UPLOAD_ROOT = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
     "static", "uploads",
@@ -416,12 +448,14 @@ def faculty_list():
 @login_required
 def faculty_add():
     if request.method == "POST":
+        import json as _json
+        schedule = _json.dumps(_parse_schedule_form(request.form))
         with db_connection() as conn:
             conn.execute(
                 """INSERT INTO faculty
                    (name, department, position, photo, schedule_image,
-                    room, building, office_key)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                    room, building, office_key, schedule)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     request.form["name"],
                     request.form.get("department", ""),
@@ -431,6 +465,7 @@ def faculty_add():
                     request.form.get("room", ""),
                     request.form.get("building", ""),
                     request.form.get("office_key", ""),
+                    schedule,
                 ),
             )
             conn.commit()
@@ -449,10 +484,13 @@ def faculty_edit(member_id: int):
             abort(404)
 
         if request.method == "POST":
+            import json as _json
+            schedule = _json.dumps(_parse_schedule_form(request.form))
             conn.execute(
                 """UPDATE faculty
                    SET name=?, department=?, position=?, photo=?,
-                       schedule_image=?, room=?, building=?, office_key=?
+                       schedule_image=?, room=?, building=?, office_key=?,
+                       schedule=?
                    WHERE id=?""",
                 (
                     request.form["name"],
@@ -463,6 +501,7 @@ def faculty_edit(member_id: int):
                     request.form.get("room", ""),
                     request.form.get("building", ""),
                     request.form.get("office_key", ""),
+                    schedule,
                     member_id,
                 ),
             )
@@ -470,6 +509,18 @@ def faculty_edit(member_id: int):
             return redirect(url_for("content.faculty_list"))
 
     return render_template("admin/faculty_form.html", member=member)
+
+
+@content_bp.route("/api/faculty/<int:member_id>/schedule")
+def faculty_schedule_api(member_id: int):
+    with db_connection() as conn:
+        row = conn.execute("SELECT schedule FROM faculty WHERE id = ?", (member_id,)).fetchone()
+    if row is None:
+        return jsonify([])
+    try:
+        return jsonify(json.loads(row["schedule"] or "[]"))
+    except (ValueError, TypeError):
+        return jsonify([])
 
 
 @content_bp.route("/admin/faculty/<int:member_id>/delete", methods=["POST"])

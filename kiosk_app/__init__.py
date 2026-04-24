@@ -151,4 +151,12 @@ def create_app() -> Flask:
             "now": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
         }
 
+    import json as _json
+    def _from_json(s):
+        try:
+            return _json.loads(s or "[]")
+        except (ValueError, TypeError):
+            return []
+    app.jinja_env.filters["from_json"] = _from_json
+
     return app
