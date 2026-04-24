@@ -59,11 +59,15 @@ def office():
     selected = _with_files(row) if row else {}
     raw_building = request.args.get("from_building", "")
     from_building = raw_building if raw_building in _VALID_BUILDING_URLS else ""
+    try:
+        from_floor = max(1, int(request.args.get("from_floor", "1")))
+    except (ValueError, TypeError):
+        from_floor = 1
     return render_template(
         "office.html",
         offices=offices,
         selected=selected,
         from_building=from_building,
-        from_floor=request.args.get("from_floor", "1"),
+        from_floor=from_floor,
         from_room=request.args.get("from_room", selected.get("name", "")),
     )

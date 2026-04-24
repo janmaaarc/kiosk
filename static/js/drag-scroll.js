@@ -65,18 +65,19 @@
         el.style.cursor = '';
         document.removeEventListener('mousemove', onMove);
         document.removeEventListener('mouseup', onUp);
+        // Reset moved after click suppression fires (click follows mouseup)
+        setTimeout(() => { moved = false; }, 0);
       }
 
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onUp);
     });
 
-    // Suppress click after drag
+    // Suppress click after drag — only if this element was the one dragged
     el.addEventListener('click', (e) => {
-      if (moved) {
+      if (moved && e.currentTarget === el) {
         e.stopPropagation();
         e.preventDefault();
-        moved = false;
       }
     }, true);
   }
@@ -91,8 +92,14 @@
   function init() {
     document.querySelectorAll('*').forEach(attachIfNeeded);
 
-    new MutationObserver(() => {
-      document.querySelectorAll('*').forEach(attachIfNeeded);
+    new MutationObserver((mutations) => {
+      mutations.forEach(m => {
+        m.addedNodes.forEach(node => {
+          if (node.nodeType !== 1) return;
+          attachIfNeeded(node);
+          node.querySelectorAll('*').forEach(attachIfNeeded);
+        });
+      });
     }).observe(document.body, { childList: true, subtree: true });
   }
 
