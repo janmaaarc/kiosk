@@ -17,19 +17,19 @@
       -webkit-user-drag: none;
       pointer-events: none;
     }
-    button img, a img, .top-icon, .top-icons img, .nav-icons img, .card img, img[onclick] {
+    button img, a img, .top-icon, .top-icons img, .nav-icons img, img[onclick] {
       pointer-events: auto;
     }
   `;
   document.head.appendChild(style);
 
   function isScrollable(el) {
-    const style = window.getComputedStyle(el);
-    const overflowY = style.overflowY;
-    const overflowX = style.overflowX;
-    const canScrollY = (overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight;
-    const canScrollX = (overflowX === 'auto' || overflowX === 'scroll') && el.scrollWidth > el.clientWidth;
-    return canScrollY || canScrollX;
+    // Only check CSS overflow — NOT scrollHeight vs clientHeight.
+    // Content height check at init time fails when images haven't loaded yet,
+    // causing drag-scroll to never attach on image-heavy pages.
+    const s = window.getComputedStyle(el);
+    return s.overflowY === 'auto' || s.overflowY === 'scroll' ||
+           s.overflowX === 'auto' || s.overflowX === 'scroll';
   }
 
   function attachDragScroll(el) {
@@ -108,4 +108,10 @@
   } else {
     init();
   }
+
+  // Re-scan after all images/resources load — catches containers that
+  // weren't scrollable yet at DOMContentLoaded
+  window.addEventListener('load', () => {
+    document.querySelectorAll('*').forEach(attachIfNeeded);
+  });
 })();
