@@ -35,34 +35,47 @@ dashboard — no coding required.
 
 | Feature | Description |
 |---|---|
-| **Interactive campus map** | 20+ buildings with A* routing from the main gate. Click a building to see a slide-in panel with photo, **ENTER BUILDING**, **SHOW DIRECTION**, and **CANCEL**. Route line animates along the roads with a "YOU ARE HERE" pin at the gate. OUTSIDE / INSIDE toggle switches between the campus route and the building's floor plan. |
-| **Floor plans** | Every building supports multi-floor plans. The Academic Building ships with 5 hand-drawn SVG floors (Ground, 2nd, 3rd, 4th, 5th). Each room is clickable and draws an indoor route line from the building entrance to the room with a "YOU ARE HERE" pin. |
-| **In-building search** | Every floor plan has a live search bar in the top right that finds rooms across all floors of that building. Match jumps to the correct floor and draws the route automatically. |
-| **Full route (outdoor → indoor)** | Click a room → **SHOW FULL ROUTE** → campus map draws the outdoor route with stakeholder-provided campus directions, then after 3.5 seconds automatically navigates to the floor plan and draws the indoor route to the specific room. |
-| **Office directory** | Offices with location, hours, a live open/closed badge calculated from device time, downloadable forms/memos, an inline PDF viewer, and **ENTER BUILDING** + **SHOW DIRECTION** buttons on each office. Offices without a configured building still get a SHOW DIRECTION fallback to the campus map. |
-| **Faculty directory** | Browse faculty by department. Each card has a photo, name, department, and a **FIND ON MAP** button when a room and building are assigned. |
-| **Events** | Upcoming and ongoing campus events with images, dates, times, and full details. |
+| **Interactive campus map** | 20+ buildings with A* routing from the main gate. Click a building to open a slide-in panel with photo, **ENTER BUILDING**, **SHOW DIRECTION**, and **CANCEL**. Route line animates along the roads with a "YOU ARE HERE" pin at the gate. OUTSIDE / INSIDE toggle switches between the campus route and the building's floor plan. |
+| **Floor plans** | Every building supports multi-floor plans. The Academic Building ships with 5 hand-drawn SVG floors (Ground, 2nd, 3rd, 4th, 5th), the New Admin Building with 1 SVG floor. Each room is clickable and draws an indoor route line from the building entrance to the room. |
+| **In-building search** | Every floor plan has a live search bar that finds rooms across all floors of that building. Match jumps to the correct floor and draws the route automatically. |
+| **Full route (outdoor → indoor)** | Click a room → **SHOW FULL ROUTE** → campus map draws the outdoor route, then after 3.5 seconds automatically navigates to the floor plan and draws the indoor route to the specific room. |
+| **Office directory** | Offices with location, hours, a live open/closed badge, downloadable forms/memos, an inline PDF viewer, and a **GET DIRECTIONS** link on each office. |
+| **Faculty directory** | Browse faculty by department. Each card has a photo, name, department, and a **FIND ON MAP** button when a room and building are assigned. Profiles show a weekly schedule grid fetched live from the database. |
+| **Events** | Upcoming and ongoing campus events with images, dates, times, and full details. Client-side pagination (9 per page). |
 | **Announcements** | Digital notices and memos with PDF downloads. |
-| **Global search (admin / public)** | `/api/search` covers rooms, offices, and faculty in one request. |
-| **QR codes** | Every route has a **GENERATE QR CODE** button that pops up a floating card. QR images are generated server-side at `/qr?data=…&size=…` so the kiosk works offline (no third-party API). |
-| **RFID entry** | The splash screen captures RFID keystrokes (works with any USB HID reader on a laptop). On a Raspberry Pi, set `KIOSK_ENABLE_RFID=1` to also spin up an `mfrc522`-based background watcher. Scanned UIDs are looked up in the `users` table and matched users land on their personalised profile. |
+| **RFID personalized entry** | Scanning an RFID card shows the user's name, role badge, and a personalized welcome. The main menu displays a greeting for the scanned user. All scans are logged and viewable in the admin dashboard. |
+| **Drag-to-scroll** | IR touch frames that act as a mouse can drag any scrollable area (faculty grid, floor plan sidebar, etc.). Text and image selection are disabled globally on kiosk pages. |
+| **Virtual keyboard** | An on-screen QWERTY keyboard appears when any search input is focused — no physical keyboard needed. |
+| **Idle timeout** | After 60 seconds of inactivity on public pages, the kiosk clears the session and returns to the lock screen. Admin pages show a 10-second countdown warning before redirecting to the menu. |
+| **QR codes** | Every route has a **GENERATE QR CODE** button. QR images are generated server-side at `/qr?data=…&size=…` — works offline. |
 | **Offline fallback** | A service worker caches static assets and shows a branded `/offline` page when the network drops. |
 
 ---
 
 ## 2. Public screens walkthrough
 
-### Splash screen — `/`
+### Lock screen — `/`
 
-The entry screen. A rotating slideshow plays in the background. The instruction
-"SCAN YOUR RFID TO ACCESS THE KIOSK" is displayed in the center. Tapping or
-clicking anywhere navigates to the main menu. An RFID reader connected to the
-device's USB port automatically redirects when a card is scanned.
+The entry screen. A rotating slideshow plays in the background behind a dark
+overlay. "WELCOME" is displayed in large text with a blinking "SCAN YOUR RFID
+TO ACCESS THE KIOSK" instruction.
+
+- Tap or click anywhere to go directly to the main menu.
+- An RFID reader connected via USB auto-redirects to `/rfid?uid=<scanned-uid>`
+  when a card is scanned.
+- After 60 seconds of inactivity on any public page, the session is cleared
+  and the kiosk returns here automatically.
+
+---
 
 ### Main menu — `/menu`
 
-A grid of large buttons leading to every major section: Faculty, Campus Map,
-Offices, Events, Announcements, and Room Search.
+A 3×2 grid of large buttons leading to every major section: Faculty, Campus Map,
+Office Information, Digital Announcements, Events and Activities, and About Us.
+
+If a user was identified by RFID scan, a personalized greeting and role badge
+(FACULTY / STUDENT / VISITOR) are shown at the top of the menu. The role badge
+is color-coded: maroon for faculty, blue for students, gray for visitors.
 
 ---
 
@@ -79,15 +92,28 @@ Shows all faculty members stored in the database.
 
 ---
 
+### Faculty profile — `/profile?…`
+
+Opened by tapping a faculty card. Shows:
+
+- Portrait photo, name, position, and department badge.
+- Weekly schedule grid (Monday–Saturday × time slots) if a schedule has been
+  configured in the admin.
+- A **FIND ON MAP** button linking to the faculty member's building floor plan.
+- Left sidebar with department filter buttons (dynamically loaded from the DB).
+- Home and Back navigation icons (fixed position, never overlapped by content).
+
+---
+
 ### Office directory — `/office-selection` and `/office?name=<key>`
 
 - `/office-selection` lists all active offices as a scrollable sidebar on the
   left. Tap any office to load its detail view on the right.
 - The detail view shows:
   - Office name and a photo
-  - Location chip (e.g. "New Admin Building, 2nd Floor")
-  - Hours chip with a live **OPEN / CLOSED** badge calculated from the current
-    device time
+  - Location chip (e.g. "New Admin Building, 2nd Floor") — tapping it navigates
+    to the building's floor plan
+  - Hours chip with a live **OPEN / CLOSED** badge calculated from device time
   - A **GET DIRECTIONS** button that links to the building's floor plan
   - Attached forms and memos as downloadable PDFs
   - An inline PDF preview that opens when a file is tapped
@@ -96,16 +122,17 @@ The sidebar search box filters offices by name in real time.
 
 ---
 
-### Campus map — `/campus_map`
+### Campus map — `/campus`
 
 The full-campus interactive map.
 
 - Tap any building label to open a slide-in panel on the right with the
   building's photo, **ENTER BUILDING**, **SHOW DIRECTION**, and **CANCEL**.
 - **ENTER BUILDING** → jumps directly to that building's floor plan.
-- **SHOW DIRECTION** → draws a route line from the main gate to the building
-  without leaving the page. A red sidebar slides in from the left with
-  step-by-step directions and a "YOU ARE HERE" pin appears at the gate.
+- **SHOW DIRECTION** → draws a route line from the main gate to the building.
+  A collapsible directions panel slides in from the left with step-by-step
+  directions and a "YOU ARE HERE" pin at the gate. The panel can be collapsed
+  to a slim **DIR** tab on the left edge and re-expanded by tapping it.
 - The top-right of the map shows an **OUTSIDE / INSIDE** toggle and a
   **GENERATE QR CODE** button when directions are active.
 - **OUTSIDE / INSIDE** toggle — INSIDE jumps to the building's floor plan
@@ -114,9 +141,13 @@ The full-campus interactive map.
   current directions URL (server-generated, no internet required). Click
   anywhere outside the card to dismiss it.
 - `?location=<building>` in the URL automatically draws the route on load.
-- `?location=<building> room <room>` draws the outdoor route, then **after
-  3.5 seconds automatically navigates to the floor plan** at the right floor
+- `?location=<building> room <room>` draws the outdoor route, then after
+  3.5 seconds automatically navigates to the floor plan at the right floor
   with the specific room highlighted and the indoor route drawn.
+
+Buildings without a floor plan are shown at reduced opacity. Buildings with
+a working floor plan (Academic, New Admin, IT) are shown at full opacity and
+their labels pulse when selected.
 
 ---
 
@@ -130,41 +161,41 @@ Each building has its own URL. The floor plan page has:
   and a **SHOW DIRECTION** link.
 - A main area showing the floor plan image with **room rectangles** overlaid
   at their exact positions. Each room is clickable.
-- **Room search bar** (top right) — live search across every room on every
-  floor of the current building. Matches display with the floor label badge
-  (`2ND FLOOR`). Clicking a match on the current floor highlights and routes
-  in place; clicking a match on a different floor navigates there.
-- **SHOW DIRECTION** (top right) → jumps to `/campus_map?location=<BUILDING>`
-  so the visitor can see the outdoor route.
+- **Room search bar** — live search across every room on every floor of the
+  current building. Matches display with a floor label badge. Clicking a match
+  on a different floor navigates there automatically.
 - Clicking a room opens a slide-up info panel with:
   - Room name + description
-  - **DIRECTIONS** list — stakeholder-provided step-by-step wayfinding text
+  - **DIRECTIONS** list — step-by-step wayfinding text
   - **SHOW FULL ROUTE** button → outdoor route + auto-navigation back to
     this floor plan with the specific room highlighted
   - **OPEN OFFICE PAGE →** button (for rooms linked to an office)
-  - A QR code to the linked office page
 - Clicking a room also draws a **dashed indoor route line** from the
   building entrance up the hallway to the room, with a "YOU ARE HERE" pin at
   the entrance.
 - If the page loads with `?location=<room>`, that room is auto-highlighted
   and the indoor route draws on load.
 
-#### Academic Building — 5 hand-drawn floors
-
-The Academic Building ships with complete SVG floor plans for all 5 floors,
-plus stakeholder-provided wayfinding text for every known room.
+#### Academic Building — 5 hand-drawn SVG floors
 
 | Floor | Rooms |
 |---|---|
-| 1st | Medical & Dental Services, Record & Information Center, MPC Cares, Faculty Room, CR, Quality Assurance Office, Conference Room, Repair & Maintenance, Function Hall |
+| 1st (Ground) | Medical & Dental Services, Record & Information Center, MPC Cares, Faculty Room, CR, Quality Assurance Office, Conference Room, Repair & Maintenance, Function Hall |
 | 2nd | Director for Student Affairs, Guidance Scholarship & Admission, Placement and Follow-Up, Faculty Room, CR, Classroom, Command Centers |
 | 3rd | VP for Admin & Finance, VP for Academic Affairs, Program Chair's Office, Dean for Technology and Instruction, Dean for Graduate School, Classroom, Command Centers |
 | 4th | Library, Computer Library, Educational Technology Room, CR |
 | 5th | Staff Room, Control Room, CR |
 
-IT Building uses the client-supplied JPG floor plans for floors 1-3. Other
-buildings fall back to an empty placeholder until rooms are added via the
-admin dashboard.
+#### New Admin Building — 1 SVG floor
+
+Ground floor rooms with office linkage.
+
+#### IT Building — 3 JPG floors
+
+Client-supplied JPG floor plans for floors 1–3.
+
+All other buildings fall back to an empty placeholder until rooms are added
+via the admin dashboard.
 
 Full list of building URLs:
 
@@ -190,14 +221,14 @@ Full list of building URLs:
 | TE Building | `/te_building` |
 | Science Building | `/science_building` |
 | IT Building | `/it_building` |
-| Engineering Building | `/engineering-floor1` |
 
 ---
 
 ### Events — `/events`
 
 Lists all non-expired events. Each event shows an image, title, date range, and
-time. Tapping opens the full event detail.
+time. Tapping opens the full event detail. Client-side pagination shows 9 events
+per page.
 
 ### Announcements — `/announcements`
 
@@ -211,8 +242,7 @@ matching room's building, floor, and description.
 
 ### Health check — `/healthz`
 
-Returns `{"status": "ok"}` when the database is reachable. Used by monitoring
-tools and Docker health checks.
+Returns `{"status": "ok"}` when the database is reachable.
 
 ---
 
@@ -220,39 +250,34 @@ tools and Docker health checks.
 
 ### Logging in
 
-Go to `/admin`. Enter your username and password. After five failed attempts
-the login form is locked for 15 minutes per IP address.
+Go to `/admin`. Default credentials: **username:** `admin` **password:** `kiosk2025`.
 
-To log out, click the **Logout** link in the admin navigation bar.
+After five failed attempts the login form is locked for 15 minutes per IP
+address. Change the password immediately after first login in production (see
+[Section 10](#10-admin-password-management)).
 
 ---
 
 ### Dashboard — `/dashboard`
 
-After login the dashboard shows cards for every content section. Click a card
-to manage that section.
+After login the dashboard shows cards for every content section.
 
 ---
 
 ### Managing Events — `/admin/events`
 
-Lists all events in a table. Each row shows the title, date, and expiry.
-
-**Adding an event** — click **+ Add Event**:
-
 | Field | Notes |
 |---|---|
 | Title | Required. Displayed on the events page. |
-| Image | Path to an image under `static/`. Use the upload button to upload a file and fill this automatically. |
+| Image | Path to an image under `static/`. Use the upload button to fill this automatically. |
 | Short description | One-line summary shown in the events list. |
 | Date | Free text, e.g. `April 1 – April 30, 2026`. |
 | Time | Free text, e.g. `8:00 AM – 12:00 PM`. |
 | Details | Full multi-line description shown on the event detail page. |
 | Published at | Auto-fills to the current date and time. |
-| Expires at | Leave blank to never expire. Set a date to hide the event automatically after that time. |
+| Expires at | Leave blank to never expire. |
 
-Click **Save** to publish immediately, or set a future **Published at** value to
-schedule it.
+Paginated at 20 items per page.
 
 ---
 
@@ -260,7 +285,7 @@ schedule it.
 
 | Field | Notes |
 |---|---|
-| Title | Required. Shown in the announcements list. |
+| Title | Required. |
 | Thumbnail | Image shown in the list view. |
 | PDF file | The announcement document. Visitors tap to open or download. |
 | Published at | Auto-fills to now. |
@@ -272,66 +297,47 @@ schedule it.
 
 | Field | Notes |
 |---|---|
-| Key | Unique slug, lowercase, no spaces (e.g. `registrar`). Used in URLs. Must be unique. |
-| Display name | The office name shown to visitors (e.g. `Office of the Registrar`). |
-| Image | Photo of the office or its sign. |
+| Key | Unique slug, lowercase, no spaces (e.g. `registrar`). Used in URLs. |
+| Display name | The office name shown to visitors. |
+| Image | Photo of the office. |
 | Location | Short description shown as a chip (e.g. `New Admin Building, 2nd Floor`). |
-| Building URL | Select the building this office is in. When visitors tap **Get Directions**, this is where they are sent. |
-| Office hours | Displayed as a chip next to the location. Format `8:00 AM - 5:00 PM` to enable the live open/closed badge. |
+| Building URL | Select the building this office is in. |
+| Office hours | Format `8:00 AM - 5:00 PM` to enable the live open/closed badge. |
 | Description | Paragraph shown on the office detail page. |
 | Published at / Expires at | Same as events. |
 
-**Attaching forms and memos** — after creating an office, open **Edit** and use
-the "Files" section to attach PDF documents. Visitors see them as a list under
-"FORMS & MEMOS" and can open each one inline.
+After creating an office, open **Edit** and use the "Files" section to attach
+PDF documents (forms, memos).
 
 ---
 
 ### Managing Rooms — `/admin/rooms`
 
-Rooms are what appear as clickable rectangles on the floor plan images. Every
-room belongs to a building and a floor.
-
-**Adding a room** — click **+ Add Room**:
-
 | Field | Notes |
 |---|---|
-| Building | Must exactly match the building name used in `building_floors` (e.g. `Rodriguez Building`). Case-insensitive match is used at render time. |
-| Floor | Floor number as text (e.g. `1`, `2`). Must match the `floor_number` in `building_floors`. |
-| Room | Room name or number shown on the overlay label. |
+| Building | Must exactly match the building name in `building_floors`. |
+| Floor | Floor number as text (e.g. `1`, `2`). |
+| Room | Room name shown on the overlay label. |
 | Description | Short description shown in the room info panel. |
-| **Floor plan position** | |
-| Pos Left | Left edge of the room rectangle as a percentage (0–100) of the floor plan image width. |
-| Pos Top | Top edge as a percentage of the image height. |
-| Pos Width | Rectangle width as a percentage of the image width. |
-| Pos Height | Rectangle height as a percentage of the image height. |
-| Office Key | If this room belongs to an office, paste the office's **Key** here. The floor plan info panel will show a QR code linking to that office. |
-| Room Color | Optional CSS color (e.g. `#e3c766`) to tint the room rectangle. |
+| Pos Left / Top / Width / Height | Position as percentages of the floor plan image dimensions. |
+| Office Key | If this room belongs to an office, paste the office's Key here. |
+| Room Color | Optional CSS color to tint the room rectangle. |
 
-> **Tip — positioning rooms**: Open the floor plan image in any image editor,
-> note the pixel coordinates of the room rectangle corners, then divide by the
-> image dimensions to get percentages. For a 1000×800 image, a room at pixel
-> (100, 80) with size 150×100 would be: left=10, top=10, width=15, height=12.5.
+> **Tip:** Open the floor plan image in any image editor, note the pixel
+> coordinates of the room rectangle corners, then divide by image dimensions to
+> get percentages. For a 1000×800 image, a room at pixel (100, 80) with size
+> 150×100 → left=10, top=10, width=15, height=12.5.
 
 ---
 
 ### Managing Building Floors — `/admin/building-floors`
 
-Before rooms appear on a floor plan the floor itself must exist in the database.
-This is where you add floor plan images and give each floor a label.
-
 | Field | Notes |
 |---|---|
-| Building | Exact building name (e.g. `Rodriguez Building`). Must match the `building` column in `rooms`. |
+| Building | Exact building name (e.g. `Rodriguez Building`). |
 | Floor Number | Integer. `1` is the ground floor, `2` is the second, etc. |
-| Floor Label | Human-readable name shown on the floor selector button (e.g. `Ground Floor`, `2nd Floor`). |
-| Floor Plan Image | Path to the floor plan image stored under `static/`. Upload with the button to fill this automatically. |
-
-> **Note**: The `(building, floor_number)` pair must be unique. Saving a
-> duplicate replaces the existing row.
-
-Once a floor row exists and rooms have been added for that building and floor
-number, they will appear as overlays on the floor plan image automatically.
+| Floor Label | Human-readable name on the floor selector button. |
+| Floor Plan Image | Path to the floor plan image under `static/`. |
 
 ---
 
@@ -339,14 +345,37 @@ number, they will appear as overlays on the floor plan image automatically.
 
 | Field | Notes |
 |---|---|
-| Name | Required. Displayed on the faculty card and profile. |
-| Department | Used to build the department filter sidebar (e.g. `College of Engineering`). |
+| Name | Required. |
+| Department | Used to build the department filter sidebar. |
 | Position | Displayed on the profile page (e.g. `Instructor I`). |
-| Photo | Portrait photo. Upload with the button. |
-| Schedule Image | Optional image of the faculty member's class schedule. |
-| Room | Room name or number (e.g. `IT 202`). Enables the **Find on Map** button on the faculty card. |
+| Photo | Portrait photo. |
+| Schedule Image | Optional image of the class schedule (legacy). |
+| Room | Room name or number (e.g. `IT 202`). Enables the Find on Map button. |
 | Building | Building name (e.g. `IT Building`). Required together with Room for map navigation. |
-| Office Key | Optional. Links the faculty member's profile to a specific office page. |
+| Office Key | Links the profile to a specific office page. |
+
+**Schedule editor** — at the bottom of the faculty form, add rows to build a
+weekly schedule grid. Each row has:
+
+| Field | Notes |
+|---|---|
+| Day | MON, TUE, WED, THU, FRI, or SAT |
+| Time | e.g. `7:30 AM – 9:00 AM` |
+| Subject | Subject code or name |
+| Section | Class section |
+| Room | Room where the class is held |
+| Color | Background color for the schedule cell (Yellow, Green, Blue, Cyan, Red, Purple) |
+
+The schedule is stored as JSON and rendered as a grid table on the faculty
+profile page. Use **+ Add Row** and the row delete button to manage entries.
+
+---
+
+### RFID Entry Logs — `/admin/rfid-logs`
+
+Shows a paginated table of all RFID scan events: user name, role badge, UID,
+and timestamp. Use **Clear All** to wipe the log. Useful for tracking who has
+accessed the kiosk and when.
 
 ---
 
@@ -357,9 +386,8 @@ to add a new building or update an existing one:
 
 ### Step 1 — Prepare the floor plan image
 
-Export the floor plan as a JPEG or PNG. There is no required resolution but
-wider images give more room precision. Store the file under `static/` (e.g.
-`static/images/rodriguez_ground.jpg`).
+Export the floor plan as a JPEG, PNG, or SVG. Store the file under `static/`
+(e.g. `static/images/rodriguez_ground.jpg`).
 
 ### Step 2 — Add a building floor row
 
@@ -369,60 +397,46 @@ Go to **Admin → Building Floors → Add**. Fill in:
 - Floor Label: `Ground Floor`
 - Floor Plan Image: `images/rodriguez_ground.jpg`
 
-Repeat for each floor of the building.
+Repeat for each floor.
 
 ### Step 3 — Add rooms for that floor
 
-Go to **Admin → Rooms → Add**. For each room on the Ground Floor:
+Go to **Admin → Rooms → Add**. For each room:
 - Building: `Rodriguez Building`
 - Floor: `1`
 - Room: `Room 101`
-- Description: `General Purpose Classroom`
 - Pos Left / Top / Width / Height: percentage coordinates on the image
 
 ### Step 4 — Visit the floor plan
 
-Open `/rodriguez_building` on the kiosk. The Ground Floor image appears with
-room rectangles at the configured positions. Switch floors using the sidebar
-buttons. Hover or tap a room to see its info panel.
+Open `/rodriguez_building`. The Ground Floor image appears with room rectangles
+at the configured positions.
 
 ### Linking a room to an office
 
-Set the **Office Key** field on the room to match the **Key** field of an
-existing office. The room's info panel will then show a QR code that links
-directly to that office's detail page.
-
-### Buildings with hardcoded floors
-
-The **Academic Building** and **IT Building** have partial room sets hardcoded
-in the application for the ground floor. All other floors still read from the
-database. You can add database rows for any floor including the ground floor —
-database rows take priority over hardcoded ones once any `building_floors` row
-exists for that building.
+Set the **Office Key** field on the room to match the **Key** of an existing
+office. The room's info panel will show an **OPEN OFFICE PAGE →** button.
 
 ---
 
 ## 5. Local development setup
 
 ```bash
-# Clone and enter the project
 git clone <repo-url>
 cd kiosk
 
-# Create a Python virtual environment
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 
-# First time only: create tables and seed the admin user
+# First time: create tables and seed admin
 .venv/bin/python init_db.py
-# → prompts for admin password, or reads from KIOSK_ADMIN_PASSWORD env var
 
-# Start the development server
+# Start dev server
 .venv/bin/python app.py
 # → http://127.0.0.1:5000/
 ```
 
-Log in to the admin at `http://127.0.0.1:5000/admin`.
+Default admin credentials: `admin` / `kiosk2025`
 
 The development server auto-reloads on file changes. Do not use it in
 production.
@@ -430,8 +444,6 @@ production.
 ---
 
 ## 6. Production deployment
-
-The dev server is for local use only. On the display PC or Raspberry Pi:
 
 ```bash
 # 1. Create a system user and copy the project
@@ -443,13 +455,13 @@ sudo chown -R kiosk:kiosk /opt/kiosk
 sudo -u kiosk python3 -m venv /opt/kiosk/.venv
 sudo -u kiosk /opt/kiosk/.venv/bin/pip install -r /opt/kiosk/requirements.txt
 
-# 3. Write the environment file (keep it private — chmod 600)
+# 3. Write the environment file (chmod 600)
 sudo cp /opt/kiosk/deploy/kiosk.env.example /etc/kiosk.env
 sudo chmod 600 /etc/kiosk.env
-# Open /etc/kiosk.env and set KIOSK_SECRET_KEY to a long random string:
+# Set KIOSK_SECRET_KEY:
 #   python3 -c "import secrets; print(secrets.token_hex(32))"
 
-# 4. Initialise the database and seed the admin user
+# 4. Initialise the database
 sudo -u kiosk KIOSK_ADMIN_PASSWORD='your-strong-password' \
     /opt/kiosk/.venv/bin/python /opt/kiosk/init_db.py
 
@@ -461,35 +473,29 @@ sudo systemctl status kiosk
 
 # 6. Schedule nightly database backups
 sudo crontab -u kiosk -e
-# Add this line:
-# 0 3 * * * /opt/kiosk/scripts/backup_db.sh >> /opt/kiosk/logs/backup.log 2>&1
+# Add: 0 3 * * * /opt/kiosk/scripts/backup_db.sh >> /opt/kiosk/logs/backup.log 2>&1
 ```
 
 The service listens on port 8000. Point the kiosk browser at
-`http://127.0.0.1:8000/`. For remote admin access over LAN use the machine's
-local IP address.
+`http://127.0.0.1:8000/`. Change the default admin password before going live.
 
 ---
 
 ## 7. Docker deployment
 
 ```bash
-# Copy and edit the environment file
 cp deploy/kiosk.env.example .env
 # Edit .env and set KIOSK_SECRET_KEY
 
-# Start in the background
 docker compose up -d
-
-# The kiosk is available at http://localhost:8000/
+# → http://localhost:8000/
 ```
 
-The container runs as a non-root `kiosk` user. The following paths are mounted
-as host volumes so data survives restarts and image upgrades:
+Volumes mounted from the host:
 
 | Volume | Contents |
 |---|---|
-| `./database.db` | All content: rooms, events, announcements, offices, faculty |
+| `./database.db` | All content: rooms, events, announcements, offices, faculty, RFID users and logs |
 | `./static/uploads/` | Uploaded images and PDFs |
 | `./logs/` | Application logs |
 
@@ -499,17 +505,11 @@ Health check: `curl http://localhost:8000/healthz` → `{"status":"ok"}`.
 
 ## 8. Free cloud hosting options
 
-If you want to make the kiosk accessible online (e.g. for the client to preview
-or manage content remotely), both options below have a free tier and connect
-directly to this GitHub repo.
-
----
-
 ### Render — `render.com`
 
 1. Create a free account at [render.com](https://render.com).
 2. Click **New → Web Service** and connect this GitHub repo.
-3. Set the following in the Render dashboard:
+3. Set:
 
    | Setting | Value |
    |---|---|
@@ -525,50 +525,22 @@ directly to this GitHub repo.
    | `FLASK_ENV` | `production` |
    | `KIOSK_ADMIN_PASSWORD` | Your chosen admin password |
 
-5. Click **Deploy**. Render builds and starts the app. Your URL will be
-   `https://your-app-name.onrender.com`.
-
-**Free tier limits:**
-- The instance **spins down after 15 minutes of inactivity** and takes ~30
-  seconds to wake on the next request. This is fine for demos and admin access
-  but not ideal for an always-on kiosk display.
-- The SQLite database file **resets on every redeploy** because the free tier
-  has no persistent disk. Uploaded images and added content will be lost on the
-  next deploy. For persistent storage, add a Render PostgreSQL database (free
-  for 90 days, then $7/mo) or upgrade to a paid plan with a disk.
+**Free tier limits:** Spins down after 15 minutes of inactivity (~30s wake
+time). SQLite resets on every redeploy (no persistent disk on the free tier).
 
 ---
 
 ### Railway — `railway.app`
 
-Railway gives $5 of free credit per month, which is enough to run this app
-continuously at low traffic.
+Railway gives $5 of free credit per month (enough for low-traffic continuous
+uptime).
 
 1. Create a free account at [railway.app](https://railway.app).
-2. Click **New Project → Deploy from GitHub repo** and select this repo.
-3. Railway auto-detects Python and sets up the build. Add the following
-   environment variables under **Variables**:
-
-   | Key | Value |
-   |---|---|
-   | `KIOSK_SECRET_KEY` | Any long random string |
-   | `FLASK_ENV` | `production` |
-   | `KIOSK_ADMIN_PASSWORD` | Your chosen admin password |
-
-4. Set the **Start command** (under Settings → Deploy):
-   ```
-   gunicorn app:app --bind 0.0.0.0:$PORT
-   ```
-
-5. Add a **Volume** (under the service → Volumes) mounted at `/app` to persist
-   the SQLite database across deploys. Railway supports persistent volumes on
-   all plans including the free credit tier.
-
-**Free tier limits:**
-- $5 of credit per month. A single low-traffic service uses roughly $0.50–$2
-  per month, so the free credit covers it most of the time.
-- No persistent volume on the absolute free hobby plan — add one from the
-  Railway dashboard to keep your data across deploys.
+2. **New Project → Deploy from GitHub repo**.
+3. Add environment variables: `KIOSK_SECRET_KEY`, `FLASK_ENV=production`,
+   `KIOSK_ADMIN_PASSWORD`.
+4. Start command: `gunicorn app:app --bind 0.0.0.0:$PORT`
+5. Add a **Volume** mounted at `/app` to persist the SQLite database.
 
 ---
 
@@ -577,14 +549,13 @@ continuously at low traffic.
 | | Render | Railway |
 |---|---|---|
 | Easiest setup | Yes | Yes |
-| Always-on (no sleep) | No (free tier sleeps) | Yes (within credit) |
-| Persistent storage | Paid add-on | Volume add-on (included in credit) |
+| Always-on | No (free sleeps) | Yes (within credit) |
+| Persistent storage | Paid add-on | Volume (included in credit) |
 | Custom domain | Yes (free) | Yes (free) |
 
-For a **demo or client preview**, either works. For a **production kiosk**
-running on a physical display on campus, the self-hosted deployment (Section 6)
-is recommended so the app runs locally on the device without depending on
-internet connectivity.
+For a production kiosk on a physical display, the self-hosted deployment
+(Section 6) is recommended so the app runs locally without depending on
+internet.
 
 ---
 
@@ -592,180 +563,137 @@ internet connectivity.
 
 | Variable | Required in prod | Purpose |
 |---|---|---|
-| `KIOSK_SECRET_KEY` | Yes | Flask session signing key. Generate with `python3 -c "import secrets; print(secrets.token_hex(32))"`. |
-| `FLASK_ENV` | Recommended | Set to `production` — causes the app to refuse to start if `KIOSK_SECRET_KEY` is missing. |
-| `KIOSK_ADMIN_PASSWORD` | Optional | Non-interactive password source for `init_db.py`. If unset, the script prompts for input. |
-| `KIOSK_BACKUP_RETENTION_DAYS` | Optional | How many days of backup files to keep (default 30). |
+| `KIOSK_SECRET_KEY` | Yes | Flask session signing key. |
+| `FLASK_ENV` | Recommended | Set to `production` — app refuses to start if `KIOSK_SECRET_KEY` is missing. |
+| `KIOSK_ADMIN_PASSWORD` | Optional | Non-interactive password source for `init_db.py`. |
+| `KIOSK_ENABLE_RFID` | Optional | Set to `1` on Raspberry Pi to enable the mfrc522 background watcher. |
+| `KIOSK_INTERNAL_URL` | Optional | Base URL for the Pi watcher to call back (default `http://127.0.0.1:8000`). |
+| `KIOSK_BACKUP_RETENTION_DAYS` | Optional | Days of backup files to keep (default 30). |
 
 ---
 
 ## 10. Admin password management
 
 ```bash
-# First-time setup — seeds the admin account (will not overwrite an existing one)
+# First-time setup
 .venv/bin/python init_db.py
 
 # Change an existing admin password
 .venv/bin/python scripts/set_admin_password.py
-# → prompts for new password, or reads from KIOSK_ADMIN_PASSWORD
 ```
 
-The default username is `admin`. The password is hashed with bcrypt and stored
-in the `admins` table. The plain-text password is never written to disk.
+Default username is `admin`, default password is `kiosk2025`. The password is
+hashed with bcrypt — the plain-text is never written to disk. Change it before
+going live.
 
 ---
 
 ## 11. CSV bulk room import
 
-Instead of adding rooms one by one, you can import them in bulk from a CSV file.
-
-Go to **Admin → Rooms** and use the **Import CSV** button at the top of the page.
-
-### CSV format
-
-The file must be UTF-8 encoded with a header row:
+Go to **Admin → Rooms** and click **Import CSV**.
 
 ```
 building,floor,room,description,pos_left,pos_top,pos_width,pos_height,office_key
 Rodriguez Building,1,Room 101,General Classroom,5,10,15,12,
-Rodriguez Building,1,Faculty Room,Department Office,5,30,15,12,registrar
 IT Building,2,Lab 201,Computer Laboratory,20,15,25,20,it_lab
 ```
 
 | Column | Required | Notes |
 |---|---|---|
-| `building` | Yes | Must match the `building` name in `building_floors` exactly. |
-| `floor` | Yes | Floor number as text (e.g. `1`, `2`). |
+| `building` | Yes | Must match `building_floors` exactly. |
+| `floor` | Yes | Floor number as text. |
 | `room` | Yes | Room name shown on the overlay. |
-| `description` | No | Short description for the info panel. |
-| `pos_left` | No | Left position as a percentage (default 0). |
-| `pos_top` | No | Top position as a percentage (default 0). |
-| `pos_width` | No | Width as a percentage (default 10). |
-| `pos_height` | No | Height as a percentage (default 10). |
-| `office_key` | No | Office key to link to. Leave blank if none. |
+| `description` | No | Info panel text. |
+| `pos_left/top/width/height` | No | Percentages (default 0/0/10/10). |
+| `office_key` | No | Office key to link to. |
 
-Rows that have an existing `(building, floor, room)` combination are updated in
-place. Invalid rows are skipped and reported in the flash message.
+Rows with an existing `(building, floor, room)` combination are updated in place.
 
 ---
 
 ## 12. File uploads
 
-The upload endpoint is available from any admin form that has an image or PDF
-field. Click the upload button next to the field, select a file, and the path
-is automatically inserted into the text field.
+Accepted types:
+- Images: JPEG, PNG, WebP, GIF (max 5 MB) → saved to `static/uploads/images/`
+- Documents: PDF (max 10 MB) → saved to `static/files/uploads/`
 
-**Accepted file types:**
-- Images: JPEG, PNG, WebP, GIF (max 5 MB)
-- Documents: PDF (max 10 MB)
-
-Files are saved to `static/uploads/images/` or `static/uploads/files/` with
-a random UUID filename. The path stored in the database is relative to `static/`
-(e.g. `uploads/images/3f8a…jpg`).
+Files are renamed to random UUID filenames. The database stores paths relative
+to `static/` (e.g. `uploads/images/3f8a….jpg`).
 
 ---
 
 ## 13. Offline / service worker
 
-A service worker is registered automatically on every page. It caches static
-assets (CSS, fonts) on first visit and serves them from cache on subsequent
-visits.
+A service worker caches static assets on first visit. When the device loses
+internet:
 
-**When the device loses internet connection:**
-- Page navigation requests that fail will show the `/offline` branded fallback
-  page instead of a browser error.
-- Static assets (CSS, images, fonts) that are already cached continue to load
-  normally.
+- Failed page navigation requests show the branded `/offline` fallback page.
+- Already-cached CSS, fonts, and images continue to load normally.
 
-The cache is versioned (`kiosk-v1`). When the application is updated and the
-cache version changes, stale entries are cleared automatically on the next visit.
+Cache is versioned (`kiosk-v1`). Stale entries are cleared automatically when
+the version changes.
 
 ---
 
 ## 14. RFID entry capture
 
-The kiosk supports two RFID flows — keyboard emulation (works on any device)
-and a dedicated Raspberry Pi background watcher using `mfrc522` / `RPi.GPIO`.
+### Keyboard-emulation (default, any device)
 
-### Keyboard-emulation (default)
+The lock screen silently captures keystrokes from a USB HID RFID reader:
 
-The splash screen (`/`) silently captures keystrokes from an RFID reader that
-appears as a USB HID keyboard.
-
-- Characters accumulate into a buffer as they arrive.
-- If the Enter key is pressed and the buffer has more than 4 characters, the
-  browser redirects to `/rfid?uid=<scanned-uid>`.
-- If no key is pressed for 100 ms and the buffer has more than 4 characters,
-  the same redirect fires automatically (handles readers that do not send Enter).
-- Keystrokes from the RFID reader are not displayed visibly on screen.
+- Characters accumulate into a buffer.
+- On Enter key (or 100 ms timeout with > 4 chars), the browser redirects to
+  `/rfid?uid=<scanned-uid>`.
 
 ### Raspberry Pi watcher (optional)
 
-For deployments on a Pi with a physical RC522 module, the kiosk ships a
-background thread that polls the reader and notifies the Flask app directly.
-
 ```bash
-# Install the Pi-only extras on the device
 sudo pip install mfrc522 RPi.GPIO spidev
 
-# Enable the watcher via the env file
+# In /etc/kiosk.env:
 KIOSK_ENABLE_RFID=1
 KIOSK_INTERNAL_URL=http://127.0.0.1:8000
 ```
 
-When `KIOSK_ENABLE_RFID=1` is set, `create_app()` starts the watcher on boot.
-Without the flag (e.g. on a laptop) the watcher stays dormant — nothing breaks.
+When `KIOSK_ENABLE_RFID=1` is set, `create_app()` starts the hardware watcher
+on boot. Without the flag (on a laptop) the watcher stays dormant.
 
 ### Server lookup — `/rfid?uid=` and `/check_rfid`
 
-Both the keyboard-emulation flow and the Pi watcher hit the same endpoints:
-
 | Route | Method | Purpose |
 |---|---|---|
-| `/rfid?uid=<uid>` | GET | If the UID is in the `users` table, render `profile.html` with the person's name and role. Otherwise redirect to `/menu`. Rate-limited to 30/min. |
-| `/check_rfid` | POST (JSON) | Machine-to-machine lookup: `{"uid": "..."}` → `{"status":"authorized","user":{...}}` or `{"status":"unauthorized"}`. Localhost-only (remote calls get 403). Rate-limited to 60/min. CSRF-exempt because it's called by the watcher thread. |
+| `/rfid?uid=<uid>` | GET | Looks up UID in `users` table. If found, shows personalized welcome page and saves user to localStorage before redirecting to `/menu`. Unknown UIDs redirect to `/menu` as visitor. All scans are logged to `rfid_logs`. Rate-limited to 30/min. |
+| `/check_rfid` | POST (JSON) | Machine-to-machine lookup: `{"uid":"…"}` → `{"status":"authorized","user":{…}}` or `{"status":"unauthorized"}`. Localhost-only. Rate-limited to 60/min. |
 
 ### Managing users
-
-The `users` table is populated manually for now:
 
 ```sql
 INSERT INTO users (rfid_uid, name, role) VALUES ('AB12CD34', 'Juan dela Cruz', 'student');
 ```
 
+Roles: `faculty`, `student`, `visitor`. Role determines the badge color
+displayed on the welcome screen and menu.
+
 ---
 
 ## 14a. Server-side QR code generation — `/qr?data=…&size=…`
 
-Every QR surface in the kiosk (directions QR, office QR, room QR) is
-generated server-side using the `qrcode` library. Works completely offline.
-
-**Parameters:**
-
 | Parameter | Required | Notes |
 |---|---|---|
-| `data` | Yes | The string to encode. Usually a URL. |
-| `size` | No | Pixel size (64–512, default 200). |
+| `data` | Yes | String to encode (usually a URL). |
+| `size` | No | Pixel size 64–512 (default 200). |
 
-**Examples:**
-```
-/qr?data=https://example.com&size=260
-/qr?data=/campus_map?location=ACADEMIC+BUILDING
-```
-
-Rate-limited to 60 requests/min. Returns a PNG image.
+Rate-limited to 60 requests/min. Returns a PNG image. Works offline.
 
 ---
 
 ## 15. Display scaling
 
-The kiosk is designed for a **1360 × 768** display (standard HD TV). The file
-`static/js/kiosk-scale.js` is injected into every HTML page automatically. It
-applies a CSS `transform: scale()` so the 1360 × 768 design fills any viewport
-while preserving the exact layout. Editors working on a laptop see the same
-frame the TV renders.
+Designed for a **1360 × 768** display. `static/js/kiosk-scale.js` applies a
+CSS `transform: scale()` so the layout fills any viewport while preserving the
+exact 1360 × 768 frame.
 
-If the target display changes, update `DESIGN_W` and `DESIGN_H` in
+To change the target resolution, update `DESIGN_W` and `DESIGN_H` in
 [static/js/kiosk-scale.js](static/js/kiosk-scale.js).
 
 ---
@@ -775,16 +703,16 @@ If the target display changes, update `DESIGN_W` and `DESIGN_H` in
 | Area | Implementation |
 |---|---|
 | Password storage | bcrypt hashing via Flask-Bcrypt. Plain text never stored. |
-| Admin login rate limit | 5 POST attempts per 15 minutes per IP address. |
-| CSRF protection | Flask-WTF globally enabled. Every form renders a hidden `csrf_token` field. |
+| Admin login rate limit | 5 POST attempts per 15 minutes per IP. |
+| CSRF protection | Flask-WTF globally enabled. Every form has a hidden `csrf_token`. |
 | SQL injection | All queries use parameterized placeholders. `LIKE` patterns escape `%`, `_`, `\`. |
-| Open redirect | The `from_building` parameter on the office page is validated against a fixed allowlist of building URLs. |
-| File uploads | MIME-type whitelist enforced server-side. Files are renamed to random UUIDs before storage. |
-| Session fixation | Session is cleared before writing new admin credentials on login. |
-| Search API rate limiting | `/api/search` and `/api/rooms` are limited to 60 requests per minute. |
-| Upload rate limiting | `/admin/upload` is limited to 30 requests per minute. |
-| Error handling | 404, 429, and 500 errors render branded HTML pages. 500 errors are logged with full tracebacks. |
-| Logging | Admin logins (success and failure) are written to `logs/kiosk.log` (rotating, 10 MB × 5 files). |
+| Open redirect | `from_building` parameter validated against a fixed allowlist. |
+| File uploads | MIME-type whitelist enforced server-side. Files renamed to random UUIDs. |
+| Session fixation | Session cleared before writing new admin credentials on login. |
+| Search API rate limiting | `/api/search` and `/api/rooms` limited to 60 req/min. |
+| Upload rate limiting | `/admin/upload` limited to 30 req/min. |
+| Error handling | 404, 429, and 500 errors render branded HTML pages. 500 errors logged with full tracebacks. |
+| Logging | Admin logins written to `logs/kiosk.log` (rotating, 10 MB × 5 files). |
 
 ---
 
@@ -794,7 +722,7 @@ If the target display changes, update `DESIGN_W` and `DESIGN_H` in
 .venv/bin/pytest tests/ -q
 ```
 
-38 tests cover:
+Tests cover:
 - All major public routes return HTTP 200
 - Health check endpoint returns correct JSON
 - Menu page injects kiosk scripts
@@ -802,12 +730,11 @@ If the target display changes, update `DESIGN_W` and `DESIGN_H` in
 - Admin login, logout, and session protection
 - Admin CRUD for rooms, events, announcements, offices
 - 404 error page
-- `/rfid?uid=` redirect and user profile rendering (6 tests)
+- `/rfid?uid=` redirect and user profile rendering
 - `/check_rfid` JSON endpoint (authorised / unauthorised / missing UID)
 - `/qr?data=` PNG generation + missing-data rejection
 
-Each test run uses an isolated temporary database seeded by the `conftest.py`
-fixture. No test touches the `database.db` file.
+Each test run uses an isolated temporary database. No test touches `database.db`.
 
 ---
 
@@ -818,85 +745,95 @@ kiosk/
 ├── app.py                        Entry point — dev server
 ├── init_db.py                    First-time DB setup, schema migrations, admin seed
 ├── requirements.txt
-├── Dockerfile                    Production container (non-root kiosk user)
+├── Dockerfile
 ├── docker-compose.yml
-├── database.db                   SQLite store (created by init_db.py)
+├── database.db                   SQLite store (tracked in git with seed data)
 │
 ├── kiosk_app/
-│   ├── __init__.py               create_app() factory, blueprint registration,
-│   │                             logging, error handlers, kiosk-script injection
+│   ├── __init__.py               create_app() factory; auto-creates default admin
+│   │                             on startup if none exists; injects kiosk scripts
 │   ├── extensions.py             bcrypt, CSRFProtect, Limiter singletons
 │   ├── db.py                     db_connection() context manager
 │   ├── auth.py                   login_required decorator
-│   ├── rfid.py                   Optional Pi-only mfrc522 + GPIO watcher
-│   │                             (no-op on laptops; enable with KIOSK_ENABLE_RFID)
+│   ├── rfid.py                   Optional Pi-only mfrc522 watcher
 │   └── blueprints/
-│       ├── main.py               /, /menu, /faculty, /search, /api/search,
-│       │                         /api/rooms, /rfid, /check_rfid, /qr,
-│       │                         /offline, /sw.js, /healthz
-│       ├── campus.py             /campus_map, all /building_name routes,
-│       │                         _floor_plan() helper, _ACADEMIC_FLOORS
-│       ├── offices.py            /office-selection, /office (with ENTER
-│       │                         BUILDING + SHOW DIRECTION buttons)
+│       ├── main.py               /, /menu, /faculty, /profile, /search,
+│       │                         /api/search, /api/rooms, /api/departments,
+│       │                         /api/faculty/<id>/schedule,
+│       │                         /rfid, /check_rfid, /qr, /offline, /healthz
+│       ├── campus.py             /campus, all /building_name routes,
+│       │                         _floor_plan() helper, _ACADEMIC_FLOORS,
+│       │                         _NEW_ADMIN_FLOORS, _ENTRANCE_BY_FLOOR
+│       ├── offices.py            /office-selection, /office
 │       ├── announcements.py      /announcements, /announcement-view
 │       ├── events.py             /events, /event/<id>
 │       ├── admin.py              /admin login, /dashboard, /rooms CRUD,
 │       │                         /rooms/import-csv
 │       └── content.py            /admin/events|announcements|offices|
-│                                 building-floors|faculty CRUD, /admin/upload
+│                                 building-floors|faculty CRUD,
+│                                 /admin/rfid-logs, /admin/rfid-logs/clear,
+│                                 /admin/upload
 │
 ├── templates/
-│   ├── _breadcrumb.html          Reusable breadcrumb partial
-│   ├── floor_plan.html           Generic floor plan renderer
-│   ├── index.html                Splash screen with RFID capture
-│   ├── menu.html                 Main menu grid
-│   ├── faculty.html              Faculty directory
-│   ├── office.html               Office detail + sidebar
-│   ├── office_selection.html     Office list
-│   ├── campus.html               Interactive campus map
-│   ├── events.html               Events list
+│   ├── _breadcrumb.html
+│   ├── floor_plan.html           Generic floor plan renderer (all buildings)
+│   ├── index.html                Lock screen with RFID capture + slideshow
+│   ├── menu.html                 Main menu grid + personalized greeting
+│   ├── faculty.html              Faculty directory with department sidebar
+│   ├── profile.html              Faculty profile with schedule grid + map link
+│   ├── rfid_scan.html            RFID welcome screen (role-coded, auto-redirect)
+│   ├── office.html               Office detail + file list + PDF viewer
+│   ├── office_selection.html     Office list sidebar
+│   ├── campus.html               Interactive campus map + A* routing
+│   ├── events.html               Events list + client-side pagination
 │   ├── rooms.html                Admin rooms list + CSV import
 │   ├── offline.html              Offline fallback page
 │   ├── 404.html / 429.html / 500.html
 │   └── admin/
 │       ├── base.html             Admin layout with sidebar nav
-│       ├── building_floors.html  Floor list
+│       ├── building_floors.html
 │       ├── building_floor_form.html
-│       ├── faculty_list.html     Faculty list
-│       ├── faculty_form.html
+│       ├── faculty_list.html
+│       ├── faculty_form.html     Faculty editor with schedule row builder
+│       ├── rfid_logs.html        RFID scan log table + clear button
 │       └── …                    Event, announcement, office forms
 │
 ├── static/
 │   ├── css/style.css
 │   ├── js/
 │   │   ├── kiosk-scale.js        Auto-scales every page to 1360×768
-│   │   └── kiosk-idle.js         Idle timeout → returns to splash
+│   │   ├── kiosk-idle.js         60s idle → lock screen; admin countdown modal
+│   │   ├── drag-scroll.js        Drag-to-scroll for IR touch frames
+│   │   ├── keyboard.js           On-screen QWERTY keyboard for search inputs
+│   │   ├── toast.js              window.toast() notification utility
+│   │   ├── kiosk.js              Shared utilities
+│   │   └── slideshow.js          Lock screen slide rotation
 │   ├── sw.js                     Service worker (cache-first assets,
 │   │                             network-first navigation, offline fallback)
-│   ├── font/                     LeagueSpartan and other typefaces
+│   ├── font/                     LeagueSpartan variable font
 │   ├── images/
-│   │   ├── icon/                 Home / back icons
+│   │   ├── icon/                 Home / back / menu icons
 │   │   ├── building/             Campus map building photos
 │   │   ├── floor_plans/          Hand-drawn SVGs + client JPGs
-│   │   │   ├── academic_ground.svg
-│   │   │   ├── academic_2nd.svg
-│   │   │   ├── academic_3rd.svg
-│   │   │   ├── academic_4th.svg
-│   │   │   ├── academic_5th.svg
+│   │   │   ├── academic_ground.svg … academic_5th.svg
+│   │   │   ├── new_admin_f1.svg  New Admin Building ground floor
 │   │   │   └── IT_1ST.JPG / IT_2ND.JPG / IT_3RD.JPG
 │   │   ├── offices/              Office cover photos
-│   │   ├── qr/                   Pre-generated QR codes (fallback)
-│   │   └── screensaver/          Splash slideshow images
-│   └── uploads/                  Admin-uploaded images and PDFs
+│   │   ├── screensaver/          Lock screen slideshow images (slide1–4.png)
+│   │   └── KIOSK BACKGROUND.png  Menu and faculty page background
+│   ├── files/
+│   │   └── uploads/              Admin-uploaded PDF documents
+│   └── uploads/
+│       └── images/               Admin-uploaded photos
 │
 ├── logs/                         Rotating app logs (auto-created)
-├── tests/                        pytest suite (38 tests)
+├── tests/                        pytest suite
 ├── scripts/
-│   ├── backup_db.sh              SQLite online backup + retention
-│   └── set_admin_password.py     Rotate admin password
+│   ├── backup_db.sh
+│   └── set_admin_password.py
 └── deploy/
-    ├── kiosk.service             systemd unit (gunicorn)
-    └── kiosk.env.example         Environment variable template
+    ├── kiosk.service
+    └── kiosk.env.example
 ```
 
 ---
@@ -906,13 +843,14 @@ kiosk/
 | Table | Purpose |
 |---|---|
 | `admins` | Admin login credentials (username + bcrypt hash) |
-| `rooms` | Individual rooms with building, floor, position coordinates, and optional office link |
+| `rooms` | Individual rooms with building, floor, position, and optional office link |
 | `offices` | Office directory entries with hours, location, files, and building link |
 | `events` | Campus events with image, date, time, and expiry |
 | `announcements` | Digital notices with thumbnail and PDF attachment |
 | `building_floors` | Floor plan images and labels for each building floor |
-| `faculty` | Faculty members with department, photo, room, and office link |
-| `users` | RFID UID → name + role (used by `/rfid?uid=` and `/check_rfid` for personalised entry) |
+| `faculty` | Faculty members with department, photo, room, schedule JSON, and office link |
+| `users` | RFID UID → name + role (used by `/rfid?uid=` for personalized entry) |
+| `rfid_logs` | Timestamped record of every RFID scan: uid, name, role |
 
 All content tables have `published_at` and `expires_at` columns. Records with
 a past `expires_at` are automatically excluded from all public-facing queries.
