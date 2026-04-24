@@ -19,16 +19,15 @@ body {
 
 /* ── Sidebar ─────────────────────────────────────── */
 .sidebar {
-  width: 240px;
+  width: 260px;
   flex-shrink: 0;
-  background: linear-gradient(180deg, #7b2d2d, #8f3a3a);
+  background: linear-gradient(180deg, #7b2d2d, #b85757);
   color: white;
-  padding: 60px 20px 30px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  padding: 22px 25px;
   overflow-y: auto;
+  scrollbar-width: none;
 }
+.sidebar::-webkit-scrollbar { display: none; }
 
 .sidebar h1 {
   font-size: 17px;
