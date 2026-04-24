@@ -132,6 +132,11 @@
     resetTimers();
   }
 
+  function goToLockScreen() {
+    localStorage.removeItem('rfid_user');
+    window.location.href = '/';
+  }
+
   function resetTimers() {
     clearTimeout(menuTimer);
     clearTimeout(screensaverTimer);
@@ -139,15 +144,13 @@
     clearInterval(countdownInterval);
     if (warningEl) warningEl.style.display = 'none';
 
-    if (window.location.pathname !== '/menu') {
-      if (isAdminPage()) {
-        // Show warning instead of hard redirect on admin pages
-        warningTimer = setTimeout(showWarning, MENU_TIMEOUT_MS);
-      } else {
-        menuTimer = setTimeout(function () {
-          window.location.href = '/menu';
-        }, MENU_TIMEOUT_MS);
-      }
+    var path = window.location.pathname;
+    if (path === '/') return; // already on lock screen, no timer needed
+
+    if (isAdminPage()) {
+      warningTimer = setTimeout(showWarning, MENU_TIMEOUT_MS);
+    } else {
+      menuTimer = setTimeout(goToLockScreen, MENU_TIMEOUT_MS);
     }
 
     screensaverTimer = setTimeout(showScreensaver, SCREENSAVER_TIMEOUT_MS);
