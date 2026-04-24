@@ -6,7 +6,7 @@
     </pattern>
     <style>
       .wall       { fill: none; stroke: #333; stroke-width: 4; }
-      .room-white { fill: #ffffff; stroke: #333; stroke-width: 2; }
+      .room-white { fill: #f0eeea; stroke: #333; stroke-width: 2; }
       .room-yellow{ fill: #f4d35e; stroke: #333; stroke-width: 2; }
       .room-cr    { fill: #8b1a1a; stroke: #333; stroke-width: 2; }
       .label-exit { font: 700 12px sans-serif; fill: #1a1a1a; text-anchor: middle;
