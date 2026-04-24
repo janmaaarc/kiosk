@@ -89,9 +89,18 @@
 <body>
     <h1 class="title">DIGITAL ANNOUNCEMENTS</h1>
 
+<!-- Lightbox -->
+<div id="lightbox" onclick="closeLightbox()" style="
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);
+    z-index:9999;align-items:center;justify-content:center;cursor:pointer;">
+    <img id="lightbox-img" src="" style="
+        max-width:90vw;max-height:90vh;border-radius:12px;
+        box-shadow:0 20px 60px rgba(0,0,0,0.6);object-fit:contain;">
+</div>
+
 <div class="grid">
     {% for a in announcements %}
-    <div class="card" onclick="openPDF('{{ a.file }}')">
+    <div class="card" onclick="openImage('{{ url_for('static', filename=a.thumbnail) }}')">
         <img src="{{ url_for('static', filename=a.thumbnail) }}">
         <p>{{ a.title }}</p>
     </div>
@@ -108,8 +117,14 @@
 
 
 <script>
-function openPDF(file){
-    window.location.href = "/announcement-view?file=" + file;
+function openImage(src) {
+    const lb = document.getElementById('lightbox');
+    document.getElementById('lightbox-img').src = src;
+    lb.style.display = 'flex';
+}
+
+function closeLightbox() {
+    document.getElementById('lightbox').style.display = 'none';
 }
 
 function goBack(){
