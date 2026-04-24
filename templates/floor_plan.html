@@ -21,15 +21,18 @@ body {
 
 /* ── Side panel ─────────────────────────────────── */
 .side-panel {
-  width: 220px;
+  width: 260px;
   flex-shrink: 0;
   background: linear-gradient(180deg, #7b2d2d, #b85757);
   color: white;
-  padding: 60px 20px 30px;
+  padding: 22px 25px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
+  overflow-y: auto;
+  scrollbar-width: none;
 }
+.side-panel::-webkit-scrollbar { display: none; }
 
 .side-panel h1 {
   font-size: 17px;
@@ -40,21 +43,23 @@ body {
 
 .floor-btn {
   width: 100%;
-  padding: 8px 12px;
+  padding: 14px 16px;
   border: none;
   border-radius: 20px;
   background: transparent;
   color: rgba(255,255,255,0.75);
   font-family: inherit;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 1px;
   text-align: left;
   cursor: pointer;
   transition: 0.2s;
+  line-height: 1.3;
 }
-.floor-btn:hover, .floor-btn.active {
-  background: white;
+.floor-btn:hover { color: white; }
+.floor-btn.active {
+  background: #f1dede;
   color: #7b2d2d;
 }
 
