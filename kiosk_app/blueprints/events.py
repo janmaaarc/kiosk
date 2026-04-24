@@ -13,7 +13,7 @@ def events():
             " WHERE expires_at IS NULL OR expires_at > datetime('now')"
             " ORDER BY id DESC"
         ).fetchall()
-    return render_template("events.html", events=rows)
+    return render_template("events.html", events=[dict(r) for r in rows])
 
 
 @events_bp.route("/event/<int:event_id>")
