@@ -19,7 +19,6 @@ body {
   background-size: cover;
 }
 
-/* ── Side panel ─────────────────────────────────── */
 .side-panel {
   width: 260px;
   flex-shrink: 0;
@@ -63,7 +62,6 @@ body {
   color: #7b2d2d;
 }
 
-/* ── Main area ───────────────────────────────────── */
 .main {
   flex: 1;
   display: flex;
@@ -165,7 +163,6 @@ body {
   font-size:11px;color:#999;font-weight:700;letter-spacing:1px;margin-left:8px;
 }
 
-/* ── Floor plan wrapper ──────────────────────────── */
 .plan-wrapper {
   flex: 1;
   position: relative;
@@ -184,10 +181,8 @@ body {
   pointer-events: none;
   user-select: none;
 }
-/* SVGs stretch so room overlays stay aligned; raster floor plans keep contain */
 .plan-wrapper img.floor-img.stretch { object-fit: fill; }
 
-/* Placeholder when no image */
 .plan-placeholder {
   width: 100%;
   height: 100%;
@@ -200,7 +195,6 @@ body {
   color: #aaa;
 }
 
-/* ── Room overlays ───────────────────────────────── */
 .room-label {
   position: absolute;
   display: flex;
@@ -209,7 +203,6 @@ body {
   text-align: center;
   cursor: pointer;
 
-  /* default look — transparent so the image shows through */
   background: transparent;
   border: 2px solid transparent;
   border-radius: 6px;
@@ -232,10 +225,8 @@ body {
   color: white;
 }
 
-/* White text for rooms on dark backgrounds */
 .room-label[data-name="CR"] { color: white; }
 
-/* Indoor YOU ARE HERE pin */
 .indoor-pin {
   position:absolute;
   width:44px;
@@ -266,7 +257,6 @@ body {
 }
 #indoorRouteLine { animation: dash-march 0.8s linear infinite; }
 
-/* ── Mobile responsive ────────────────────────── */
 @media (max-width: 768px) {
   body { height: auto; overflow: auto; }
   .side-panel {
@@ -283,11 +273,9 @@ body {
   .top-bar .show-dir { display: none; }
   .top-bar .room-search { display: none; }
 
-  /* Fix floor plan aspect ratio — SVG viewBox is 1200x700 */
   .plan-wrapper {
     flex: none;
     width: 100%;
-    /* 700/1200 = 58.33% */
     aspect-ratio: 1200 / 700;
     min-height: 0;
     height: auto;
@@ -309,7 +297,6 @@ body {
   text-transform: uppercase;
 }
 
-/* Highlighted (e.g. from search) */
 .room-label.highlighted {
   background: rgba(255, 220, 0, 0.9);
   border-color: #8b2e2e;
@@ -321,7 +308,6 @@ body {
   to   { box-shadow: 0 0 0 8px rgba(255,220,0,0); }
 }
 
-/* ── Info panel (slide-up on room tap) ────────────── */
 .info-panel {
   position: absolute;
   bottom: 0;
@@ -364,7 +350,6 @@ body {
 </head>
 <body>
 
-<!-- Side panel: floor switcher -->
 <div class="side-panel">
   <h1>{{ building_name | upper }}</h1>
   {% for floor in all_floors %}
@@ -375,7 +360,6 @@ body {
   {% endfor %}
 </div>
 
-<!-- Main -->
 <div class="main">
   <div class="top-bar">
     <img src="{{ url_for('static', filename='images/icon/home_button.png') }}"
@@ -402,7 +386,6 @@ body {
     <div class="plan-placeholder">FLOOR PLAN IMAGE COMING SOON</div>
     {% endif %}
 
-    <!-- Indoor route overlay (drawn only when a room is highlighted) -->
     <svg id="indoorRouteSVG" viewBox="0 0 100 100" preserveAspectRatio="none"
          style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5;">
       <path id="indoorRouteLine" fill="none" stroke="#8e44ad" stroke-width="1.4"
@@ -410,12 +393,10 @@ body {
             style="display:none"/>
     </svg>
 
-    <!-- YOU ARE HERE pin at building entrance -->
     <div id="indoorYouHere" class="indoor-pin" style="display:none">
       <div class="pin"><div class="pin-text">YOU<br>ARE<br>HERE.</div></div>
     </div>
 
-    <!-- Room labels: left/top/width/height are percentages of the wrapper -->
     {% for room in rooms %}
     <button class="room-label {% if highlight and highlight|lower == room.name|lower %}highlighted{% endif %}"
             style="left:{{ room.left }}%; top:{{ room.top }}%; width:{{ room.width }}%; height:{{ room.height }}%;"
@@ -432,7 +413,6 @@ body {
     </button>
     {% endfor %}
 
-    <!-- Slide-up info panel -->
     <div class="info-panel" id="infoPanel">
       <button class="info-close" onclick="closeInfo()">✕</button>
       <h3 id="infoName"></h3>
@@ -456,8 +436,6 @@ body {
              border:2px solid #7b2d2d;
              padding:8px 16px;border-radius:22px;font-weight:900;letter-spacing:1.5px;
              text-decoration:none;font-size:13px;">OPEN OFFICE PAGE →</a>
-        <img id="infoQR" src="" alt="QR code"
-             style="width:70px;height:70px;display:none;border-radius:4px">
       </div>
     </div>
 
@@ -511,7 +489,6 @@ function showInfo(btn) {
   const campusLoc = BUILDING_NAME + ' room ' + btn.dataset.name;
   routeBtn.href = '/campus_map?location=' + encodeURIComponent(campusLoc) + '&room_floor=' + FLOOR_NUMBER;
 
-  const qr = document.getElementById('infoQR');
   const officeBtn = document.getElementById('infoOfficeBtn');
   const officeKey = btn.dataset.officeKey;
   if (officeKey) {
@@ -519,12 +496,8 @@ function showInfo(btn) {
     const roomParam = encodeURIComponent(btn.dataset.name);
     officeBtn.href = `/office?name=${officeKey}&from_building=${from}&from_floor=${FLOOR_NUMBER}&from_room=${roomParam}`;
     officeBtn.style.display = 'inline-block';
-    const dest = window.location.origin + '/office?name=' + encodeURIComponent(officeKey);
-    qr.src = '/qr?size=200&data=' + encodeURIComponent(dest);
-    qr.style.display = 'block';
   } else {
     officeBtn.style.display = 'none';
-    qr.style.display = 'none';
   }
   document.getElementById('infoPanel').classList.add('visible');
 }
@@ -634,9 +607,7 @@ function drawIndoorRoute(targetBtn) {
   pin.style.display = 'block';
 }
 
-// ── Entrance animation ─────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  // Stagger room labels in
   document.querySelectorAll('.room-label').forEach((b, i) => {
     b.style.opacity = '0';
     b.style.transform = 'scale(0.85)';
@@ -649,7 +620,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Slide side panel in from left
   const side = document.querySelector('.side-panel');
   if (side) {
     side.style.transform = 'translateX(-100%)';
@@ -657,7 +627,6 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(() => setTimeout(() => { side.style.transform = ''; }, 30));
   }
 
-  // Fade plan wrapper in
   const wrap = document.getElementById('planWrapper');
   if (wrap) {
     wrap.style.opacity = '0';
