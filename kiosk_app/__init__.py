@@ -151,7 +151,6 @@ def create_app() -> Flask:
             "now": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
         }
 
-    # Ensure default admin exists on every startup (no manual init_db needed)
     with app.app_context():
         try:
             from kiosk_app.db import db_connection as _db

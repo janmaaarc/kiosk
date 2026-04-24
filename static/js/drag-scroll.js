@@ -1,5 +1,4 @@
 (function () {
-  // Disable text selection and image dragging globally
   const style = document.createElement('style');
   style.textContent = `
     * {
