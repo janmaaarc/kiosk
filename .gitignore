@@ -4,8 +4,6 @@ __pycache__/
 .venv/
 venv/
 logs/
-database.db
-*.db
 *.db.gz
 .env
 .env.*
