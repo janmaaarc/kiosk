@@ -1145,19 +1145,15 @@ const BUILDING_PHOTOS = {
   "TE BUILDING":          "/static/images/building/te_building.jpg",
 };
 let _pendingUrl = null;
-const ACTIVE_BUILDINGS = new Set(["ACADEMIC BUILDING", "NEW ADMIN BUILDING", "OLD ADMIN BUILDING"]);
 document.querySelectorAll('.building[data-page]').forEach(b => {
-  const bName = (b.getAttribute('data-name') || b.textContent.trim()).toUpperCase();
-  if (!ACTIVE_BUILDINGS.has(bName)) {
-    b.style.opacity = "0.55";
-    b.style.cursor = "default";
-  }
   b.onclick = function(e) {
     e.stopPropagation();
     const page = b.getAttribute('data-page');
-    if (!page) return;
     const name = b.getAttribute('data-name') || b.textContent.trim();
-    _pendingUrl = page + "?from=gate&location=" + encodeURIComponent(name);
+    const hasFloorPlan = !!page;
+    document.getElementById('panelEnterBtn').style.display = hasFloorPlan ? '' : 'none';
+    document.getElementById('panelComingSoon').style.display = hasFloorPlan ? 'none' : 'block';
+    _pendingUrl = hasFloorPlan ? page + "?from=gate&location=" + encodeURIComponent(name) : null;
     document.getElementById('panelBuildingName').textContent = name;
     const img = document.getElementById('panelBuildingImage');
     const photo = BUILDING_PHOTOS[name.toUpperCase()];
@@ -1359,6 +1355,11 @@ var _mapScale = 0.7;
     onmouseout="this.style.background='#7b2d2d'">
     ENTER BUILDING
   </button>
+  <div id="panelComingSoon" style="display:none;background:#f5f0f0;border-radius:12px;
+    padding:14px 18px;font-size:13px;font-weight:700;letter-spacing:1.5px;
+    color:#8b2e2e;text-align:center;margin-bottom:12px">
+    FLOOR PLAN COMING SOON
+  </div>
   <button onclick="closeBuildingPanel()" style="
     background:transparent;color:#555;border:2px solid #ddd;border-radius:12px;
     padding:12px 24px;font-size:14px;font-weight:700;letter-spacing:1px;
