@@ -2,34 +2,51 @@
 <html>
 <head>
     <title>View Announcement</title>
-
     <style>
-        body {
-            margin: 0;
-            background: black;
+        @font-face {
+            font-family: 'League Spartan';
+            src: url('/static/font/LeagueSpartan-VariableFont_wght.ttf');
         }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: black;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .top-icons {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .top-icon {
+            width: 44px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .top-icon:hover { transform: scale(1.1); }
 
         iframe {
             width: 100%;
             height: 100vh;
             border: none;
         }
-
-        .back {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: white;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
     </style>
 </head>
-
 <body>
 
-<div class="back" onclick="history.back()">Back</div>
+<div class="top-icons">
+    <img src="{{ url_for('static', filename='images/icon/home_button.png') }}"
+         class="top-icon" alt="Home" onclick="window.location.href='/menu'">
+    <img src="{{ url_for('static', filename='images/icon/back_button.png') }}"
+         class="top-icon" alt="Back" onclick="history.back()">
+</div>
 
 <iframe src="{{ url_for('static', filename=file) }}"></iframe>
 
