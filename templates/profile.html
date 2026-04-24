@@ -49,7 +49,12 @@ body{
   gap:6px;
 }
 
-.menu div{
+.menu button{
+  background: none;
+  border: none;
+  font-family: inherit;
+  width: 100%;
+  text-align: left;
   font-size:15px;
   font-weight:700;
   letter-spacing:1px;
@@ -61,13 +66,13 @@ body{
   line-height:1.3;
 }
 
-.menu div.active{
+.menu button.active{
   background: #f1dede;
   color: #7b2d2d;
   font-weight:700;
 }
 
-.menu div:hover{ color:white; }
+.menu button:hover{ color:white; }
 
 /* MAIN */
 .main{
@@ -289,19 +294,19 @@ body{
 <!-- SIDEBAR -->
 <div class="sidebar">
   <h1>FACULTY</h1>
-  <div class="menu">
-  <div onclick="goFaculty('All')" class="active">ALL</div>
-  <div onclick="goFaculty('Automotive Technology')">AUTOMOTIVE TECHNOLOGY</div>
-  <div onclick="goFaculty('Civil Technology')">CIVIL TECHNOLOGY</div>
-  <div onclick="goFaculty('Drafting Technology')">DRAFTING TECHNOLOGY</div>
-  <div onclick="goFaculty('Electrical Technology')">ELECTRICAL TECHNOLOGY</div>
-  <div onclick="goFaculty('Electronics Technology')">ELECTRONICS TECHNOLOGY</div>
-  <div onclick="goFaculty('Food and Service Management')">FOOD AND SERVICE MANAGEMENT</div>
-  <div onclick="goFaculty('Garments, Fashion and Design')">GARMENTS, FASHION AND DESIGN</div>
-  <div onclick="goFaculty('Mechanical Technology')">MECHANICAL TECHNOLOGY</div>
-  <div onclick="goFaculty('Welding and Fabrication Technology')">WELDING AND FABRICATION</div>
-  <div onclick="goFaculty('Electronics Engineering')">ELECTRONICS ENGINEERING</div>
-  <div onclick="goFaculty('Entrepreneurship')">ENTREPRENEURSHIP</div>
+  <div class="menu" id="sidebarMenu">
+  <button onclick="goFaculty('All')">ALL</button>
+  <button onclick="goFaculty('Automotive Technology')">AUTOMOTIVE TECHNOLOGY</button>
+  <button onclick="goFaculty('Civil Technology')">CIVIL TECHNOLOGY</button>
+  <button onclick="goFaculty('Drafting Technology')">DRAFTING TECHNOLOGY</button>
+  <button onclick="goFaculty('Electrical Technology')">ELECTRICAL TECHNOLOGY</button>
+  <button onclick="goFaculty('Electronics Technology')">ELECTRONICS TECHNOLOGY</button>
+  <button onclick="goFaculty('Food and Service Management')">FOOD AND SERVICE MANAGEMENT</button>
+  <button onclick="goFaculty('Garments, Fashion and Design')">GARMENTS, FASHION AND DESIGN</button>
+  <button onclick="goFaculty('Mechanical Technology')">MECHANICAL TECHNOLOGY</button>
+  <button onclick="goFaculty('Welding and Fabrication Technology')">WELDING AND FABRICATION</button>
+  <button onclick="goFaculty('Electronics Engineering')">ELECTRONICS ENGINEERING</button>
+  <button onclick="goFaculty('Entrepreneurship')">ENTREPRENEURSHIP</button>
 </div>
 </div>
 
@@ -560,11 +565,10 @@ function highlightActiveDept(){
   const params = new URLSearchParams(window.location.search);
   const currentDept = params.get("dept") || "All";
 
-  document.querySelectorAll(".menu div").forEach(item => {
-    item.classList.remove("active");
-
-    if(item.innerText.toUpperCase() === currentDept.toUpperCase()){
-      item.classList.add("active");
+  document.querySelectorAll("#sidebarMenu button").forEach(btn => {
+    btn.classList.remove("active");
+    if(btn.textContent.trim().toUpperCase() === currentDept.toUpperCase()){
+      btn.classList.add("active");
     }
   });
 }
