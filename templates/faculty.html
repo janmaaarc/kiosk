@@ -381,6 +381,7 @@ function goToProfile(d) {
     dept: d.department || "",
     room: JSON.stringify(d.room ? [d.room] : []),
     img: d.photo ? "/static/" + d.photo : "",
+    sched_img: d.schedule_image ? "/static/" + d.schedule_image : "",
     building: d.building || "",
     office_key: d.office_key || "",
     office_name: d.office_name || ""

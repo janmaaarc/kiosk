@@ -195,3 +195,13 @@ def healthz():
         return jsonify({"status": "ok"}), 200
     except Exception:
         return jsonify({"status": "degraded"}), 503
+
+
+@main_bp.route("/api/departments")
+def api_departments():
+    with db_connection() as conn:
+        rows = conn.execute(
+            "SELECT DISTINCT department FROM faculty WHERE department IS NOT NULL AND department != '' ORDER BY department"
+        ).fetchall()
+    depts = [r["department"] for r in rows]
+    return jsonify(depts)

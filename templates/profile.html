@@ -329,225 +329,49 @@ body{
   </div>
 
   <!-- SCHEDULE -->
-<div class="schedule-container">
-  <img src="/static/images/schedule_template.png" class="schedule-bg">
+<div class="schedule-container" id="scheduleContainer">
+  <p id="schedPlaceholder" style="color:#aaa;font-size:16px;letter-spacing:1px;padding:20px;">
+    NO SCHEDULE AVAILABLE
+  </p>
 </div>
 
 <script>
 
-  const facultyData = [
-  { name:"MS. MARIEL BLANCA",       dept:"Electronics Technology",            rooms:["IT Building Room 202"] },
-  { name:"MR. RONALD MENDEZ",       dept:"Automotive Technology",             rooms:["Tech Building Room 101"] },
-  { name:"MS. ANNA GARCIA",         dept:"Civil Technology",                  rooms:["Civil Tech Building Room 201"] },
-  { name:"MR. PETER TAN",           dept:"Drafting Technology",               rooms:["Academic Building Room 105"] },
-  { name:"MS. ROSE DELA CRUZ",      dept:"Electrical Technology",             rooms:["Tech Building Room 203"] },
-  { name:"MR. JUAN SANTOS",         dept:"Electronics Technology",            rooms:["IT Building Room 305"] },
-  { name:"MS. LOURDES REYES",       dept:"Food and Service Management",       rooms:["FSM Building Room 102"] },
-  { name:"MR. CARLOS BAUTISTA",     dept:"Garments, Fashion and Design",      rooms:["FSM Building Room 204"] },
-  { name:"MR. MIGUEL TORRES",       dept:"Mechanical Technology",             rooms:["Tech Building Room 302"] },
-  { name:"MS. ELENA FLORES",        dept:"Welding and Fabrication Technology",rooms:["Tech Building Room 401"] },
-  { name:"MR. ANDRES LIM",          dept:"Electronics Engineering",           rooms:["IT Building Room 103"] },
-  { name:"MS. CARMEN VIDAL",        dept:"Entrepreneurship",                  rooms:["Academic Building Room 210"] },
-  { name:"MR. JOSE HERNANDEZ",      dept:"Automotive Technology",             rooms:["Tech Building Room 102"] },
-  { name:"MS. TERESA PADILLA",      dept:"Civil Technology",                  rooms:["Civil Tech Building Room 303"] },
-  { name:"MR. ANTONIO RAMOS",       dept:"Drafting Technology",               rooms:["Academic Building Room 107"] },
-  { name:"MS. LUCIA MENDOZA",       dept:"Electrical Technology",             rooms:["Tech Building Room 205"] },
-  { name:"MR. RAUL VILLANUEVA",     dept:"Electronics Technology",            rooms:["IT Building Room 207"] },
-  { name:"MS. PILAR AGUILAR",       dept:"Food and Service Management",       rooms:["FSM Building Room 105"] },
-  { name:"MR. EMILIO GARCIA",       dept:"Garments, Fashion and Design",      rooms:["FSM Building Room 206"] },
-  { name:"MS. DOLORES CASTILLO",    dept:"Mechanical Technology",             rooms:["Tech Building Room 304"] },
-  { name:"MR. RAMON REYES",         dept:"Welding and Fabrication Technology",rooms:["Tech Building Room 403"] },
-  { name:"MS. CONCEPCION NAVARRO",  dept:"Electronics Engineering",           rooms:["IT Building Room 108"] },
-  { name:"MR. FRANCISCO MORALES",   dept:"Entrepreneurship",                  rooms:["Academic Building Room 212"] },
-  { name:"MS. AMPARO ROMERO",       dept:"Automotive Technology",             rooms:["Tech Building Room 104"] },
-  { name:"MR. MANUEL JIMENEZ",      dept:"Civil Technology",                  rooms:["Civil Tech Building Room 305"] },
-  { name:"MS. ISABEL GUERRERO",     dept:"Drafting Technology",               rooms:["Academic Building Room 109"] },
-  { name:"MR. ALFREDO MEDINA",      dept:"Electrical Technology",             rooms:["Tech Building Room 207"] },
-  { name:"MS. ROSARIO ALVAREZ",     dept:"Electronics Technology",            rooms:["IT Building Room 210"] },
-  { name:"MS. LIZA REYES",          dept:"Civil Technology",                  rooms:["Civil Tech Building Room 307"] },
-  { name:"MR. JOSHUA LEE",          dept:"Drafting Technology",               rooms:["Academic Building Room 111"] },
-  { name:"MS. KAREN ONG",           dept:"Garments, Fashion and Design",      rooms:["FSM Building Room 208"] }
-];
-
-const schedules = {
-  "MS. MARIEL BLANCA": [
-    { day: "MON", time: "9:00-10:00", subject:"PILL42", prof:"ESTRADA", color:"yellow" },
-    { day: "TUE", time: "9:00-10:00", subject:"POM42", prof:"MICHAEL", color:"green" },
-    { day: "MON", time: "1:00-2:00", subject:"SPPM42", prof:"ROMMEL", color:"blue" }
-  ],
-
-  "MR. EDWIN SANTOS": [
-    { day: "MON", time: "9:00-10:00", subject:"PILL42", prof:"ESTRADA", color:"yellow" },
-    { day: "TUE", time: "9:00-10:00", subject:"POM42", prof:"MICHAEL", color:"green" },
-    { day: "MON", time: "1:00-2:00", subject:"SPPM42", prof:"ROMMEL", color:"blue" }
-  ]
-};
-
-const dayMap = {
-  "MON": 0,
-  "TUE": 1,
-  "WED": 2,
-  "THU": 3,
-  "FRI": 4,
-  "SAT": 5
-};
-
-const timeMap = {
-  "7:00-8:00": 0,
-  "8:00-9:00": 1,
-  "9:00-10:00": 2,
-  "10:00-11:00": 3,
-  "11:00-12:00": 4,
-  "12:00-1:00": 5,
-  "1:00-2:00": 6,
-  "2:00-3:00": 7,
-  "3:00-4:00": 8
-};
-
-
-function renderSchedule(name){
-  const container = document.querySelector(".schedule-container");
-
-  document.querySelectorAll(".sched-item").forEach(e => e.remove());
-
-  const sched = schedules[name];
-  if(!sched) return;
-
-  function renderSchedule(name){
-  const container = document.querySelector(".schedule-container");
-  const bg = document.querySelector(".schedule-bg");
-
-  document.querySelectorAll(".sched-item").forEach(e => e.remove());
-
-  const sched = schedules[name];
-  if(!sched) return;
-
-  const rect = bg.getBoundingClientRect();
-
-  const colWidth = rect.width / 7;   // 6 days + time column spacing
-  const rowHeight = rect.height / 10;
-
-  const startX = colWidth * 1.2;  // skip TIME column
-  const startY = rowHeight * 1.5;
-
-  sched.forEach(item=>{
-    const col = dayMap[item.day];
-    const row = timeMap[item.time];
-
-    if(col === undefined || row === undefined) return;
-
-    const div = document.createElement("div");
-    div.className = "sched-item " + item.color;
-
-    div.style.left = (startX + col * colWidth) + "px";
-    div.style.top = (startY + row * rowHeight) + "px";
-
-    div.style.width = (colWidth * 0.9) + "px";
-    div.style.height = (rowHeight * 0.8) + "px";
-
-    div.innerHTML = `
-      ${item.subject}<br>
-      ${item.prof}
-    `;
-
-    container.appendChild(div);
-  });
-}
-
-  sched.forEach(item=>{
-    const col = dayMap[item.day];
-    const row = timeMap[item.time];
-
-    if(col === undefined || row === undefined) return;
-
-    const div = document.createElement("div");
-    div.className = "sched-item " + item.color;
-
-    div.style.left = (startX + col * colWidth) + "px";
-    div.style.top = (startY + row * rowHeight) + "px";
-
-    div.innerHTML = `
-      ${item.subject}<br>
-      ${item.prof}
-    `;
-
-    container.appendChild(div);
-  });
-}
-
 function loadFromURL(){
-  const params = new URLSearchParams(window.location.search);
-
-  let name = params.get("name");
-  const dept = params.get("dept");
-
-  // ✅ FIX: if no name, auto-pick a faculty
-  if(!name){
-    if(dept){
-      const found = facultyData.find(f => f.dept === dept);
-      if(found){
-        name = found.name;
-
-        // update URL properly
-        const query = new URLSearchParams({
-          name: found.name,
-          dept: found.dept,
-          room: JSON.stringify(found.rooms || []),
-          img: found.img
-        });
-
-        window.location.search = query.toString();
-        return;
-      }
-    }
-
-    // fallback default
-    name = "MS. MARIEL BLANCA";
-  }
-
-  document.querySelector(".header-text h2").innerText = name;
-  document.querySelector(".header-text p").innerText = dept + " DEPARTMENT";
-
-  const building   = params.get("building") || "";
+  const params   = new URLSearchParams(window.location.search);
+  const name     = params.get("name") || "";
+  const dept     = params.get("dept") || "";
+  const imgSrc   = params.get("img") || "";
+  const schedImg = params.get("sched_img") || "";
   const officeKey  = params.get("office_key") || "";
   const officeName = params.get("office_name") || "";
 
+  document.querySelector(".header-text h2").innerText = name || "—";
+  document.querySelector(".header-text p").innerText  = (dept ? dept.toUpperCase() : "") + " DEPARTMENT";
+
+  if(imgSrc) document.querySelector(".header img").src = imgSrc;
+
+  // Office badge
   const existing = document.querySelector(".location-links");
   if(existing) existing.remove();
-
-  const locDiv = document.createElement("div");
-  locDiv.className = "location-links";
-
-  const ALLOWED_BUILDINGS = new Set([
-    "Academic Building","IT Building","FSM Building","Civil Tech Building",
-    "Tech Building","Mechanical Building","Automotive Building",
-    "WAF & RAC Building","Science Building","Graduate School Building",
-    "Rodriguez Building","MIST-NCESTD Dorm","MIST-NCESTD Building",
-    "Multi-Purpose Building","Power Room","Ylagan Hall","TE Building",
-    "New Admin Building","Old Admin Building","WAF & FSM Building"
-  ]);
   const SAFE_KEY = /^[A-Za-z0-9 _\-]+$/;
-
   if(officeKey && SAFE_KEY.test(officeKey)){
+    const locDiv = document.createElement("div");
+    locDiv.className = "location-links";
     const a = document.createElement("a");
     a.className = "office-link";
     a.textContent = officeName || officeKey;
-    a.onclick = () => {
-      window.location.href = "/office?name=" + encodeURIComponent(officeKey);
-    };
+    a.onclick = () => { window.location.href = "/office?name=" + encodeURIComponent(officeKey); };
     locDiv.appendChild(a);
-  }
-
-  if(locDiv.children.length){
     document.querySelector(".header-text").appendChild(locDiv);
   }
 
-  const faculty = facultyData.find(f => f.name === name);
+  // Rooms from URL param
   const roomsDiv = document.querySelector(".rooms");
-  roomsDiv.innerHTML = "";
-
-  if(faculty && faculty.rooms){
-    faculty.rooms.forEach(room => {
+  roomsDiv.textContent = "";
+  try {
+    const rooms = JSON.parse(params.get("room") || "[]");
+    rooms.forEach(room => {
       const a = document.createElement("a");
       a.textContent = room;
       a.onclick = () => {
@@ -556,9 +380,18 @@ function loadFromURL(){
       };
       roomsDiv.appendChild(a);
     });
-  }
+  } catch(e) {}
 
-  renderSchedule(name);
+  // Schedule — show uploaded image from admin, or placeholder
+  const container   = document.getElementById("scheduleContainer");
+  const placeholder = document.getElementById("schedPlaceholder");
+  if(schedImg && /^\/static\//.test(schedImg)){
+    placeholder.style.display = "none";
+    const schedImgEl = document.createElement("img");
+    schedImgEl.src = schedImg;
+    schedImgEl.style.cssText = "width:100%;border-radius:8px;display:block;";
+    container.appendChild(schedImgEl);
+  }
 }
 
 function highlightActiveDept(){
@@ -586,9 +419,31 @@ function goFaculty(dept){
   window.location.href = "/faculty?dept=" + encodeURIComponent(dept);
 }
 
+// Load departments dynamically from DB
+function loadSidebar(){
+  fetch("/api/departments")
+    .then(r => r.json())
+    .then(depts => {
+      const menu = document.getElementById("sidebarMenu");
+      menu.textContent = "";
+      const all = document.createElement("button");
+      all.textContent = "ALL";
+      all.onclick = () => goFaculty("All");
+      menu.appendChild(all);
+      depts.forEach(d => {
+        const btn = document.createElement("button");
+        btn.textContent = d.toUpperCase();
+        btn.onclick = () => goFaculty(d);
+        menu.appendChild(btn);
+      });
+      highlightActiveDept();
+    })
+    .catch(() => highlightActiveDept());
+}
+
 // RUN ON LOAD
 loadFromURL();
-highlightActiveDept(); // ✅ ADD THIS
+loadSidebar();
 </script>
 
 <script src="/static/js/drag-scroll.js"></script>

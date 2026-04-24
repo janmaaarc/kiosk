@@ -83,7 +83,7 @@ button:active { background: #555; }
   <p><b>Building:</b> {{ result['building'] }}</p>
   <p><b>Floor:</b> {{ result['floor'] }}</p>
   <p><b>Description:</b> {{ result['description'] }}</p>
-  <p><b>Directions:</b> Follow the hallway and turn left.</p>
+  {% if result['description'] %}<p><b>Directions:</b> {{ result['description'] }}</p>{% endif %}
 </div>
 {% endif %}
 
