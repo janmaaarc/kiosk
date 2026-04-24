@@ -270,6 +270,15 @@ Tracing the Democratic Space Created by EDSA Revolution.""",
         "time": "",
         "details": "Activating systems thinking in education.",
     },
+    {
+        "id": 31,
+        "title": "BE AN ACCREDITED CLUB FOR UNESCO",
+        "image": "events/11.jpg",
+        "desc": "Clubs for UNESCO PH",
+        "date": "",
+        "time": "",
+        "details": "Be an accredited club for UNESCO. Visit Clubs for UNESCO PH on Facebook.",
+    },
 ]
 
 
