@@ -151,6 +151,30 @@ def create_app() -> Flask:
             "now": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
         }
 
+    # Ensure default admin exists on every startup (no manual init_db needed)
+    with app.app_context():
+        try:
+            from kiosk_app.db import db_connection as _db
+            with _db() as _conn:
+                _conn.execute("""
+                    CREATE TABLE IF NOT EXISTS admins (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        username TEXT UNIQUE,
+                        password_hash TEXT
+                    )""")
+                _exists = _conn.execute(
+                    "SELECT 1 FROM admins WHERE username='admin'"
+                ).fetchone()
+                if not _exists:
+                    _hash = bcrypt.generate_password_hash("kiosk2025").decode("utf-8")
+                    _conn.execute(
+                        "INSERT INTO admins (username, password_hash) VALUES ('admin', ?)",
+                        (_hash,)
+                    )
+                    _conn.commit()
+        except Exception:
+            pass
+
     import json as _json
     def _from_json(s):
         try:
