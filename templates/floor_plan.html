@@ -594,7 +594,9 @@ const ALL_ROOMS = {{ all_rooms_index | default([]) | tojson }};
   });
 
   document.addEventListener('click', (e) => {
-    if (!document.getElementById('roomSearch').contains(e.target)) {
+    const vkbd = document.getElementById('vkbd');
+    if (!document.getElementById('roomSearch').contains(e.target) &&
+        !(vkbd && vkbd.contains(e.target))) {
       clearSuggestions();
     }
   });
