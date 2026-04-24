@@ -26,19 +26,18 @@ body {
   position: relative;
 }
 
-/* LEFT PANEL */
 .sidebar {
   width:260px;
   background:linear-gradient(180deg,#7b2d2d,#b85757);
   color:white;
   padding:22px 25px;
 
-  overflow-y:auto;          /* ✅ scroll */
-  scrollbar-width: none;    /* Firefox */
+  overflow-y:auto;
+  scrollbar-width: none;
 }
 
 .sidebar::-webkit-scrollbar {
-  display: none;            /* Chrome */
+  display: none;
 }
 
 .sidebar h1 {
@@ -71,7 +70,6 @@ body {
   line-height: 1.3;
 }
 
-/* OBLONG SELECTED STYLE (PDF STYLE) */
 .menu button.active {
   background: #f1dede;
   color: #7b2d2d;
@@ -82,17 +80,15 @@ body {
   color: white;
 }
 
-/* MAIN */
 .main {
   flex: 1;
   position: relative;
   background: url("/static/images/KIOSK BACKGROUND.png") center/cover no-repeat;
-  overflow-y: auto; /* 🔥 ADD */
+  overflow-y: auto;
 }
 
 
 
-/* TOP BAR */
 .topbar {
   position: absolute;
   top: 20px;
@@ -103,19 +99,25 @@ body {
 }
 
 .search {
-  padding: 10px 16px 10px 40px;
-  border-radius: 20px;
-  border: 2px solid #e0d0d0;
-  width: 240px;
-  font-size: 13px;
-  font-weight: 600;
+  padding: 14px 20px 14px 48px;
+  border-radius: 30px;
+  border: 3px solid rgba(255,255,255,0.85);
+  width: 320px;
+  font-size: 15px;
+  font-weight: 700;
   letter-spacing: 1px;
   font-family: inherit;
-  background: #fdf8f8;
+  background: rgba(255,255,255,0.92);
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  color: #333;
 }
-.search:focus { border-color: #8b2e2e; }
+.search:focus {
+  border-color: #8b2e2e;
+  box-shadow: 0 4px 20px rgba(139,46,46,0.25);
+}
+.search::placeholder { color: #999; font-weight: 600; }
 .icon {
   width: 38px;
   height: 38px;
@@ -129,15 +131,14 @@ body {
   color: #333;
 }
 
-/* GRID */
 .grid{
   margin-top:10px;
   padding:0 60px 40px;
   width:100%;
 
   display:grid;
-  grid-template-columns: repeat(auto-fill, 180px); /* 🔥 fixed size */
-  justify-content:flex-start; /* 🔥 left aligned */
+  grid-template-columns: repeat(auto-fill, 180px);
+  justify-content:flex-start;
   gap:35px;
 }
 .card {
@@ -157,7 +158,6 @@ body {
   object-fit: cover;
   box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
-/* SELECTED FACULTY EFFECT */
 .card.selected img {
   outline: 5px solid rgba(255,255,255,0.9);
   box-shadow: 0 0 25px rgba(255,255,255,0.8),
@@ -177,7 +177,6 @@ body {
   letter-spacing: 1px;
 }
 
-/* MODAL */
 .modal {
   position: fixed;
   top: 0;
@@ -206,14 +205,12 @@ body {
   cursor: pointer;
 }
 
-/* TOP BAR */
 .top-bar {
     position: relative;
     width: 100%;
     height: 60px;
 }
 
-/* TOP LEFT ICONS (LIKE PDF) */
 .top-icons {
     position: absolute;
     top: 20px;
@@ -286,7 +283,6 @@ body {
 <script>
 const data = {{ faculty_list | tojson }};
 
-// Build department list dynamically from DB data, plus "All"
 const deptSet = new Set(data.map(d => d.department).filter(Boolean));
 const categories = ["All", ...Array.from(deptSet).sort()];
 
