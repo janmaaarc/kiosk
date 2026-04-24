@@ -17,7 +17,7 @@
     position:fixed;
     bottom:0;left:0;right:0;
     background:#1a1a1a;
-    padding:10px 8px 16px;
+    padding:14px 20px 20px;
     z-index:99999;
     box-shadow:0 -4px 24px rgba(0,0,0,0.5);
     user-select:none;
@@ -26,25 +26,25 @@
 
   ROWS.forEach(row => {
     const rowDiv = document.createElement('div');
-    rowDiv.style.cssText = 'display:flex;justify-content:center;gap:6px;margin-bottom:6px;';
+    rowDiv.style.cssText = 'display:flex;justify-content:center;gap:10px;margin-bottom:10px;';
 
     row.forEach(key => {
       const btn = document.createElement('button');
       btn.textContent = key === 'SPACE' ? '' : key;
       btn.dataset.key = key;
 
-      let w = '42px';
-      if (key === 'SPACE') w = '260px';
-      if (key === 'DONE')  w = '100px';
-      if (key === '⌫')    w = '60px';
-      if (key === '⇧')    w = '60px';
-      if (key === '✕')    w = '60px';
+      let w = '62px';
+      if (key === 'SPACE') w = '340px';
+      if (key === 'DONE')  w = '140px';
+      if (key === '⌫')    w = '90px';
+      if (key === '⇧')    w = '90px';
+      if (key === '✕')    w = '90px';
 
       btn.style.cssText = `
-        width:${w};height:48px;
+        width:${w};height:62px;
         background:${key === 'DONE' ? '#7b2d2d' : key === '✕' ? '#444' : '#333'};
-        color:#fff;border:none;border-radius:8px;
-        font-size:${key === 'SPACE' ? '0' : '16px'};
+        color:#fff;border:none;border-radius:10px;
+        font-size:${key === 'SPACE' ? '0' : '20px'};
         font-weight:700;cursor:pointer;
         font-family:'League Spartan',sans-serif;
         transition:background 0.1s;
