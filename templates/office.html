@@ -329,8 +329,8 @@ body {
 function openPDF(file, title) {
   document.getElementById('viewer').src = '/static/files/' + file;
   document.getElementById('pdf-title').textContent = title || '';
-  const ov = document.getElementById('pdf-overlay');
-  ov.style.display = 'flex';
+  document.getElementById('pdf-overlay').style.display = 'flex';
+  toast('Opening ' + (title || 'document') + '…', 'info', 2000);
 }
 
 function closePDF() {
@@ -386,6 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 20));
 });
 </script>
+<script src="/static/js/toast.js"></script>
 <script src="/static/js/drag-scroll.js"></script>
 <script src="/static/js/keyboard.js"></script>
 </body>

@@ -67,6 +67,15 @@ textarea { resize: vertical; min-height: 100px; }
 
 .expired-badge { background: #ffc107; color: #333; font-size: 11px;
     padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
+
+.pagination { display:flex; gap:8px; align-items:center; margin-top:16px; }
+.pagination a { padding:6px 14px; border-radius:5px; background:#fff;
+    border:1px solid #ddd; color:#333; text-decoration:none; font-size:13px; }
+.pagination a:hover { background:#f0e8e8; border-color:#7b2d2d; }
+.pagination .current { padding:6px 14px; border-radius:5px; background:#7b2d2d;
+    color:#fff; font-size:13px; font-weight:700; }
+.pagination .disabled { padding:6px 14px; border-radius:5px; background:#f4f4f4;
+    color:#bbb; font-size:13px; cursor:default; }
 </style>
 </head>
 <body>
@@ -123,6 +132,15 @@ function previewUpload(inputId, pathId) {
     })
     .catch(() => alert('Upload failed'));
 }
+</script>
+<script src="/static/js/toast.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.flash').forEach(el => {
+    const type = el.classList.contains('flash-success') ? 'success' : 'error';
+    toast(el.textContent.trim(), type, 3500);
+  });
+});
 </script>
 </body>
 </html>

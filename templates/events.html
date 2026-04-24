@@ -100,6 +100,37 @@
         }
         .admin-btn:hover { background: rgba(0,0,0,0.4); }
         .admin-btn svg { width: 18px; height: 18px; fill: rgba(255,255,255,0.7); }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 0 30px;
+            flex-shrink: 0;
+        }
+        .page-btn {
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            cursor: pointer;
+            color: #7b2d2d;
+            transition: 0.2s;
+        }
+        .page-btn:hover { background: #7b2d2d; color: white; }
+        .page-btn:disabled { opacity: 0.35; cursor: default; }
+        .page-info {
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+        }
     </style>
 </head>
 
@@ -107,12 +138,11 @@
 
 <h1>EVENTS AND ACTIVITIES</h1>
 
-<div class="grid">
-    {% for event in events %}
-    <div class="card" onclick="go('{{ event.id }}')">
-        <img src="{{ url_for('static', filename=event.image) }}">
-    </div>
-    {% endfor %}
+<div class="grid" id="eventsGrid"></div>
+<div class="pagination">
+    <button class="page-btn" id="prevBtn" onclick="changePage(-1)">◀ PREV</button>
+    <span class="page-info" id="pageInfo"></span>
+    <button class="page-btn" id="nextBtn" onclick="changePage(1)">NEXT ▶</button>
 </div>
 
 <div class="top-icons">
@@ -124,6 +154,39 @@
 </div>
 
 <script>
+const ALL_EVENTS = {{ events | tojson }};
+const PER_PAGE = 9;
+let currentPage = 1;
+
+function renderPage(page){
+    const grid  = document.getElementById('eventsGrid');
+    const start = (page - 1) * PER_PAGE;
+    const slice = ALL_EVENTS.slice(start, start + PER_PAGE);
+    grid.textContent = '';
+    slice.forEach(ev => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.onclick = () => go(ev.id);
+        const img = document.createElement('img');
+        img.src = '/static/' + ev.image;
+        div.appendChild(img);
+        grid.appendChild(div);
+    });
+    const total = Math.ceil(ALL_EVENTS.length / PER_PAGE);
+    document.getElementById('pageInfo').textContent = 'PAGE ' + page + ' / ' + total;
+    document.getElementById('prevBtn').disabled = page <= 1;
+    document.getElementById('nextBtn').disabled = page >= total;
+    grid.scrollTop = 0;
+}
+
+function changePage(dir){
+    const total = Math.ceil(ALL_EVENTS.length / PER_PAGE);
+    currentPage = Math.max(1, Math.min(total, currentPage + dir));
+    renderPage(currentPage);
+}
+
+renderPage(1);
+
 function go(id){
     window.location.href = "/event/" + id;
 }
@@ -141,6 +204,7 @@ function goHome(){
 <a href="/admin" class="admin-btn" title="Admin">
     <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
 </a>
+<script src="/static/js/toast.js"></script>
 <script src="/static/js/drag-scroll.js"></script>
 </body>
 </html>

@@ -120,9 +120,16 @@ def upload():
 @content_bp.route("/admin/events")
 @login_required
 def events_list():
+    per  = 20
     with db_connection() as conn:
-        rows = conn.execute("SELECT * FROM events ORDER BY id DESC").fetchall()
-    return render_template("admin/events.html", events=rows)
+        total = conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
+    total_pages = max(1, -(-total // per))
+    page = max(1, min(request.args.get("page", 1, type=int), total_pages))
+    with db_connection() as conn:
+        rows = conn.execute("SELECT * FROM events ORDER BY id DESC LIMIT ? OFFSET ?",
+                            (per, (page - 1) * per)).fetchall()
+    return render_template("admin/events.html", events=rows,
+                           page=page, total_pages=total_pages)
 
 
 @content_bp.route("/admin/events/add", methods=["GET", "POST"])
@@ -202,11 +209,16 @@ def event_delete(event_id: int):
 @content_bp.route("/admin/announcements")
 @login_required
 def announcements_list():
+    per  = 20
     with db_connection() as conn:
-        rows = conn.execute(
-            "SELECT * FROM announcements ORDER BY id DESC"
-        ).fetchall()
-    return render_template("admin/announcements.html", announcements=rows)
+        total = conn.execute("SELECT COUNT(*) FROM announcements").fetchone()[0]
+    total_pages = max(1, -(-total // per))
+    page = max(1, min(request.args.get("page", 1, type=int), total_pages))
+    with db_connection() as conn:
+        rows = conn.execute("SELECT * FROM announcements ORDER BY id DESC LIMIT ? OFFSET ?",
+                            (per, (page - 1) * per)).fetchall()
+    return render_template("admin/announcements.html", announcements=rows,
+                           page=page, total_pages=total_pages)
 
 
 @content_bp.route("/admin/announcements/add", methods=["GET", "POST"])
@@ -439,9 +451,16 @@ def building_floor_delete(floor_id: int):
 @content_bp.route("/admin/faculty")
 @login_required
 def faculty_list():
+    per  = 20
     with db_connection() as conn:
-        rows = conn.execute("SELECT * FROM faculty ORDER BY name").fetchall()
-    return render_template("admin/faculty_list.html", faculty=rows)
+        total = conn.execute("SELECT COUNT(*) FROM faculty").fetchone()[0]
+    total_pages = max(1, -(-total // per))
+    page = max(1, min(request.args.get("page", 1, type=int), total_pages))
+    with db_connection() as conn:
+        rows = conn.execute("SELECT * FROM faculty ORDER BY name LIMIT ? OFFSET ?",
+                            (per, (page - 1) * per)).fetchall()
+    return render_template("admin/faculty_list.html", faculty=rows,
+                           page=page, total_pages=total_pages)
 
 
 @content_bp.route("/admin/faculty/add", methods=["GET", "POST"])

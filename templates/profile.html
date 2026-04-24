@@ -416,9 +416,10 @@ function loadFromURL(){
             placeholder.style.display = "none";
             tableWrap.style.display = "block";
             tableWrap.appendChild(buildScheduleTable(entries));
+            toast('Schedule loaded', 'success', 2000);
           }
         })
-        .catch(() => {});
+        .catch(() => { toast('Could not load schedule', 'error'); });
     }
   }
 }
@@ -525,6 +526,7 @@ loadFromURL();
 loadSidebar();
 </script>
 
+<script src="/static/js/toast.js"></script>
 <script src="/static/js/drag-scroll.js"></script>
 <script src="/static/js/keyboard.js"></script>
 </body>

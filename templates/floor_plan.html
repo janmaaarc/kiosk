@@ -484,6 +484,7 @@ function handleRoomClick(btn) {
   btn.classList.add('highlighted');
   drawIndoorRoute(btn);
   showInfo(btn);
+  toast(btn.dataset.name, 'success', 2000);
 }
 
 function showInfo(btn) {
@@ -667,6 +668,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
+<script src="/static/js/toast.js"></script>
 <script src="/static/js/drag-scroll.js"></script>
 <script src="/static/js/keyboard.js"></script>
 </body>

@@ -55,4 +55,14 @@
         {% endfor %}
     </tbody>
 </table>
+
+{% if total_pages > 1 %}
+<div class="pagination">
+    {% if page > 1 %}<a href="?page={{ page - 1 }}">← Prev</a>
+    {% else %}<span class="disabled">← Prev</span>{% endif %}
+    <span class="current">{{ page }} / {{ total_pages }}</span>
+    {% if page < total_pages %}<a href="?page={{ page + 1 }}">Next →</a>
+    {% else %}<span class="disabled">Next →</span>{% endif %}
+</div>
+{% endif %}
 {% endblock %}
