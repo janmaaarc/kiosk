@@ -15,7 +15,9 @@
             background: url("/static/images/KIOSK BACKGROUND.png") no-repeat center center fixed;
             background-size: cover;
             height: 100vh;
-            overflow-y: auto;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         h1 {
@@ -27,13 +29,17 @@
             text-shadow: 2px 2px 0 rgba(0,0,0,0.15);
             margin-top: 80px;
             margin-bottom: 10px;
+            flex-shrink: 0;
         }
 
         .grid {
+            flex: 1;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 40px;
             padding: 40px;
+            overflow-y: auto;
+            align-content: start;
         }
 
         .card {
