@@ -35,50 +35,37 @@ body {
 .overlay {
   position: absolute;
   inset: 0;
-  background: rgba(255, 240, 190, 0.38);
+  background: rgba(0, 0, 0, 0.45);
 }
 
-/* ── Centered text block ─────────────────────────── */
-.hero {
+.text {
   position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   text-align: center;
-  padding: 0 40px;
+  color: white;
 }
 
-.hero-main {
-  font-size: clamp(72px, 12vw, 160px);
+.text h1 {
+  font-size: clamp(80px, 10vw, 140px);
   font-weight: 900;
-  letter-spacing: 6px;
+  letter-spacing: 12px;
   line-height: 1;
-
-  color: #8b1a1a;
-  -webkit-text-stroke: 6px #1a0000;
-  paint-order: stroke fill;
-
-  /* subtle depth shadow */
-  filter: drop-shadow(4px 6px 0px rgba(0,0,0,0.45));
 }
 
-.hero-sub {
-  font-size: clamp(18px, 2.4vw, 30px);
-  font-weight: 800;
-  letter-spacing: 8px;
-  color: #1e3010;
-  text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
+.text p {
+  margin-top: 24px;
+  font-size: clamp(20px, 2.2vw, 32px);
+  font-weight: 700;
+  letter-spacing: 6px;
+  animation: blink 1.5s infinite;
 }
 
-/* Blink the subtitle */
 @keyframes blink {
   0%, 100% { opacity: 1; }
-  50%       { opacity: 0.45; }
+  50%       { opacity: 0.4; }
 }
-.hero-sub { animation: blink 1.8s ease-in-out infinite; }
 </style>
 </head>
 
@@ -91,9 +78,9 @@ body {
 
   <div class="overlay"></div>
 
-  <div class="hero">
-    <div class="hero-main">SCAN YOUR RFID</div>
-    <div class="hero-sub">TO ACCESS THE KIOSK</div>
+  <div class="text">
+    <h1>WELCOME</h1>
+    <p>SCAN YOUR RFID TO ACCESS THE KIOSK</p>
   </div>
 
   <script>
@@ -105,7 +92,6 @@ body {
       slides[idx].classList.add('active');
     }, 4000);
 
-    // RFID capture: accumulate rapid keystrokes, submit when Enter or 100ms timeout
     let rfidBuffer = "";
     let rfidTimer = null;
     document.addEventListener('keydown', e => {
