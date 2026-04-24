@@ -96,19 +96,21 @@ body {
 
 .search-wrap { position: relative; }
 .search-wrap input {
-  padding: 10px 16px 10px 40px;
-  border-radius: 20px;
-  border: 2px solid #e0d0d0;
-  background: #fdf8f8;
+  padding: 14px 20px 14px 48px;
+  border-radius: 30px;
+  border: 3px solid rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.92);
   font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   letter-spacing: 1px;
-  width: 200px;
+  width: 300px;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  color: #333;
 }
-.search-wrap input:focus { border-color: #8b2e2e; }
+.search-wrap input:focus { border-color: #8b2e2e; box-shadow: 0 4px 20px rgba(139,46,46,0.25); }
 .search-wrap::before {
   content: "⌕";
   position: absolute;
