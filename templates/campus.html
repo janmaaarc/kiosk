@@ -110,38 +110,72 @@
               transform: scale(1.1); 
             } 
 
-            .directions-panel{
-              display:none;
-              position:fixed;
-              left:0;top:0;
-              width:380px;
-              height:100vh;
-              background:linear-gradient(180deg, #7b2d2d 0%, #5a1f1f 100%);
-              padding:40px 34px 40px;
-              box-sizing:border-box;
-              color:#fff;
-              z-index:1400;
-              overflow-y:auto;
-              box-shadow:4px 0 20px rgba(0,0,0,0.2);
-              transition:transform 0.3s cubic-bezier(0.16,1,0.3,1);
+            .directions-panel {
+              display: none;
+              position: fixed;
+              left: 0; top: 0;
+              width: 360px;
+              height: 100vh;
+              background: linear-gradient(160deg, #7b2d2d 0%, #4a1818 100%);
+              box-sizing: border-box;
+              color: #fff;
+              z-index: 1400;
+              overflow-y: auto;
+              box-shadow: 6px 0 32px rgba(0,0,0,0.35);
+              transition: transform 0.32s cubic-bezier(0.16,1,0.3,1);
+              scrollbar-width: none;
             }
+            .directions-panel::-webkit-scrollbar { display: none; }
             .directions-panel.collapsed {
-              transform: translateX(-380px);
+              transform: translateX(-360px);
             }
+
+            .dp-header {
+              display: flex;
+              align-items: flex-start;
+              justify-content: space-between;
+              gap: 12px;
+              padding: 28px 28px 20px;
+              background: rgba(0,0,0,0.15);
+              border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+            .dp-header-text { flex: 1; min-width: 0; }
+            .dp-close {
+              flex-shrink: 0;
+              width: 44px; height: 44px;
+              background: rgba(255,255,255,0.12);
+              border: none;
+              border-radius: 10px;
+              color: #fff;
+              font-size: 18px;
+              cursor: pointer;
+              display: flex; align-items: center; justify-content: center;
+              transition: background 0.15s;
+              font-family: inherit;
+            }
+            .dp-close:hover { background: rgba(255,255,255,0.22); }
+
+            .dp-body { padding: 24px 28px 32px; }
+
             .panel-toggle {
-              position:fixed;
-              left:0;top:50%;
-              transform:translateY(-50%);
-              z-index:1401;
-              background:#7b2d2d;
-              color:#fff;
-              border:none;
-              border-radius:0 12px 12px 0;
-              padding:16px 12px;
-              cursor:pointer;
-              font-size:20px;
-              box-shadow:3px 0 10px rgba(0,0,0,0.3);
-              display:none;
+              position: fixed;
+              left: 0; top: 50%;
+              transform: translateY(-50%);
+              z-index: 1401;
+              width: 36px;
+              height: 80px;
+              background: #7b2d2d;
+              color: #fff;
+              border: none;
+              border-radius: 0 12px 12px 0;
+              cursor: pointer;
+              display: none;
+              box-shadow: 4px 0 14px rgba(0,0,0,0.3);
+              writing-mode: vertical-rl;
+              font-size: 11px;
+              font-weight: 900;
+              letter-spacing: 2px;
+              font-family: inherit;
             }
             .directions-panel .dest-label {
               font-size:22px;font-weight:900;letter-spacing:2px;
@@ -492,22 +526,24 @@
                           </div>
 
                            <div class="directions-panel" id="directionsPanel">
-                            <button onclick="toggleDirectionsPanel()" style="
-                              float:right;margin:-8px -8px 12px 12px;
-                              background:rgba(255,255,255,0.15);border:none;
-                              color:#fff;border-radius:8px;padding:6px 12px;
-                              font-size:16px;cursor:pointer;font-family:inherit;">✕</button>
-                            <div class="dest-label">DESTINATION:</div>
-                            <div class="dest-name" id="destName">—</div>
-                            <div class="dir-heading">Directions</div>
-                            <ul id="directionsBox"></ul>
-                            <div id="insideBlock" style="display:none">
-                              <div class="divider"></div>
-                              <div class="dir-heading" id="insideHeading">Inside the Building:</div>
-                              <ul id="insideBox"></ul>
+                            <div class="dp-header">
+                              <div class="dp-header-text">
+                                <div class="dest-label">DESTINATION:</div>
+                                <div class="dest-name" id="destName">—</div>
+                              </div>
+                              <button class="dp-close" onclick="toggleDirectionsPanel()">✕</button>
+                            </div>
+                            <div class="dp-body">
+                              <div class="dir-heading">Directions</div>
+                              <ul id="directionsBox"></ul>
+                              <div id="insideBlock" style="display:none">
+                                <div class="divider"></div>
+                                <div class="dir-heading" id="insideHeading">Inside the Building:</div>
+                                <ul id="insideBox"></ul>
+                              </div>
                             </div>
                           </div>
-                          <button class="panel-toggle" id="panelToggle" onclick="toggleDirectionsPanel()">☰</button>
+                          <button class="panel-toggle" id="panelToggle" onclick="toggleDirectionsPanel()">DIR</button>
                             
                           <script>
 
