@@ -119,6 +119,11 @@ body {
 </div>
 
 <script>
+// Save user to localStorage so menu can show greeting
+localStorage.setItem('rfid_user', JSON.stringify({
+  name: {{ user_name | tojson }},
+  role: {{ user_role | tojson }}
+}));
 setTimeout(() => { window.location.href = '/menu'; }, 5000);
 </script>
 </body>

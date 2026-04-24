@@ -112,12 +112,36 @@
         }
         .admin-btn:hover { background: rgba(0,0,0,0.4); }
         .admin-btn svg { width: 18px; height: 18px; fill: rgba(255,255,255,0.7); }
+
+        .user-greeting {
+            font-size: 22px;
+            font-weight: 700;
+            color: #7b2d2d;
+            letter-spacing: 2px;
+            margin-top: -10px;
+            margin-bottom: 0;
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+        }
+        .role-tag {
+            display: inline-block;
+            padding: 3px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        .role-faculty { background: #7b2d2d; color: #fff; }
+        .role-student { background: #1a5c8a; color: #fff; }
+        .role-visitor { background: #555;    color: #fff; }
     </style>
 </head>
 
 <body>
 
-    <h1 class="title">WELCOME</h1>
+    <h1 class="title">MENU</h1>
+    <p class="user-greeting" id="userGreeting"></p>
 
     <div class="menu-container">
 
@@ -168,5 +192,22 @@
     <a href="/admin" class="admin-btn" title="Admin">
         <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
     </a>
+
+<script>
+(function() {
+  try {
+    const u = JSON.parse(localStorage.getItem('rfid_user'));
+    if (u && u.name) {
+      const role = (u.role || 'visitor').toLowerCase();
+      const el   = document.getElementById('userGreeting');
+      el.textContent = 'Welcome, ' + u.name;
+      const tag = document.createElement('span');
+      tag.className = 'role-tag role-' + role;
+      tag.textContent = u.role.toUpperCase();
+      el.appendChild(tag);
+    }
+  } catch(e) {}
+})();
+</script>
 </body>
 </html>
