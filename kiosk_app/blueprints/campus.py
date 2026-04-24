@@ -546,7 +546,7 @@ def waf_rac_building():
 _NEW_ADMIN_FLOORS = {
     1: {
         "label": "Ground Floor",
-        "image": "images/floor_plans/new_admin_f1.png",
+        "image": "images/floor_plans/new_admin_f1.svg",
         "rooms": [
             # Top row  (left%, top%, width%, height%, office_key links to offices.key)
             {"name": "Medical and Dental Services", "left": 1,  "top": 3,  "width": 13, "height": 38, "desc": "Student health and dental clinic",           "office_key": "Clinic"},

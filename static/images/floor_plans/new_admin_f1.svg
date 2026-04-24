@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" preserveAspectRatio="none">
+  <defs>
+    <pattern id="stairs" patternUnits="userSpaceOnUse" width="16" height="16">
+      <rect width="16" height="16" fill="#e8dfc5"/>
+      <line x1="0" y1="0" x2="0" y2="16" stroke="#b8a87a" stroke-width="2"/>
+    </pattern>
+    <style>
+      .wall       { fill: none; stroke: #333; stroke-width: 4; }
+      .room-white { fill: #ffffff; stroke: #333; stroke-width: 2; }
+      .room-yellow{ fill: #f4d35e; stroke: #333; stroke-width: 2; }
+      .room-cr    { fill: #8b1a1a; stroke: #333; stroke-width: 2; }
+      .label-exit { font: 700 12px sans-serif; fill: #1a1a1a; text-anchor: middle;
+                    letter-spacing: 2px; writing-mode: vertical-rl; }
+      .label-stairs{ font: 700 14px sans-serif; fill: #1a1a1a; text-anchor: middle; letter-spacing: 2px; }
+    </style>
+  </defs>
+
+  <!-- Outer wall -->
+  <rect x="80" y="60" width="1040" height="580" class="wall"/>
+
+  <!-- TOP ROW -->
+  <!-- Medical and Dental Services: left 1%, w 13% -->
+  <rect x="90"  y="77" width="135" height="220" class="room-white"/>
+  <!-- Record and Information Center: left 14%, w 10% -->
+  <rect x="225" y="77" width="104" height="220" class="room-yellow"/>
+  <!-- MPC Cares: left 24%, w 10% -->
+  <rect x="329" y="77" width="104" height="220" class="room-white"/>
+  <!-- Faculty Room: left 34%, w 28% -->
+  <rect x="433" y="77" width="291" height="220" class="room-white"/>
+  <!-- Lobby/Entrance gap: 62%–88% = open area -->
+  <!-- CR: left 88%, w 11% -->
+  <rect x="995" y="77" width="114" height="220" class="room-cr"/>
+
+  <!-- HALLWAY lines -->
+  <line x1="80"  y1="297" x2="1120" y2="297" stroke="#333" stroke-width="3"/>
+  <line x1="80"  y1="396" x2="1120" y2="396" stroke="#333" stroke-width="3"/>
+  <text x="100"  y="350" class="label-exit">EXIT</text>
+  <text x="1100" y="350" class="label-exit">EXIT</text>
+
+  <!-- BOTTOM ROW -->
+  <!-- Quality Assurance: left 1%, w 13% -->
+  <rect x="90"  y="396" width="135" height="224" class="room-white"/>
+  <!-- Conference Room: left 14%, w 10% -->
+  <rect x="225" y="396" width="104" height="224" class="room-white"/>
+  <!-- Stairs area: left 24%–62% -->
+  <rect x="329" y="396" width="200" height="150" fill="url(#stairs)" stroke="#333" stroke-width="2"/>
+  <rect x="329" y="546" width="200" height="74"  class="room-yellow"/>
+  <text x="595"  y="490" class="label-stairs" transform="rotate(-90 595 490)">STAIRS</text>
+  <!-- Repair and Maintenance: left 62%, w 13% -->
+  <rect x="724" y="396" width="135" height="224" class="room-yellow"/>
+  <!-- Function Hall: left 75%, w 14% -->
+  <rect x="859" y="396" width="146" height="224" class="room-yellow"/>
+</svg>
