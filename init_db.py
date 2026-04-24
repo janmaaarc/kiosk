@@ -301,6 +301,21 @@ def _migrate(conn: sqlite3.Connection) -> None:
         )
 
 
+def _seed_rfid_users(cur: sqlite3.Cursor) -> None:
+    _RFID_USERS = [
+        ("0609475703", "Group 1",       "student"),
+        ("0609393591", "Racelis",        "faculty"),
+        ("0609057607", "Cesarcris",      "student"),
+        ("1226934023", "Ms. Bonifacio",  "faculty"),
+        ("1227038391", "Ms. Dilag",      "faculty"),
+    ]
+    for uid, name, role in _RFID_USERS:
+        cur.execute(
+            "INSERT OR IGNORE INTO users (rfid_uid, name, role) VALUES (?, ?, ?)",
+            (uid, name, role),
+        )
+
+
 def main() -> None:
     bcrypt = Bcrypt()
     with sqlite3.connect(DB_PATH) as conn:
@@ -313,6 +328,7 @@ def main() -> None:
         _seed_announcements(cur)
         _seed_offices(cur)
         _seed_faculty(cur)
+        _seed_rfid_users(cur)
         conn.commit()
 
         existing = cur.execute(
