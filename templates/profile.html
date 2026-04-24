@@ -363,7 +363,14 @@ function loadFromURL(){
   document.querySelector(".header-text h2").innerText = name || "—";
   document.querySelector(".header-text p").innerText  = (dept ? dept.toUpperCase() : "") + " DEPARTMENT";
 
-  if(imgSrc) document.querySelector(".header img").src = imgSrc;
+  const AVATAR_FALLBACK = '/static/images/icon/avatar_placeholder.svg';
+  const headerImg = document.querySelector(".header img");
+  if(imgSrc) {
+    headerImg.src = imgSrc;
+    headerImg.onerror = function() { this.src = AVATAR_FALLBACK; this.onerror = null; };
+  } else {
+    headerImg.src = AVATAR_FALLBACK;
+  }
 
   // Office badge
   const existing = document.querySelector(".location-links");

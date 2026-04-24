@@ -65,14 +65,89 @@
     resetTimers();
   }
 
+  var warningTimer = null;
+  var warningEl = null;
+  var countdownInterval = null;
+
+  function isAdminPage() {
+    var p = window.location.pathname;
+    return p.startsWith('/admin') || p.startsWith('/dashboard');
+  }
+
+  function buildWarning() {
+    var el = document.createElement('div');
+    el.id = 'kiosk-idle-warning';
+    el.style.cssText =
+      'position:fixed;top:0;left:0;width:100%;height:100%;z-index:99998;' +
+      'background:rgba(0,0,0,0.75);display:none;align-items:center;justify-content:center;';
+    var box = document.createElement('div');
+    box.style.cssText =
+      'background:#fff;border-radius:16px;padding:40px 48px;text-align:center;' +
+      'font-family:League Spartan,sans-serif;max-width:420px;';
+    var title = document.createElement('div');
+    title.style.cssText = 'font-size:22px;font-weight:900;color:#7b2d2d;margin-bottom:12px;';
+    title.textContent = 'Still there?';
+    var msg = document.createElement('div');
+    msg.style.cssText = 'font-size:16px;color:#555;margin-bottom:24px;';
+    msg.textContent = 'Returning to menu in ';
+    var counter = document.createElement('strong');
+    counter.id = 'kiosk-countdown';
+    counter.style.color = '#7b2d2d';
+    counter.textContent = '10';
+    msg.appendChild(counter);
+    msg.appendChild(document.createTextNode(' seconds…'));
+    var btn = document.createElement('button');
+    btn.textContent = 'STAY ON PAGE';
+    btn.style.cssText =
+      'background:#7b2d2d;color:#fff;border:none;border-radius:10px;' +
+      'padding:14px 32px;font-family:inherit;font-size:16px;font-weight:900;cursor:pointer;';
+    btn.onclick = dismissWarning;
+    box.appendChild(title);
+    box.appendChild(msg);
+    box.appendChild(btn);
+    el.appendChild(box);
+    document.body.appendChild(el);
+    return el;
+  }
+
+  function showWarning() {
+    if (!warningEl) warningEl = buildWarning();
+    var n = 10;
+    var counter = document.getElementById('kiosk-countdown');
+    if (counter) counter.textContent = n;
+    warningEl.style.display = 'flex';
+    countdownInterval = setInterval(function () {
+      n -= 1;
+      if (counter) counter.textContent = n;
+      if (n <= 0) {
+        clearInterval(countdownInterval);
+        window.location.href = '/menu';
+      }
+    }, 1000);
+  }
+
+  function dismissWarning() {
+    if (warningEl) warningEl.style.display = 'none';
+    clearInterval(countdownInterval);
+    resetTimers();
+  }
+
   function resetTimers() {
     clearTimeout(menuTimer);
     clearTimeout(screensaverTimer);
+    clearTimeout(warningTimer);
+    clearInterval(countdownInterval);
+    if (warningEl) warningEl.style.display = 'none';
 
     if (window.location.pathname !== '/menu') {
-      menuTimer = setTimeout(function () {
-        window.location.href = '/menu';
-      }, MENU_TIMEOUT_MS);
+      if (isAdminPage()) {
+        // Show warning instead of hard redirect on admin pages
+        warningTimer = setTimeout(showWarning, MENU_TIMEOUT_MS);
+      } else {
+        menuTimer = setTimeout(function () {
+          window.location.href = '/menu';
+        }, MENU_TIMEOUT_MS);
+      }
     }
 
     screensaverTimer = setTimeout(showScreensaver, SCREENSAVER_TIMEOUT_MS);

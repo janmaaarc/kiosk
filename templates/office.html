@@ -283,17 +283,20 @@ body {
     </div>
 
     <!-- Directions buttons -->
-    {% if from_building %}
     <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:36px;">
+      {% if from_building %}
       <a class="btn-directions"
          href="{{ from_building }}?floor={{ from_floor }}&location={{ from_room | urlencode }}">
         <svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>
         SHOW DIRECTION
       </a>
+      {% elif not selected.building_url and selected.location %}
+      <a class="btn-directions" href="/campus?location={{ selected.location | urlencode }}">
+        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        FIND ON CAMPUS MAP
+      </a>
+      {% endif %}
     </div>
-    {% else %}
-    <div style="margin-bottom:36px;"></div>
-    {% endif %}
 
     <!-- Forms & Memos -->
     <div class="section-label">FORMS &amp; MEMOS</div>

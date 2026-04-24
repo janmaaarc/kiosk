@@ -100,7 +100,16 @@ def upload():
     elif mime in _ALLOWED_FILE_MIME:
         if size > _MAX_FILE_BYTES:
             return jsonify({"error": "File exceeds 10 MB limit"}), 400
-        subdir = "files"
+        # PDFs go under static/files/uploads/ so openPDF('/static/files/' + path) works
+        _FILES_ROOT = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+            "static", "files", "uploads",
+        )
+        os.makedirs(_FILES_ROOT, exist_ok=True)
+        filename = _safe_filename(f.filename)
+        with open(os.path.join(_FILES_ROOT, filename), "wb") as fh:
+            fh.write(data)
+        return jsonify({"path": f"uploads/{filename}"})
     else:
         return jsonify({"error": "File type not allowed"}), 400
 
@@ -548,4 +557,45 @@ def faculty_delete(member_id: int):
     with db_connection() as conn:
         conn.execute("DELETE FROM faculty WHERE id = ?", (member_id,))
         conn.commit()
+    return redirect(url_for("content.faculty_list"))
+
+
+@content_bp.route("/admin/faculty/import-csv", methods=["POST"])
+@login_required
+def faculty_import_csv():
+    f = request.files.get("csv_file")
+    if not f or not f.filename:
+        flash("No file provided", "error")
+        return redirect(url_for("content.faculty_list"))
+
+    text = f.read().decode("utf-8", errors="replace")
+    reader = csv.DictReader(io.StringIO(text))
+    inserted = skipped = 0
+    with db_connection() as conn:
+        for row in reader:
+            try:
+                conn.execute(
+                    """INSERT INTO faculty
+                       (name, department, position, photo, room, building, office_key)
+                       VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                    (
+                        row.get("name", "").strip(),
+                        row.get("department", "").strip(),
+                        row.get("position", "").strip(),
+                        row.get("photo", "").strip(),
+                        row.get("room", "").strip(),
+                        row.get("building", "").strip(),
+                        row.get("office_key", "").strip(),
+                    ),
+                )
+                inserted += 1
+            except Exception as exc:
+                skipped += 1
+                current_app.logger.warning("Faculty CSV skip row %d: %s", inserted + skipped, exc)
+        conn.commit()
+
+    msg = f"Imported {inserted} faculty member(s)"
+    if skipped:
+        msg += f", skipped {skipped} invalid row(s)"
+    flash(msg, "success")
     return redirect(url_for("content.faculty_list"))

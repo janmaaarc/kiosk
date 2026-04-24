@@ -4,8 +4,20 @@
 {% block content %}
 <div class="toolbar">
     <h1 class="page-title" style="margin:0">Faculty</h1>
-    <a href="{{ url_for('content.faculty_add') }}" class="btn btn-primary">+ Add Faculty</a>
+    <div style="display:flex;gap:8px;align-items:center">
+        <form method="POST" action="{{ url_for('content.faculty_import_csv') }}"
+              enctype="multipart/form-data" style="display:flex;gap:6px;align-items:center">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="file" name="csv_file" accept=".csv"
+                   style="font-size:13px;border:1px solid #ddd;padding:5px 8px;border-radius:5px">
+            <button type="submit" class="btn btn-secondary btn-sm">Import CSV</button>
+        </form>
+        <a href="{{ url_for('content.faculty_add') }}" class="btn btn-primary">+ Add Faculty</a>
+    </div>
 </div>
+<p style="font-size:12px;color:#888;margin-bottom:12px">
+    CSV columns: <code>name, department, position, photo, room, building, office_key</code>
+</p>
 
 <table>
     <thead>
