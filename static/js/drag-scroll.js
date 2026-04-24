@@ -17,7 +17,7 @@
       -webkit-user-drag: none;
       pointer-events: none;
     }
-    button img, a img, .top-icon, .top-icons img, .nav-icons img, .card img, [onclick] img {
+    button img, a img, .top-icon, .top-icons img, .nav-icons img, .card img, img[onclick] {
       pointer-events: auto;
     }
   `;
