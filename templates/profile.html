@@ -520,16 +520,6 @@ function loadFromURL(){
   ]);
   const SAFE_KEY = /^[A-Za-z0-9 _\-]+$/;
 
-  if(building && ALLOWED_BUILDINGS.has(building)){
-    const a = document.createElement("a");
-    a.className = "building-link";
-    a.textContent = building;
-    a.onclick = () => {
-      window.location.href = "/campus_map?location=" + encodeURIComponent(building);
-    };
-    locDiv.appendChild(a);
-  }
-
   if(officeKey && SAFE_KEY.test(officeKey)){
     const a = document.createElement("a");
     a.className = "office-link";
@@ -582,7 +572,7 @@ function goBack(){
 }
 
 function goHome(){
-  window.location.href="/";
+  window.location.href="/menu";
 }
 
 function goFaculty(dept){

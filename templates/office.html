@@ -270,10 +270,17 @@ body {
     <!-- Info chips -->
     <div class="info-row">
       {% if selected.location %}
+      {% if selected.building_url %}
+      <a class="chip" href="{{ selected.building_url }}" style="cursor:pointer;text-decoration:none;color:inherit;">
+        <span class="chip-icon">📍</span>
+        {{ selected.location }}
+      </a>
+      {% else %}
       <div class="chip">
         <span class="chip-icon">📍</span>
         {{ selected.location }}
       </div>
+      {% endif %}
       {% endif %}
       {% if selected.hours %}
       <div class="chip">
@@ -285,33 +292,17 @@ body {
     </div>
 
     <!-- Directions buttons -->
+    {% if from_building %}
     <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:36px;">
-      {% if from_building %}
-      {# User came from a floor plan — show "Show Direction" back to that floor #}
       <a class="btn-directions"
          href="{{ from_building }}?floor={{ from_floor }}&location={{ from_room | urlencode }}">
         <svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>
         SHOW DIRECTION
       </a>
-      {% else %}
-        {% if selected.building_url %}
-        <a class="btn-directions" href="{{ selected.building_url }}">
-          <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 7h10v2H7zm0 4h10v2H7zm0 4h7v2H7z"/></svg>
-          ENTER BUILDING
-        </a>
-        <a class="btn-directions" href="/campus_map?location={{ selected.location | urlencode }}">
-          <svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>
-          SHOW DIRECTION
-        </a>
-        {% else %}
-        {# No building set — point to the campus map so visitors can still navigate #}
-        <a class="btn-directions" href="/campus_map">
-          <svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg>
-          SHOW DIRECTION
-        </a>
-        {% endif %}
-      {% endif %}
     </div>
+    {% else %}
+    <div style="margin-bottom:36px;"></div>
+    {% endif %}
 
     <!-- Forms & Memos -->
     <div class="section-label">FORMS &amp; MEMOS</div>

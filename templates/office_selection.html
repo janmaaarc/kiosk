@@ -128,11 +128,11 @@ body{
 <body>
 
 <div class="top-icons">
-  <img src="{{ url_for('static', filename='images/icon/back_button.png') }}" 
-       class="top-icon" alt="Back" onclick="goBack()">
-
-  <img src="{{ url_for('static', filename='images/icon/home_button.png') }}" 
+  <img src="{{ url_for('static', filename='images/icon/home_button.png') }}"
        class="top-icon" alt="Home" onclick="goHome()">
+
+  <img src="{{ url_for('static', filename='images/icon/back_button.png') }}"
+       class="top-icon" alt="Back" onclick="goBack()">
 </div>
 <!-- TOP BAR -->
 <div class="topbar">
@@ -170,7 +170,7 @@ function goBack(){
   window.history.back();
 }
 function goHome(){
-  window.location.href = "/";
+  window.location.href = "/menu";
 }
 function filterCards(q) {
   const term = q.trim().toLowerCase();

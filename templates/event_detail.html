@@ -4,20 +4,44 @@
     <title>{{ event['title'] }}</title>
 
     <style>
-        body {
-            margin: 0;
-            font-family: Arial;
-            background: #f5f5f5;
+        @font-face {
+          font-family: 'League Spartan';
+          src: url('/static/font/LeagueSpartan-VariableFont_wght.ttf') format('truetype');
+          font-weight: 100 900;
         }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'League Spartan', sans-serif; }
+
+        body {
+            background: #f5f5f5;
+            overflow-y: auto;
+        }
+
+        .top-icons {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .top-icon {
+            width: 44px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .top-icon:hover { transform: scale(1.1); }
 
         .container {
             display: flex;
             gap: 40px;
-            padding: 50px;
+            padding: 80px 50px 50px;
         }
 
         .left img {
             width: 350px;
+            border-radius: 12px;
         }
 
         .right {
@@ -27,25 +51,24 @@
         h1 {
             color: #7a1f2a;
             font-size: 50px;
+            margin-bottom: 20px;
         }
 
         p {
             line-height: 1.6;
-        }
-
-        .back {
-            position: absolute;
-            bottom: 30px;
-            right: 30px;
-            padding: 10px 20px;
-            background: #eee;
-            border-radius: 10px;
-            cursor: pointer;
+            font-size: 16px;
         }
     </style>
 </head>
 
 <body>
+
+<div class="top-icons">
+    <img src="{{ url_for('static', filename='images/icon/home_button.png') }}"
+         class="top-icon" alt="Home" onclick="window.location.href='/menu'">
+    <img src="{{ url_for('static', filename='images/icon/back_button.png') }}"
+         class="top-icon" alt="Back" onclick="history.back()">
+</div>
 
 <div class="container">
     <div class="left">
@@ -57,8 +80,6 @@
         <p style="white-space:pre-wrap">{{ event['details'] }}</p>
     </div>
 </div>
-
-<div class="back" onclick="history.back()">Back</div>
 
 </body>
 </html>
