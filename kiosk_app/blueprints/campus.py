@@ -548,17 +548,18 @@ _NEW_ADMIN_FLOORS = {
         "label": "Ground Floor",
         "image": "images/floor_plans/new_admin_f1.svg",
         "rooms": [
-            # Top row  (left%, top%, width%, height%, office_key links to offices.key)
-            {"name": "Medical and Dental Services", "left": 1,  "top": 3,  "width": 13, "height": 38, "desc": "Student health and dental clinic",           "office_key": "Clinic"},
-            {"name": "Record and Information Center",   "left": 14, "top": 3,  "width": 10, "height": 38, "desc": "Official school records and documents",   "office_key": "Registrar"},
-            {"name": "MPC Cares",                       "left": 24, "top": 3,  "width": 10, "height": 38, "desc": "Student welfare and assistance"},
-            {"name": "Faculty Room",                    "left": 34, "top": 3,  "width": 28, "height": 38, "desc": "Faculty lounge and workroom"},
-            {"name": "CR",                              "left": 88, "top": 3,  "width": 11, "height": 38, "desc": "Comfort room"},
-            # Bottom row
-            {"name": "Quality Assurance Office",        "left": 1,  "top": 58, "width": 13, "height": 38, "desc": "Quality management and accreditation"},
-            {"name": "Conference Room",                 "left": 14, "top": 58, "width": 10, "height": 38, "desc": "Meeting and conference facility"},
-            {"name": "Repair and Maintenance",          "left": 62, "top": 58, "width": 13, "height": 38, "desc": "Facilities maintenance office"},
-            {"name": "Function Hall",                   "left": 75, "top": 58, "width": 14, "height": 38, "desc": "Multi-purpose function hall"},
+            # Coords = % of full SVG image (1200×700). Building outer: x=80-1120, y=60-640.
+            # Top row (SVG y=77, h=220 → top=11%, height=31%)
+            {"name": "Medical and Dental Services",   "left": 8,  "top": 11, "width": 11, "height": 31, "desc": "Student health and dental clinic",           "office_key": "Clinic"},
+            {"name": "Record and Information Center", "left": 19, "top": 11, "width": 9,  "height": 31, "desc": "Official school records and documents",       "office_key": "Registrar"},
+            {"name": "MPC Cares",                     "left": 28, "top": 11, "width": 9,  "height": 31, "desc": "Student welfare and assistance"},
+            {"name": "Faculty Room",                  "left": 37, "top": 11, "width": 24, "height": 31, "desc": "Faculty lounge and workroom"},
+            {"name": "CR",                            "left": 83, "top": 11, "width": 10, "height": 31, "desc": "Comfort room"},
+            # Bottom row (SVG y=396, h=224 → top=57%, height=32%)
+            {"name": "Quality Assurance Office",      "left": 8,  "top": 57, "width": 11, "height": 32, "desc": "Quality management and accreditation"},
+            {"name": "Conference Room",               "left": 19, "top": 57, "width": 9,  "height": 32, "desc": "Meeting and conference facility"},
+            {"name": "Repair and Maintenance",        "left": 60, "top": 57, "width": 11, "height": 32, "desc": "Facilities maintenance office"},
+            {"name": "Function Hall",                 "left": 71, "top": 57, "width": 12, "height": 32, "desc": "Multi-purpose function hall"},
         ],
     },
 }
