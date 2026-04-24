@@ -361,7 +361,7 @@ function loadFromURL(){
   const officeName = params.get("office_name") || "";
 
   document.querySelector(".header-text h2").innerText = name || "—";
-  document.querySelector(".header-text p").innerText  = (dept ? dept.toUpperCase() : "") + " DEPARTMENT";
+  document.querySelector(".header-text p").innerText  = dept ? dept.toUpperCase() : "";
 
   const AVATAR_FALLBACK = '/static/images/icon/avatar_placeholder.svg';
   const headerImg = document.querySelector(".header img");
@@ -388,16 +388,42 @@ function loadFromURL(){
   }
 
   // Rooms from URL param
+  const BUILDING_SLUG = {
+    "Academic Building":       "/academic_building",
+    "IT Building":             "/it_building",
+    "Tech Building":           "/tech_building",
+    "Civil Tech Building":     "/civil_tech_building",
+    "FSM Building":            "/fsm_building",
+    "Mechanical Building":     "/mechanical_building",
+    "Automotive Building":     "/automotive_building",
+    "Rodriguez Building":      "/rodriguez_building",
+    "New Admin Building":      "/new_admin_building",
+    "Old Admin Building":      "/old_admin_building",
+    "Graduate School Building":"/graduate_school_building",
+    "Ylagan Hall":             "/ylagan_hall",
+    "WAF & RAC Building":      "/waf_&_rac_building",
+    "Science Building":        "/science_building",
+    "TE Building":             "/te_building",
+    "MIST-NCESTD Dorm":        "/mist_ncestd_dorm",
+    "MIST-NCESTD Building":    "/mist_ncestd_building",
+    "Multi-Purpose Building":  "/multi_purpose_building",
+  };
+
+  const building = params.get("building") || "";
   const roomsDiv = document.querySelector(".rooms");
   roomsDiv.textContent = "";
   try {
     const rooms = JSON.parse(params.get("room") || "[]");
     rooms.forEach(room => {
       const a = document.createElement("a");
-      a.textContent = room;
+      a.textContent = (building ? building + " — " : "") + room;
       a.onclick = () => {
-        const b = room.split(" Room")[0];
-        window.location.href = "/campus_map?location=" + encodeURIComponent(b);
+        const slug = BUILDING_SLUG[building];
+        if (slug) {
+          window.location.href = slug + "?location=" + encodeURIComponent(room);
+        } else if (building) {
+          window.location.href = "/campus?location=" + encodeURIComponent(building);
+        }
       };
       roomsDiv.appendChild(a);
     });
