@@ -47,29 +47,28 @@
       scrollLeft = el.scrollLeft;
       scrollTop = el.scrollTop;
       el.style.cursor = 'grabbing';
-    });
 
-    el.addEventListener('mouseleave', () => {
-      isDown = false;
-      el.style.cursor = '';
-    });
+      // Track drag on document so fast gestures don't lose the scroll target
+      function onMove(e) {
+        if (!isDown) return;
+        e.preventDefault();
+        const rect = el.getBoundingClientRect();
+        const walkX = (e.clientX - rect.left) - startX;
+        const walkY = (e.clientY - rect.top) - startY;
+        if (Math.abs(walkX) > 3 || Math.abs(walkY) > 3) moved = true;
+        el.scrollLeft = scrollLeft - walkX;
+        el.scrollTop = scrollTop - walkY;
+      }
 
-    el.addEventListener('mouseup', () => {
-      isDown = false;
-      el.style.cursor = '';
-    });
+      function onUp() {
+        isDown = false;
+        el.style.cursor = '';
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
 
-    el.addEventListener('mousemove', (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const rect = el.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const walkX = x - startX;
-      const walkY = y - startY;
-      if (Math.abs(walkX) > 3 || Math.abs(walkY) > 3) moved = true;
-      el.scrollLeft = scrollLeft - walkX;
-      el.scrollTop = scrollTop - walkY;
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
     });
 
     // Suppress click after drag
@@ -82,20 +81,18 @@
     }, true);
   }
 
-  function init() {
-    // Apply to all currently scrollable elements
-    document.querySelectorAll('*').forEach(el => {
-      if (isScrollable(el)) attachDragScroll(el);
-    });
+  function attachIfNeeded(el) {
+    if (!el._dragScrollAttached && isScrollable(el)) {
+      el._dragScrollAttached = true;
+      attachDragScroll(el);
+    }
+  }
 
-    // Also watch for dynamically added scrollable elements
+  function init() {
+    document.querySelectorAll('*').forEach(attachIfNeeded);
+
     new MutationObserver(() => {
-      document.querySelectorAll('*').forEach(el => {
-        if (!el._dragScrollAttached && isScrollable(el)) {
-          el._dragScrollAttached = true;
-          attachDragScroll(el);
-        }
-      });
+      document.querySelectorAll('*').forEach(attachIfNeeded);
     }).observe(document.body, { childList: true, subtree: true });
   }
 
