@@ -214,15 +214,6 @@ body {
 .pdf-item:hover { background: #fdf0f0; border-color: #8b2e2e; color: #8b2e2e; }
 .pdf-icon { font-size: 20px; }
 
-.pdf-viewer {
-  margin-top: 16px;
-  width: 100%;
-  max-width: 700px;
-  height: 440px;
-  border: 2px solid #e8d0d0;
-  border-radius: 12px;
-  display: none;
-}
 
 .no-files {
   color: #aaa;
@@ -309,7 +300,7 @@ body {
     <div class="pdf-list">
       {% if selected.files %}
         {% for file in selected.files %}
-        <div class="pdf-item" onclick="openPDF('{{ file.file }}')">
+        <div class="pdf-item" onclick="openPDF('{{ file.file }}', '{{ file.title }}')">
           <span class="pdf-icon">📄</span>
           {{ file.title }}
         </div>
@@ -319,16 +310,32 @@ body {
       {% endif %}
     </div>
 
-    <iframe class="pdf-viewer" id="viewer" sandbox="allow-same-origin"></iframe>
+    <!-- PDF fullscreen overlay -->
+    <div id="pdf-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;flex-direction:column;">
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 20px;background:#7b2d2d;">
+        <button onclick="closePDF()" style="background:white;color:#7b2d2d;border:none;border-radius:8px;
+          padding:8px 20px;font-family:inherit;font-weight:900;font-size:14px;letter-spacing:1px;cursor:pointer;">
+          ✕ CLOSE
+        </button>
+        <span id="pdf-title" style="color:white;font-weight:700;letter-spacing:1px;font-size:14px;"></span>
+      </div>
+      <iframe id="viewer" style="flex:1;width:100%;border:none;" allowfullscreen></iframe>
+    </div>
 
   </div>
 </div>
 
 <script>
-function openPDF(file) {
-  const v = document.getElementById('viewer');
-  v.src = '/static/files/' + file;
-  v.style.display = 'block';
+function openPDF(file, title) {
+  document.getElementById('viewer').src = '/static/files/' + file;
+  document.getElementById('pdf-title').textContent = title || '';
+  const ov = document.getElementById('pdf-overlay');
+  ov.style.display = 'flex';
+}
+
+function closePDF() {
+  document.getElementById('pdf-overlay').style.display = 'none';
+  document.getElementById('viewer').src = '';
 }
 
 function filterOffices(q) {
