@@ -198,8 +198,10 @@
   try {
     const u = JSON.parse(localStorage.getItem('rfid_user'));
     if (u && u.name) {
-      const role = (u.role || 'visitor').toLowerCase();
-      const el   = document.getElementById('userGreeting');
+      const ROLES = ['faculty', 'student', 'visitor'];
+      const rawRole = (u.role || 'visitor').toLowerCase();
+      const role  = ROLES.includes(rawRole) ? rawRole : 'visitor';
+      const el    = document.getElementById('userGreeting');
       el.textContent = 'Welcome, ' + u.name;
       const tag = document.createElement('span');
       tag.className = 'role-tag role-' + role;
