@@ -6,6 +6,13 @@
       user-select: none;
       -webkit-user-select: none;
     }
+    input, textarea {
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    html {
+      scroll-behavior: smooth;
+    }
     img {
       -webkit-user-drag: none;
       pointer-events: none;
