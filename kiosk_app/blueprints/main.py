@@ -33,6 +33,15 @@ def faculty():
     return render_template("faculty.html", faculty_list=[dict(r) for r in rows])
 
 
+def _log_rfid(conn, uid: str, name: str, role: str) -> None:
+    from datetime import datetime
+    conn.execute(
+        "INSERT INTO rfid_logs (rfid_uid, name, role, scanned_at) VALUES (?,?,?,?)",
+        (uid, name, role, datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+    )
+    conn.commit()
+
+
 @main_bp.route("/rfid")
 @limiter.limit("30 per minute")
 def rfid():
@@ -43,9 +52,13 @@ def rfid():
         row = conn.execute(
             "SELECT name, role FROM users WHERE rfid_uid = ?", (uid,)
         ).fetchone()
-    if row:
-        return render_template("profile.html", user_name=row["name"], user_role=row["role"])
-    return redirect("/menu")
+        if row:
+            _log_rfid(conn, uid, row["name"], row["role"])
+            return render_template("rfid_scan.html",
+                                   user_name=row["name"], user_role=row["role"])
+        else:
+            _log_rfid(conn, uid, "Unknown", "visitor")
+    return render_template("rfid_scan.html", user_name="Visitor", user_role="visitor")
 
 
 _RFID_LOCAL_ADDRS = frozenset({"127.0.0.1", "::1", "localhost"})
@@ -66,9 +79,14 @@ def check_rfid():
         row = conn.execute(
             "SELECT name, role FROM users WHERE rfid_uid = ?", (uid,)
         ).fetchone()
-    if row:
-        return jsonify({"status": "authorized", "user": {"name": row["name"], "role": row["role"]}})
-    return jsonify({"status": "unauthorized"})
+        if row:
+            _log_rfid(conn, uid, row["name"], row["role"])
+            return jsonify({"status": "authorized",
+                            "user": {"name": row["name"], "role": row["role"]}})
+        else:
+            _log_rfid(conn, uid, "Unknown", "visitor")
+            return jsonify({"status": "visitor",
+                            "user": {"name": "Visitor", "role": "visitor"}})
 
 
 @main_bp.route("/profile")

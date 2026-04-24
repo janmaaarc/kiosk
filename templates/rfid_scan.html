@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Welcome</title>
+<style>
+@font-face {
+  font-family: 'League Spartan';
+  src: url('/static/font/LeagueSpartan-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+}
+* { margin:0; padding:0; box-sizing:border-box; font-family:'League Spartan',sans-serif; }
+
+body {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: url('/static/images/KIOSK BACKGROUND.png') center/cover no-repeat;
+  overflow: hidden;
+}
+
+.card {
+  background: rgba(255,255,255,0.95);
+  border-radius: 28px;
+  padding: 60px 80px;
+  text-align: center;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.25);
+  min-width: 480px;
+  animation: pop 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+
+@keyframes pop {
+  from { transform: scale(0.8); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 8px 28px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+.role-faculty  { background: #7b2d2d; color: #fff; }
+.role-student  { background: #1a5c8a; color: #fff; }
+.role-visitor  { background: #555;    color: #fff; }
+
+.greeting {
+  font-size: 22px;
+  font-weight: 700;
+  color: #888;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.name {
+  font-size: 52px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  line-height: 1.1;
+  margin-bottom: 32px;
+}
+.name-faculty { color: #7b2d2d; }
+.name-student { color: #1a5c8a; }
+.name-visitor { color: #444; }
+
+.icon { font-size: 64px; margin-bottom: 20px; }
+
+.redirect-msg {
+  font-size: 14px;
+  color: #aaa;
+  letter-spacing: 1px;
+  margin-top: 28px;
+}
+
+.bar {
+  height: 6px;
+  border-radius: 3px;
+  background: #eee;
+  margin-top: 10px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  animation: drain 5s linear forwards;
+}
+.bar-faculty { background: #7b2d2d; }
+.bar-student { background: #1a5c8a; }
+.bar-visitor { background: #888; }
+
+@keyframes drain { from { width:100%; } to { width:0%; } }
+</style>
+</head>
+<body>
+
+{% set role = user_role | lower %}
+
+<div class="card">
+  <div class="icon">
+    {% if role == 'faculty' %}🎓
+    {% elif role == 'student' %}📚
+    {% else %}👤{% endif %}
+  </div>
+
+  <div class="role-badge role-{{ role }}">{{ user_role | upper }}</div>
+
+  <div class="greeting">WELCOME,</div>
+  <div class="name name-{{ role }}">{{ user_name | upper }}</div>
+
+  <div class="redirect-msg">Redirecting to menu…</div>
+  <div class="bar">
+    <div class="bar-fill bar-{{ role }}"></div>
+  </div>
+</div>
+
+<script>
+setTimeout(() => { window.location.href = '/menu'; }, 5000);
+</script>
+</body>
+</html>

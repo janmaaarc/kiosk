@@ -539,6 +539,33 @@ def faculty_edit(member_id: int):
     return render_template("admin/faculty_form.html", member=member)
 
 
+@content_bp.route("/admin/rfid-logs")
+@login_required
+def rfid_logs():
+    per  = 30
+    with db_connection() as conn:
+        total = conn.execute("SELECT COUNT(*) FROM rfid_logs").fetchone()[0]
+    total_pages = max(1, -(-total // per))
+    page = max(1, min(request.args.get("page", 1, type=int), total_pages))
+    with db_connection() as conn:
+        rows = conn.execute(
+            "SELECT * FROM rfid_logs ORDER BY id DESC LIMIT ? OFFSET ?",
+            (per, (page - 1) * per)
+        ).fetchall()
+    return render_template("admin/rfid_logs.html", logs=rows,
+                           page=page, total_pages=total_pages)
+
+
+@content_bp.route("/admin/rfid-logs/clear", methods=["POST"])
+@login_required
+def rfid_logs_clear():
+    with db_connection() as conn:
+        conn.execute("DELETE FROM rfid_logs")
+        conn.commit()
+    flash("Scan logs cleared", "success")
+    return redirect(url_for("content.rfid_logs"))
+
+
 @content_bp.route("/api/faculty/<int:member_id>/schedule")
 def faculty_schedule_api(member_id: int):
     with db_connection() as conn:

@@ -1,0 +1,57 @@
+{% extends "admin/base.html" %}
+{% block title %}RFID Scan Logs{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <h1 class="page-title" style="margin:0">RFID Scan History</h1>
+    <form method="POST" action="{{ url_for('content.rfid_logs_clear') }}"
+          onsubmit="return confirm('Clear all logs?')" style="display:inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-danger btn-sm">Clear All</button>
+    </form>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>RFID UID</th>
+            <th>Scanned At</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log['id'] }}</td>
+            <td style="font-weight:600">{{ log['name'] }}</td>
+            <td>
+                {% set role = log['role'] | lower %}
+                <span style="
+                    display:inline-block;padding:3px 10px;border-radius:10px;
+                    font-size:12px;font-weight:700;letter-spacing:1px;
+                    background:{{ '#7b2d2d' if role=='faculty' else '#1a5c8a' if role=='student' else '#555' }};
+                    color:#fff">
+                    {{ log['role'] | upper }}
+                </span>
+            </td>
+            <td style="font-family:monospace;font-size:13px;color:#666">{{ log['rfid_uid'] }}</td>
+            <td>{{ log['scanned_at'] }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" style="text-align:center;color:#999;padding:20px">No scan logs yet.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if total_pages > 1 %}
+<div class="pagination">
+    {% if page > 1 %}<a href="?page={{ page - 1 }}">← Prev</a>
+    {% else %}<span class="disabled">← Prev</span>{% endif %}
+    <span class="current">{{ page }} / {{ total_pages }}</span>
+    {% if page < total_pages %}<a href="?page={{ page + 1 }}">Next →</a>
+    {% else %}<span class="disabled">Next →</span>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

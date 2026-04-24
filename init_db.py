@@ -301,6 +301,18 @@ def _migrate(conn: sqlite3.Connection) -> None:
         )
 
 
+def _ensure_rfid_logs(conn: sqlite3.Connection) -> None:
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS rfid_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            rfid_uid TEXT NOT NULL,
+            name TEXT DEFAULT 'Unknown',
+            role TEXT DEFAULT 'visitor',
+            scanned_at TEXT
+        )
+    """)
+
+
 def _seed_rfid_users(cur: sqlite3.Cursor) -> None:
     _RFID_USERS = [
         ("0609475703", "Group 1",       "student"),
@@ -322,6 +334,7 @@ def main() -> None:
         cur = conn.cursor()
         _create_tables(cur)
         _migrate(conn)
+        _ensure_rfid_logs(conn)
         conn.commit()
 
         _seed_events(cur)

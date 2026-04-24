@@ -100,6 +100,8 @@ textarea { resize: vertical; min-height: 100px; }
         <a href="{{ url_for('admin.rooms') }}" class="{% if request.endpoint == 'admin.rooms' %}active{% endif %}">Rooms</a>
         <a href="{{ url_for('content.building_floors_list') }}" class="{% if 'building_floor' in request.endpoint %}active{% endif %}">Building Floors</a>
         <a href="{{ url_for('content.faculty_list') }}" class="{% if 'faculty' in request.endpoint %}active{% endif %}">Faculty</a>
+        <div class="section">RFID</div>
+        <a href="{{ url_for('content.rfid_logs') }}" class="{% if request.endpoint == 'content.rfid_logs' %}active{% endif %}">Scan Logs</a>
         <div class="section">Account</div>
         <a href="{{ url_for('admin.logout') }}">Logout</a>
     </nav>
