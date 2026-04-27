@@ -16,7 +16,7 @@
       -webkit-user-drag: none;
       pointer-events: none;
     }
-    button img, a img, .top-icon, .top-icons img, .nav-icons img, img[onclick] {
+    button img, a img, .top-icon, .top-icons img, .nav-icons img, img[onclick], .img-thumb {
       pointer-events: auto;
     }
   `;

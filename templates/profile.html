@@ -130,11 +130,19 @@ body{
 }
 
 .icon{
-  width:35px;
-  height:35px;
-  border:2px solid black;
+  width:44px;
+  height:44px;
+  border:2px solid #7b2d2d;
   border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  text-decoration:none;
+  flex-shrink:0;
+  transition:background 0.2s;
 }
+.icon:hover { background:rgba(123,45,45,0.1); }
 
 /* HEADER */
 .header{
@@ -336,7 +344,7 @@ body{
   <!-- SEARCH -->
   <div class="topbar">
     <input type="text" class="search" placeholder="Search..">
-    <div class="icon"></div>
+    <a href="/admin" class="icon" title="Admin"></a>
   </div>
 
   <!-- HEADER -->
