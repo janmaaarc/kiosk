@@ -71,10 +71,7 @@ body {
 
 <body>
 
-  <div class="slide active" style="background-image:url('/static/images/screensaver/slide1.png')"></div>
-  <div class="slide"        style="background-image:url('/static/images/screensaver/slide2.png')"></div>
-  <div class="slide"        style="background-image:url('/static/images/screensaver/slide3.png')"></div>
-  <div class="slide"        style="background-image:url('/static/images/screensaver/slide4.png')"></div>
+  <div id="slideContainer"></div>
 
   <div class="overlay"></div>
 
@@ -84,13 +81,46 @@ body {
   </div>
 
   <script>
-    const slides = document.querySelectorAll('.slide');
-    let idx = 0;
-    setInterval(() => {
-      slides[idx].classList.remove('active');
-      idx = (idx + 1) % slides.length;
-      slides[idx].classList.add('active');
-    }, 4000);
+    localStorage.removeItem('rfid_user');
+
+    const FALLBACK = [
+      '/static/images/screensaver/slide1.png',
+      '/static/images/screensaver/slide2.png',
+      '/static/images/screensaver/slide3.png',
+      '/static/images/screensaver/slide4.png',
+    ];
+
+    function buildSlides(filenames) {
+      const container = document.getElementById('slideContainer');
+      filenames.forEach((src, i) => {
+        const div = document.createElement('div');
+        div.className = 'slide' + (i === 0 ? ' active' : '');
+        div.style.backgroundImage = `url('${src}')`;
+        container.appendChild(div);
+      });
+    }
+
+    fetch('/api/screensaver-images')
+      .then(r => r.json())
+      .then(data => {
+        const urls = data.length
+          ? data.map(f => '/static/images/screensaver/' + f)
+          : FALLBACK;
+        buildSlides(urls);
+        startSlideshow();
+      })
+      .catch(() => { buildSlides(FALLBACK); startSlideshow(); });
+
+    function startSlideshow() {
+      const slides = document.querySelectorAll('.slide');
+      if (!slides.length) return;
+      let idx = 0;
+      setInterval(() => {
+        slides[idx].classList.remove('active');
+        idx = (idx + 1) % slides.length;
+        slides[idx].classList.add('active');
+      }, 4000);
+    }
 
     let rfidBuffer = "";
     let rfidTimer = null;

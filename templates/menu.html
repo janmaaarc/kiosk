@@ -29,7 +29,7 @@
         }
 
         .title {
-            margin-top: 20px;
+            margin-top: 50px;
             font-size: 90px;
             font-weight: 900;
             color: #8b2e2e;
@@ -114,6 +114,49 @@
         .admin-btn:hover { background: rgba(0,0,0,0.4); }
         .admin-btn svg { width: 18px; height: 18px; fill: rgba(255,255,255,0.7); }
 
+        .logout-btn {
+            position: fixed;
+            bottom: 18px;
+            left: 18px;
+            padding: 10px 22px;
+            background: rgba(123,45,45,0.85);
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            font-family: 'League Spartan', sans-serif;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            cursor: pointer;
+            z-index: 100;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+        .logout-btn:hover { background: rgba(123,45,45,1); }
+
+        .restricted-notice {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #7b2d2d;
+            color: #fff;
+            padding: 14px 32px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            z-index: 9999;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            animation: fadeOut 4s forwards;
+        }
+        @keyframes fadeOut {
+            0%,70% { opacity:1; } 100% { opacity:0; pointer-events:none; }
+        }
+
         .user-greeting {
             font-size: 22px;
             font-weight: 700;
@@ -190,6 +233,10 @@
 
     </div>
 
+    <a href="/logout" class="logout-btn">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+        LOGOUT
+    </a>
 
 <script>
 (function() {
@@ -207,6 +254,15 @@
       el.appendChild(tag);
     }
   } catch(e) {}
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('restricted') === 'faculty') {
+    const n = document.createElement('div');
+    n.className = 'restricted-notice';
+    n.textContent = 'Faculty schedules are only accessible to students and faculty.';
+    document.body.appendChild(n);
+    setTimeout(() => n.remove(), 4200);
+  }
 })();
 </script>
 </body>

@@ -96,6 +96,9 @@ textarea { resize: vertical; min-height: 100px; }
         <a href="{{ url_for('content.offices_list') }}" class="{% if 'office' in request.endpoint %}active{% endif %}">
             Offices
         </a>
+        <a href="{{ url_for('content.screensaver_list') }}" class="{% if 'screensaver' in request.endpoint %}active{% endif %}">
+            Screensaver
+        </a>
         <div class="section">Data</div>
         <a href="{{ url_for('admin.rooms') }}" class="{% if request.endpoint == 'admin.rooms' %}active{% endif %}">Rooms</a>
         <a href="{{ url_for('content.building_floors_list') }}" class="{% if 'building_floor' in request.endpoint %}active{% endif %}">Building Floors</a>
@@ -135,8 +138,8 @@ function previewUpload(inputId, pathId) {
     .catch(() => alert('Upload failed'));
 }
 </script>
-<script src="/static/js/toast.js"></script>
-<script src="/static/js/drag-scroll.js"></script>
+<script src="/static/js/toast.js?v=2"></script>
+<script src="/static/js/drag-scroll.js?v=2"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.flash').forEach(el => {

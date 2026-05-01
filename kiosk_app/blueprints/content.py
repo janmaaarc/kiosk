@@ -7,6 +7,7 @@ from flask import (
     Blueprint,
     abort,
     current_app,
+    flash,
     jsonify,
     redirect,
     render_template,
@@ -61,6 +62,26 @@ _ALLOWED_FILE_MIME = {"application/pdf"}
 _MAX_IMAGE_BYTES = 5 * 1024 * 1024
 _MAX_FILE_BYTES = 10 * 1024 * 1024
 
+_MAGIC_BYTES: list[tuple[bytes, str]] = [
+    (b"\xff\xd8\xff", "image/jpeg"),
+    (b"\x89PNG\r\n\x1a\n", "image/png"),
+    (b"GIF87a", "image/gif"),
+    (b"GIF89a", "image/gif"),
+    (b"RIFF", "image/webp"),
+    (b"%PDF", "application/pdf"),
+]
+
+
+def _sniff_mime(stream) -> str:
+    header = stream.read(12)
+    stream.seek(0)
+    for magic, mime in _MAGIC_BYTES:
+        if header.startswith(magic):
+            if mime == "image/webp" and b"WEBP" not in header:
+                continue
+            return mime
+    return ""
+
 
 def _parse_dt(value: str) -> str | None:
     value = value.strip()
@@ -89,7 +110,7 @@ def upload():
     if not f or not f.filename:
         return jsonify({"error": "No file provided"}), 400
 
-    mime = f.mimetype or ""
+    mime = _sniff_mime(f.stream)
     data = f.read()
     size = len(data)
 
@@ -310,11 +331,15 @@ def offices_list():
 def office_add():
     if request.method == "POST":
         with db_connection() as conn:
+            visible_roles = request.form.getlist("visible_to")
+            _ALLOWED_ROLES = {"student", "faculty", "visitor"}
+            safe_roles = [r for r in visible_roles if r in _ALLOWED_ROLES]
+            visible_to = "," + ",".join(safe_roles) + "," if safe_roles else ",student,faculty,visitor,"
             conn.execute(
                 """INSERT INTO offices
                    (key, name, image, location, hours, desc, files, building_url,
-                    published_at, expires_at)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    visible_to, published_at, expires_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     request.form["key"],
                     request.form["name"],
@@ -324,6 +349,7 @@ def office_add():
                     request.form.get("desc", ""),
                     "[]",
                     request.form.get("building_url", ""),
+                    visible_to,
                     _parse_dt(request.form.get("published_at", "")) or
                     datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
                     _parse_dt(request.form.get("expires_at", "")),
@@ -345,10 +371,14 @@ def office_edit(office_id: int):
             abort(404)
 
         if request.method == "POST":
+            visible_roles = request.form.getlist("visible_to")
+            _ALLOWED_ROLES = {"student", "faculty", "visitor"}
+            safe_roles = [r for r in visible_roles if r in _ALLOWED_ROLES]
+            visible_to = "," + ",".join(safe_roles) + "," if safe_roles else ",student,faculty,visitor,"
             conn.execute(
                 """UPDATE offices
                    SET key=?, name=?, image=?, location=?, hours=?, desc=?,
-                       files=COALESCE(files, '[]'), building_url=?,
+                       files=COALESCE(files, '[]'), building_url=?, visible_to=?,
                        published_at=?, expires_at=?
                    WHERE id=?""",
                 (
@@ -359,6 +389,7 @@ def office_edit(office_id: int):
                     request.form.get("hours", ""),
                     request.form.get("desc", ""),
                     request.form.get("building_url", ""),
+                    visible_to,
                     _parse_dt(request.form.get("published_at", "")) or
                     office["published_at"],
                     _parse_dt(request.form.get("expires_at", "")),
@@ -626,3 +657,98 @@ def faculty_import_csv():
         msg += f", skipped {skipped} invalid row(s)"
     flash(msg, "success")
     return redirect(url_for("content.faculty_list"))
+
+
+# ---------------------------------------------------------------------------
+# Screensaver image management
+# ---------------------------------------------------------------------------
+
+_SCREENSAVER_ROOT = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    "static", "images", "screensaver",
+)
+
+
+@content_bp.route("/admin/screensaver")
+@login_required
+def screensaver_list():
+    with db_connection() as conn:
+        rows = conn.execute(
+            "SELECT * FROM screensaver_images ORDER BY display_order, id"
+        ).fetchall()
+    return render_template("admin/screensaver.html", images=rows)
+
+
+@content_bp.route("/admin/screensaver/upload", methods=["POST"])
+@login_required
+@limiter.limit("20 per minute")
+def screensaver_upload():
+    f = request.files.get("file")
+    if not f or not f.filename:
+        flash("No file provided", "error")
+        return redirect(url_for("content.screensaver_list"))
+    if _sniff_mime(f.stream) not in _ALLOWED_IMAGE_MIME:
+        flash("Only image files allowed", "error")
+        return redirect(url_for("content.screensaver_list"))
+    os.makedirs(_SCREENSAVER_ROOT, exist_ok=True)
+    filename = _safe_filename(f.filename)
+    f.save(os.path.join(_SCREENSAVER_ROOT, filename))
+    order = int(request.form.get("display_order", 0) or 0)
+    with db_connection() as conn:
+        conn.execute(
+            "INSERT INTO screensaver_images (filename, display_order, active) VALUES (?,?,1)",
+            (filename, order),
+        )
+        conn.commit()
+    flash("Image uploaded", "success")
+    return redirect(url_for("content.screensaver_list"))
+
+
+@content_bp.route("/admin/screensaver/<int:image_id>/toggle", methods=["POST"])
+@login_required
+def screensaver_toggle(image_id: int):
+    with db_connection() as conn:
+        conn.execute(
+            "UPDATE screensaver_images SET active = 1 - active WHERE id = ?",
+            (image_id,),
+        )
+        conn.commit()
+    return redirect(url_for("content.screensaver_list"))
+
+
+@content_bp.route("/admin/screensaver/<int:image_id>/delete", methods=["POST"])
+@login_required
+def screensaver_delete(image_id: int):
+    with db_connection() as conn:
+        row = conn.execute(
+            "SELECT filename FROM screensaver_images WHERE id = ?", (image_id,)
+        ).fetchone()
+        if row:
+            filepath = os.path.join(_SCREENSAVER_ROOT, row["filename"])
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            conn.execute("DELETE FROM screensaver_images WHERE id = ?", (image_id,))
+            conn.commit()
+    return redirect(url_for("content.screensaver_list"))
+
+
+@content_bp.route("/admin/screensaver/<int:image_id>/order", methods=["POST"])
+@login_required
+def screensaver_order(image_id: int):
+    order = int(request.form.get("display_order", 0) or 0)
+    with db_connection() as conn:
+        conn.execute(
+            "UPDATE screensaver_images SET display_order = ? WHERE id = ?",
+            (order, image_id),
+        )
+        conn.commit()
+    return redirect(url_for("content.screensaver_list"))
+
+
+@content_bp.route("/api/screensaver-images")
+def api_screensaver_images():
+    with db_connection() as conn:
+        rows = conn.execute(
+            "SELECT filename FROM screensaver_images WHERE active = 1 ORDER BY display_order, id"
+        ).fetchall()
+    return jsonify([r["filename"] for r in rows])

@@ -72,6 +72,21 @@
     </div>
 
     <div class="form-group">
+        <label>Visible to <span style="font-weight:400;color:#888">(who can see this office)</span></label>
+        {% set vt = (office['visible_to'] if office and office['visible_to'] else 'student,faculty,visitor').split(',') %}
+        <div style="display:flex;gap:20px;padding:10px 0;">
+            {% for role, label in [('student','Student'),('faculty','Faculty'),('visitor','Visitor')] %}
+            <label style="display:flex;align-items:center;gap:6px;font-weight:600;cursor:pointer;">
+                <input type="checkbox" name="visible_to" value="{{ role }}"
+                       {% if role in vt %}checked{% endif %}
+                       style="width:18px;height:18px;cursor:pointer;">
+                {{ label }}
+            </label>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="form-group">
         <label>Office hours</label>
         <input type="text" name="hours"
                value="{{ office['hours'] if office else '' }}"

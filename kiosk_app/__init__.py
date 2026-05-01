@@ -147,8 +147,11 @@ def create_app() -> Flask:
 
     @app.context_processor
     def inject_globals():
+        from flask import session as _session
         return {
             "now": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+            "user_role": _session.get("user_role", "visitor"),
+            "user_name": _session.get("user_name", ""),
         }
 
     with app.app_context():

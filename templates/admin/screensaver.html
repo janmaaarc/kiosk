@@ -1,0 +1,77 @@
+{% extends "admin/base.html" %}
+{% block title %}Screensaver Images{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <h1 class="page-title">Screensaver Images</h1>
+</div>
+
+<div class="form-card" style="margin-bottom:24px;">
+    <h3 style="margin-bottom:14px;font-size:15px;font-weight:700;">Upload New Image</h3>
+    <form method="POST" action="{{ url_for('content.screensaver_upload') }}" enctype="multipart/form-data"
+          style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div>
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px;">Image File</label>
+            <input type="file" name="file" accept="image/*" required>
+        </div>
+        <div>
+            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px;">Display Order</label>
+            <input type="number" name="display_order" value="0" min="0" style="width:80px;padding:8px;border-radius:6px;border:1px solid #ddd;">
+        </div>
+        <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Preview</th>
+            <th>Filename</th>
+            <th>Order</th>
+            <th>Active</th>
+            <th>Uploaded</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for img in images %}
+        <tr>
+            <td>
+                <img src="/static/images/screensaver/{{ img['filename'] }}"
+                     style="width:80px;height:50px;object-fit:cover;border-radius:4px;"
+                     onerror="this.style.display='none'" alt="">
+            </td>
+            <td>{{ img['filename'] }}</td>
+            <td>
+                <form method="POST" action="{{ url_for('content.screensaver_order', image_id=img['id']) }}"
+                      style="display:flex;gap:6px;align-items:center;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="number" name="display_order" value="{{ img['display_order'] }}"
+                           min="0" style="width:60px;padding:4px 6px;border-radius:4px;border:1px solid #ddd;font-size:13px;">
+                    <button type="submit" class="btn btn-secondary btn-sm">Set</button>
+                </form>
+            </td>
+            <td>
+                <form method="POST" action="{{ url_for('content.screensaver_toggle', image_id=img['id']) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-sm {% if img['active'] %}btn-primary{% else %}btn-secondary{% endif %}">
+                        {{ 'Active' if img['active'] else 'Hidden' }}
+                    </button>
+                </form>
+            </td>
+            <td>{{ img['uploaded_at'][:10] if img['uploaded_at'] else '—' }}</td>
+            <td>
+                <form method="POST" action="{{ url_for('content.screensaver_delete', image_id=img['id']) }}"
+                      style="display:inline" onsubmit="return confirm('Delete this image?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" style="text-align:center;color:#888;">No screensaver images yet. Upload one above.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

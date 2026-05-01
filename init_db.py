@@ -221,6 +221,13 @@ def _migrate(conn: sqlite3.Connection) -> None:
     cols = {r[1] for r in conn.execute("PRAGMA table_info(offices)").fetchall()}
     if "building_url" not in cols:
         conn.execute("ALTER TABLE offices ADD COLUMN building_url TEXT")
+    if "visible_to" not in cols:
+        conn.execute("ALTER TABLE offices ADD COLUMN visible_to TEXT DEFAULT ',student,faculty,visitor,'")
+    # Migrate unformatted visible_to values to bookended format (,role1,role2,)
+    conn.execute(
+        "UPDATE offices SET visible_to = ',' || visible_to || ',' "
+        "WHERE visible_to IS NOT NULL AND visible_to NOT LIKE ',%'"
+    )
 
     faculty_cols = {r[1] for r in conn.execute("PRAGMA table_info(faculty)").fetchall()}
     if "schedule" not in faculty_cols:
@@ -309,6 +316,15 @@ def _ensure_rfid_logs(conn: sqlite3.Connection) -> None:
             name TEXT DEFAULT 'Unknown',
             role TEXT DEFAULT 'visitor',
             scanned_at TEXT
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS screensaver_images (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            filename      TEXT NOT NULL,
+            display_order INTEGER DEFAULT 0,
+            active        INTEGER DEFAULT 1,
+            uploaded_at   TEXT DEFAULT (datetime('now'))
         )
     """)
 

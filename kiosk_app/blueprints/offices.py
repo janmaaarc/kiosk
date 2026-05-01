@@ -1,6 +1,6 @@
 import json
 
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, session
 
 _VALID_BUILDING_URLS = frozenset([
     "/rodriguez_building", "/mist_ncestd_dorm", "/mist_ncestd_building",
@@ -27,13 +27,24 @@ def _with_files(row):
     return d
 
 
+_VALID_ROLES = frozenset({"student", "faculty", "visitor"})
+
+
+def _role_filter(role: str) -> str:
+    safe = role if role in _VALID_ROLES else "visitor"
+    return f"%,{safe},%"
+
+
 @offices_bp.route("/office-selection")
 def office_selection():
+    role = session.get("user_role", "visitor")
     with db_connection() as conn:
         rows = conn.execute(
             "SELECT * FROM offices"
-            " WHERE expires_at IS NULL OR expires_at > datetime('now')"
-            " ORDER BY id"
+            " WHERE (expires_at IS NULL OR expires_at > datetime('now'))"
+            " AND (visible_to IS NULL OR visible_to LIKE ?)"
+            " ORDER BY id",
+            (_role_filter(role),),
         ).fetchall()
     return render_template("office_selection.html", offices=rows)
 
@@ -41,16 +52,20 @@ def office_selection():
 @offices_bp.route("/office")
 def office():
     office_key = request.args.get("name", "")
+    role = session.get("user_role", "visitor")
     with db_connection() as conn:
         rows = conn.execute(
             "SELECT * FROM offices"
-            " WHERE expires_at IS NULL OR expires_at > datetime('now')"
-            " ORDER BY id"
+            " WHERE (expires_at IS NULL OR expires_at > datetime('now'))"
+            " AND (visible_to IS NULL OR visible_to LIKE ?)"
+            " ORDER BY id",
+            (_role_filter(role),),
         ).fetchall()
         row = conn.execute(
             "SELECT * FROM offices WHERE key = ?"
-            " AND (expires_at IS NULL OR expires_at > datetime('now'))",
-            (office_key,),
+            " AND (expires_at IS NULL OR expires_at > datetime('now'))"
+            " AND (visible_to IS NULL OR visible_to LIKE ?)",
+            (office_key, _role_filter(role)),
         ).fetchone()
         if row is None and rows:
             row = rows[0]

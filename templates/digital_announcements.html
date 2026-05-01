@@ -100,12 +100,38 @@
 }
 .admin-btn:hover { background: rgba(0,0,0,0.4); }
 .admin-btn svg { width: 18px; height: 18px; fill: rgba(255,255,255,0.7); }
+
+.search-bar {
+    display: flex;
+    justify-content: center;
+    padding: 16px 80px 0;
+    flex-shrink: 0;
+}
+.search-bar input {
+    width: 100%;
+    max-width: 600px;
+    padding: 14px 24px;
+    border-radius: 50px;
+    border: none;
+    font-family: 'League Spartan', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    background: rgba(255,255,255,0.92);
+    color: #333;
+    outline: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
 </style>
 
 </head>
 
 <body>
     <h1 class="title">DIGITAL ANNOUNCEMENTS</h1>
+
+<div class="search-bar">
+    <input type="text" id="announcementSearch" placeholder="Search announcements..." oninput="filterAnnouncements(this.value)">
+</div>
 
 <!-- Lightbox -->
 <div id="lightbox" onclick="closeLightbox()" style="
@@ -146,6 +172,14 @@ function closeLightbox() {
     document.getElementById('lightbox').style.display = 'none';
 }
 
+function filterAnnouncements(q) {
+    const term = q.trim().toLowerCase();
+    document.querySelectorAll('.card').forEach(card => {
+        const label = (card.querySelector('p') || {}).textContent || '';
+        card.style.display = label.toLowerCase().includes(term) ? '' : 'none';
+    });
+}
+
 function goBack(){
   history.back();
 }
@@ -158,7 +192,8 @@ function goHome(){
 <a href="/admin" class="admin-btn" title="Admin">
     <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
 </a>
-<script src="/static/js/toast.js"></script>
-<script src="/static/js/drag-scroll.js"></script>
+<script src="/static/js/toast.js?v=2"></script>
+<script src="/static/js/drag-scroll.js?v=2"></script>
+<script src="/static/js/keyboard.js?v=2"></script>
 </body>
 </html>

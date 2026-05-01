@@ -3,12 +3,15 @@ import os
 from urllib.parse import quote
 
 import qrcode
-from flask import Blueprint, Response, jsonify, redirect, render_template, request, send_file
+from flask import Blueprint, Response, jsonify, redirect, render_template, request, send_file, session
 
 from kiosk_app.db import db_connection
 from kiosk_app.extensions import csrf, limiter
 
 main_bp = Blueprint("main", __name__)
+
+_VALID_ROLES = frozenset({"student", "faculty", "visitor"})
+_LOCAL_ADDRS = frozenset({"127.0.0.1", "::1", "localhost"})
 
 
 @main_bp.route("/")
@@ -23,6 +26,8 @@ def menu():
 
 @main_bp.route("/faculty")
 def faculty():
+    if session.get("user_role", "visitor") == "visitor":
+        return redirect("/menu?restricted=faculty")
     with db_connection() as conn:
         rows = conn.execute("""
             SELECT f.*, o.name AS office_name
@@ -45,6 +50,8 @@ def _log_rfid(conn, uid: str, name: str, role: str) -> None:
 @main_bp.route("/rfid")
 @limiter.limit("30 per minute")
 def rfid():
+    if request.remote_addr not in _LOCAL_ADDRS:
+        return redirect("/menu")
     uid = request.args.get("uid", "").strip()
     if not uid:
         return redirect("/menu")
@@ -54,22 +61,22 @@ def rfid():
         ).fetchone()
         if row:
             _log_rfid(conn, uid, row["name"], row["role"])
+            session["user_role"] = row["role"]
+            session["user_name"] = row["name"]
             return render_template("rfid_scan.html",
                                    user_name=row["name"], user_role=row["role"])
         else:
             _log_rfid(conn, uid, "Unknown", "visitor")
+    session["user_role"] = "visitor"
+    session["user_name"] = "Visitor"
     return render_template("rfid_scan.html", user_name="Visitor", user_role="visitor")
-
-
-_RFID_LOCAL_ADDRS = frozenset({"127.0.0.1", "::1", "localhost"})
 
 
 @main_bp.route("/check_rfid", methods=["POST"])
 @csrf.exempt
 @limiter.limit("60 per minute")
 def check_rfid():
-    # Only accept from localhost (the RFID watcher runs on the same host).
-    if request.remote_addr not in _RFID_LOCAL_ADDRS:
+    if request.remote_addr not in _LOCAL_ADDRS:
         return jsonify({"status": "forbidden"}), 403
     data = request.get_json(silent=True) or {}
     uid = (data.get("uid") or "").strip()
@@ -81,12 +88,22 @@ def check_rfid():
         ).fetchone()
         if row:
             _log_rfid(conn, uid, row["name"], row["role"])
+            session["user_role"] = row["role"]
+            session["user_name"] = row["name"]
             return jsonify({"status": "authorized",
                             "user": {"name": row["name"], "role": row["role"]}})
         else:
             _log_rfid(conn, uid, "Unknown", "visitor")
+            session["user_role"] = "visitor"
+            session["user_name"] = "Visitor"
             return jsonify({"status": "visitor",
                             "user": {"name": "Visitor", "role": "visitor"}})
+
+
+@main_bp.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
 
 
 @main_bp.route("/profile")
@@ -133,10 +150,14 @@ def api_search():
                             "building": row["building"] or "",
                             "url": "/search?room=" + quote(row["room"], safe="")})
 
+        raw_role = session.get("user_role", "visitor")
+        role = raw_role if raw_role in _VALID_ROLES else "visitor"
+        role_pattern = f"%,{role},%"
         for row in conn.execute(
             "SELECT key, name FROM offices WHERE name LIKE ? ESCAPE '\\'"
-            " AND (expires_at IS NULL OR expires_at > datetime('now')) LIMIT 5",
-            (pattern,),
+            " AND (expires_at IS NULL OR expires_at > datetime('now'))"
+            " AND (visible_to IS NULL OR visible_to LIKE ?) LIMIT 5",
+            (pattern, role_pattern),
         ).fetchall():
             results.append({"type": "office", "name": row["name"],
                             "building": "",
