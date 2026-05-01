@@ -357,7 +357,7 @@ def office_add():
             )
             conn.commit()
         return redirect(url_for("content.offices_list"))
-    return render_template("admin/office_form.html", office=None)
+    return render_template("admin/office_form.html", office=None, staff=[])
 
 
 @content_bp.route("/admin/offices/<int:office_id>/edit", methods=["GET", "POST"])
@@ -397,9 +397,34 @@ def office_edit(office_id: int):
                 ),
             )
             conn.commit()
+
+            # Update office_position — only for faculty that belong to this office
+            staff_rows = conn.execute(
+                "SELECT id FROM faculty WHERE office_key = ?", (office["key"],)
+            ).fetchall()
+            valid_ids = {r["id"] for r in staff_rows}
+            for key, val in request.form.items():
+                if key.startswith("staff_position[") and key.endswith("]"):
+                    try:
+                        fid = int(key[15:-1])
+                    except ValueError:
+                        continue
+                    if fid not in valid_ids:
+                        continue
+                    conn.execute(
+                        "UPDATE faculty SET office_position=? WHERE id=?",
+                        (val.strip(), fid),
+                    )
+            conn.commit()
             return redirect(url_for("content.offices_list"))
 
-    return render_template("admin/office_form.html", office=office)
+        staff = [dict(r) for r in conn.execute(
+            "SELECT id, name, office_position FROM faculty"
+            " WHERE office_key = ? ORDER BY office_position, name",
+            (office["key"],),
+        ).fetchall()]
+
+    return render_template("admin/office_form.html", office=office, staff=staff)
 
 
 @content_bp.route("/admin/offices/<int:office_id>/delete", methods=["POST"])
@@ -513,8 +538,8 @@ def faculty_add():
             conn.execute(
                 """INSERT INTO faculty
                    (name, department, position, photo, schedule_image,
-                    room, building, office_key, schedule)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    room, building, office_key, office_position, schedule)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     request.form["name"],
                     request.form.get("department", ""),
@@ -524,6 +549,7 @@ def faculty_add():
                     request.form.get("room", ""),
                     request.form.get("building", ""),
                     request.form.get("office_key", ""),
+                    request.form.get("office_position", ""),
                     schedule,
                 ),
             )
@@ -549,7 +575,7 @@ def faculty_edit(member_id: int):
                 """UPDATE faculty
                    SET name=?, department=?, position=?, photo=?,
                        schedule_image=?, room=?, building=?, office_key=?,
-                       schedule=?
+                       office_position=?, schedule=?
                    WHERE id=?""",
                 (
                     request.form["name"],
@@ -560,6 +586,7 @@ def faculty_edit(member_id: int):
                     request.form.get("room", ""),
                     request.form.get("building", ""),
                     request.form.get("office_key", ""),
+                    request.form.get("office_position", ""),
                     schedule,
                     member_id,
                 ),

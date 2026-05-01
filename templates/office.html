@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ selected.name }}</title>
 <style>
 @font-face {
@@ -223,6 +224,58 @@ body {
   font-weight: 600;
   letter-spacing: 1px;
 }
+
+/* Staff roster */
+.staff-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.staff-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100px;
+  text-align: center;
+  gap: 6px;
+}
+.staff-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #e8d0d0;
+  background: #f1dede;
+  flex-shrink: 0;
+}
+.staff-initials {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #8b2e2e;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+.staff-name {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  color: #333;
+  line-height: 1.3;
+  word-break: break-word;
+}
+.staff-pos {
+  font-size: 11px;
+  font-weight: 600;
+  color: #8b2e2e;
+  letter-spacing: 0.5px;
+}
 </style>
 </head>
 <body>
@@ -315,6 +368,31 @@ body {
       {% endif %}
     </div>
 
+    <!-- Office Staff -->
+    {% if staff %}
+    <div class="section-label" style="margin-top:32px;">OFFICE STAFF</div>
+    <div class="staff-row">
+      {% for m in staff %}
+      <div class="staff-card">
+        {% set safe_photo = m.photo | replace('..', '') | replace('//', '') if m.photo else '' %}
+        {% if safe_photo and safe_photo.startswith('images/') %}
+        <img class="staff-avatar"
+             src="/static/{{ safe_photo }}"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+             alt="{{ m.name }}">
+        <div class="staff-initials" style="display:none;">{{ m.name[0] | upper }}</div>
+        {% else %}
+        <div class="staff-initials">{{ m.name[0] | upper }}</div>
+        {% endif %}
+        <span class="staff-name">{{ m.name }}</span>
+        {% if m.office_position %}
+        <span class="staff-pos">{{ m.office_position }}</span>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
     <!-- PDF fullscreen overlay -->
     <div id="pdf-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;flex-direction:column;">
       <div style="display:flex;align-items:center;gap:12px;padding:12px 20px;background:#7b2d2d;">
@@ -391,8 +469,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 20));
 });
 </script>
-<script src="/static/js/toast.js"></script>
-<script src="/static/js/drag-scroll.js"></script>
-<script src="/static/js/keyboard.js"></script>
+<script src="/static/js/toast.js?v=2"></script>
+<script src="/static/js/drag-scroll.js?v=2"></script>
+<script src="/static/js/keyboard.js?v=2"></script>
 </body>
 </html>

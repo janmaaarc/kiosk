@@ -70,6 +70,14 @@ def office():
         if row is None and rows:
             row = rows[0]
 
+        staff = []
+        if row:
+            staff = [dict(r) for r in conn.execute(
+                "SELECT name, photo, office_position FROM faculty"
+                " WHERE office_key = ? AND office_key != '' ORDER BY office_position, name",
+                (row["key"],),
+            ).fetchall()]
+
     offices = [_with_files(r) for r in rows]
     selected = _with_files(row) if row else {}
     raw_building = request.args.get("from_building", "")
@@ -82,6 +90,7 @@ def office():
         "office.html",
         offices=offices,
         selected=selected,
+        staff=staff,
         from_building=from_building,
         from_floor=from_floor,
         from_room=request.args.get("from_room", selected.get("name", "")),
