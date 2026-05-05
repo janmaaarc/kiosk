@@ -361,12 +361,14 @@ body{
   </div>
 
   <!-- SCHEDULE -->
+{% if show_schedule %}
 <div class="schedule-container" id="scheduleContainer">
   <p id="schedPlaceholder" style="color:#aaa;font-size:16px;letter-spacing:1px;padding:20px;">
     NO SCHEDULE AVAILABLE
   </p>
   <div id="schedTableWrap" style="display:none;overflow-x:auto;margin-top:10px"></div>
 </div>
+{% endif %}
 
 <script>
 
@@ -448,7 +450,8 @@ function loadFromURL(){
     });
   } catch(e) {}
 
-  // Schedule — show uploaded image if provided, otherwise load from DB
+  // Schedule — only for non-visitor roles
+  {% if show_schedule %}
   const placeholder = document.getElementById("schedPlaceholder");
   const tableWrap   = document.getElementById("schedTableWrap");
 
@@ -474,6 +477,7 @@ function loadFromURL(){
         .catch(() => { toast('Could not load schedule', 'error'); });
     }
   }
+  {% endif %}
 }
 
 const DAYS  = ["MON","TUE","WED","THU","FRI","SAT"];

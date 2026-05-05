@@ -650,6 +650,9 @@ def rfid_logs_clear():
 
 @content_bp.route("/api/faculty/<int:member_id>/schedule")
 def faculty_schedule_api(member_id: int):
+    from flask import session as _session
+    if _session.get("user_role", "visitor") == "visitor":
+        return jsonify({"error": "forbidden"}), 403
     with db_connection() as conn:
         row = conn.execute("SELECT schedule FROM faculty WHERE id = ?", (member_id,)).fetchone()
     if row is None:

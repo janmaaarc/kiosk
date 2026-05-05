@@ -26,8 +26,7 @@ def menu():
 
 @main_bp.route("/faculty")
 def faculty():
-    if session.get("user_role", "visitor") == "visitor":
-        return redirect("/menu?restricted=faculty")
+    role = session.get("user_role", "visitor")
     with db_connection() as conn:
         rows = conn.execute("""
             SELECT f.*, o.name AS office_name
@@ -35,7 +34,9 @@ def faculty():
             LEFT JOIN offices o ON COALESCE(f.office_key, '') = o.key
             ORDER BY f.name
         """).fetchall()
-    return render_template("faculty.html", faculty_list=[dict(r) for r in rows])
+    return render_template("faculty.html",
+                           faculty_list=[dict(r) for r in rows],
+                           show_schedule=(role != "visitor"))
 
 
 def _log_rfid(conn, uid: str, name: str, role: str) -> None:
@@ -108,7 +109,8 @@ def logout():
 
 @main_bp.route("/profile")
 def profile():
-    return render_template("profile.html")
+    role = session.get("user_role", "visitor")
+    return render_template("profile.html", show_schedule=(role != "visitor"))
 
 
 @main_bp.route("/about")
