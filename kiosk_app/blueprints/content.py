@@ -411,7 +411,7 @@ def office_edit(office_id: int):
                     request.form.get("location", ""),
                     request.form.get("hours", ""),
                     request.form.get("desc", ""),
-                    _safe_files_json(request.form.get("files_json", office.get("files") or "[]")),
+                    _safe_files_json(request.form.get("files_json", office["files"] or "[]")),
                     request.form.get("building_url", ""),
                     visible_to,
                     _parse_dt(request.form.get("published_at", "")) or
