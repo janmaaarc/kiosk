@@ -1,15 +1,17 @@
-<!DOCTYPE html> 
-<html> 
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> 
+<!DOCTYPE html>
+<html>
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <title>Campus Map</title>
      <style> 
      
-     body { 
-      margin: 0; font-family: 'League Spartan', sans-serif; 
-      overflow: hidden; 
-      background: url("/static/images/KIOSK BACKGROUND.png") no-repeat center center fixed; 
-      background-size: cover; } 
+     body {
+      margin: 0; font-family: 'League Spartan', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      background: url("/static/images/KIOSK BACKGROUND.png") no-repeat center center fixed;
+      background-size: cover; }
 
       h1 { 
         text-align: center; 
@@ -1370,7 +1372,7 @@ var _mapScale = 0.7;
   </button>
 </div>
 
-<script src="/static/js/drag-scroll.js"></script>
-<script src="{{ url_for('static', filename='js/keyboard.js') }}"></script>
+<script src="/static/js/drag-scroll.js?v=2"></script>
+<script src="{{ url_for('static', filename='js/keyboard.js') }}?v=2"></script>
 </body>
 </html>

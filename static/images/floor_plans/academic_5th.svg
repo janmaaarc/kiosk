@@ -26,9 +26,6 @@
   <!-- Large central yellow open space -->
   <rect x="310" y="60" width="620" height="540" class="room-yellow"/>
 
-  <!-- Control Room (below Staff Room, on the left) -->
-  <rect x="210" y="380" width="100" height="260" class="room-yellow"/>
-
   <!-- Elevator -->
   <text x="985" y="80" class="label-elev">ELEVATOR</text>
   <polygon points="985,95 975,115 995,115" fill="#f4d35e"/>

@@ -403,125 +403,135 @@ _ACADEMIC_2ND_ROOMS = [
 ]
 
 _ACADEMIC_3RD_ROOMS = [
-    # Top row (north side)
+    # ── Top row (north side): top=8, height=36 ─────────────────────────────
+    # Cols 1-2 (x=7–14)
     {
         "name": "VP for Admin and Finance",
-        "left": 6.7, "top": 8.6, "width": 8.3, "height": 37.1,
+        "left": 7, "top": 8, "width": 7, "height": 36,
         "desc": "Office of the Vice President for Administration and Finance",
         "directions": [
-            "From the staircase on the 3rd floor, turn left along the hallway.",
-            "The VP for Administration and Finance Office is the first door on your right.",
+            "From the staircase, turn left along the north hallway.",
+            "VP for Administration and Finance is the first office on your right.",
         ],
     },
+    # Cols 2-3 (x=14–20)
     {
         "name": "VP for Academic Affairs",
-        "left": 15.0, "top": 8.6, "width": 8.3, "height": 37.1,
+        "left": 14, "top": 8, "width": 6, "height": 36,
         "desc": "Office of the Vice President for Academic Affairs",
         "directions": [
-            "From the staircase on the 3rd floor, turn left along the hallway.",
-            "The VP for Academic Affairs Office is the second door on your right.",
+            "From the staircase, turn left along the north hallway.",
+            "VP for Academic Affairs is the second office on your right.",
         ],
     },
+    # Cols 3-4 (x=20–27)
     {
-        "name": "VP for Research, Extension, Planning and Budget",
-        "left": 23.3, "top": 8.6, "width": 8.3, "height": 37.1,
-        "desc": "Office of the Vice President for Research, Extension, Planning and Budget",
+        "name": "VP for Research, Extension, Linkages and Quality Assurance",
+        "left": 20, "top": 8, "width": 7, "height": 36,
+        "desc": "Office of the Vice President for Research, Extension, Linkages and Quality Assurance",
         "directions": [
-            "From the staircase on the 3rd floor, turn left along the hallway.",
-            "The VP for Research Office is the third door on your right.",
+            "From the staircase, turn left along the north hallway.",
+            "VP for Research is the third office on your right.",
         ],
     },
+    # Col 4-5 (x=27–33)
     {
         "name": "Budget Office",
-        "left": 31.7, "top": 8.6, "width": 6.7, "height": 37.1,
+        "left": 27, "top": 8, "width": 6, "height": 36,
         "desc": "Budget and financial planning office",
         "directions": [
-            "From the staircase on the 3rd floor, turn left along the hallway.",
-            "The Budget Office will be on your right before the accounting area.",
+            "From the staircase, turn left along the north hallway.",
+            "The Budget Office is the fourth door on your right.",
         ],
     },
+    # Col 5-6 (x=33–40)
     {
         "name": "Accounting Office",
-        "left": 38.3, "top": 8.6, "width": 6.7, "height": 37.1,
+        "left": 33, "top": 8, "width": 7, "height": 36,
         "desc": "Accounting and financial records office",
         "directions": [
-            "From the staircase on the 3rd floor, turn left along the hallway.",
-            "Continue past the Budget Office. The Accounting Office is the next door on your right.",
+            "From the staircase, turn left along the north hallway.",
+            "The Accounting Office is the fifth door on your right.",
         ],
     },
+    # Col 6-7 (x=40–47)
     {
         "name": "Program Chair's Office and Field Study Center",
-        "left": 52.5, "top": 8.6, "width": 8.3, "height": 37.1,
+        "left": 40, "top": 8, "width": 7, "height": 36,
         "desc": "Program Chair's Office and Field Study Center",
         "directions": [
-            "From the staircase on the 3rd floor, turn right along the hallway.",
-            "The Program Chair's Office and Field Study Center will be on your left.",
+            "From the staircase, the Program Chair's Office is directly across the hallway to your left.",
         ],
     },
+    # Col 7-8 (x=47–53)
     {
         "name": "Dean for Technology and Instruction Office",
-        "left": 60.8, "top": 8.6, "width": 8.3, "height": 37.1,
+        "left": 47, "top": 8, "width": 6, "height": 36,
         "desc": "Dean for Technology and Instruction Office",
         "directions": [
-            "From the staircase on the 3rd floor, turn right along the hallway.",
-            "Continue past the Program Chair's Office. The Dean for Technology and Instruction Office is on your left.",
+            "From the staircase, turn right along the north hallway.",
+            "The Dean for Technology and Instruction Office is the first door on your left.",
         ],
     },
+    # Cols 8-10 (x=53–66) — wider room
     {
         "name": "Dean for Graduate School and Program Chair of Graduate School",
-        "left": 69.2, "top": 8.6, "width": 8.3, "height": 37.1,
+        "left": 53, "top": 8, "width": 13, "height": 36,
         "desc": "Dean for Graduate School and Program Chair of Graduate School Office",
         "directions": [
-            "From the staircase on the 3rd floor, turn right along the hallway.",
-            "Continue straight to the end of the corridor.",
-            "The Dean for Graduate School Office will be on your left.",
+            "From the staircase, turn right along the north hallway.",
+            "Continue past the Dean for Technology Office.",
+            "The Dean for Graduate School Office is the wide room on your left.",
         ],
     },
-    {
-        "name": "Graduate School Office",
-        "left": 77.5, "top": 8.6, "width": 5.8, "height": 37.1,
-        "desc": "Graduate School administrative office",
-        "directions": [
-            "From the staircase on the 3rd floor, turn right along the hallway.",
-            "Walk to the far end of the corridor. The Graduate School Office is near the comfort rooms.",
-        ],
-    },
-    {"name": "CR", "left": 83.3, "top": 8.6, "width": 10.0, "height": 37.1, "desc": "Comfort room"},
-    # Bottom row (south side)
+    # Cols 10-11 (x=66–73)
+    {"name": "CR", "left": 66, "top": 8, "width": 7, "height": 36, "desc": "Comfort rooms (Female and Male)"},
+
+    # ── Bottom row (south side): top=56, height=34 ─────────────────────────
+    # Col 1-2 (x=7–14)
     {
         "name": "College President",
-        "left": 6.7, "top": 54.3, "width": 8.3, "height": 37.1,
+        "left": 7, "top": 56, "width": 7, "height": 34,
         "desc": "Office of the College President",
         "directions": [
-            "From the staircase on the 3rd floor, turn left.",
-            "The College President's Office is at the far left corner on the south side.",
+            "From the staircase, cross the hallway to the south side.",
+            "Turn left. The College President's Office is at the far left corner.",
         ],
     },
+    # Col 2-3 (x=14–20)
     {
-        "name": "Board of Directors Office",
-        "left": 15.0, "top": 54.3, "width": 8.3, "height": 37.1,
+        "name": "Board of Secretary Office",
+        "left": 14, "top": 56, "width": 6, "height": 34,
         "desc": "Board of Directors / Secretary's Office",
         "directions": [
-            "From the staircase on the 3rd floor, turn left.",
-            "The Board of Directors Office is next to the College President's Office.",
+            "From the staircase, cross to the south side and turn left.",
+            "The Board of Secretary Office is next to the College President's Office.",
         ],
     },
+    # Col 3-4 (x=20–27)
     {
         "name": "Conference Room",
-        "left": 23.3, "top": 54.3, "width": 10.0, "height": 37.1,
+        "left": 20, "top": 56, "width": 7, "height": 34,
         "desc": "Meeting and conference facility",
         "directions": [
-            "From the staircase on the 3rd floor, turn left.",
-            "Walk past the VP offices side. The Conference Room is on the south corridor.",
+            "From the staircase, cross to the south side and turn left.",
+            "The Conference Room is the third door on your right.",
         ],
     },
+    # Col 4-5 (x=27–33) — storage before left stairs
+    {"name": "Storage", "left": 27, "top": 56, "width": 6, "height": 34, "desc": "Storage room"},
+    # [LEFT EXIT STAIRS x=33–40 — not a room]
+    # [RIGHT EXIT STAIRS x=47–53 — not a room]
+    # Col 8-9 (x=55–62) — storage after right stairs
+    {"name": "Storage", "left": 55, "top": 56, "width": 7, "height": 34, "desc": "Storage room"},
+    # Cols 9-13 (x=62–93)
     {
         "name": "Content Creator Laboratory",
-        "left": 68.3, "top": 54.3, "width": 15.0, "height": 37.1,
+        "left": 62, "top": 56, "width": 31, "height": 34,
         "desc": "Content creation and digital media laboratory",
         "directions": [
-            "From the staircase on the 3rd floor, turn right.",
-            "Continue to the far right of the south corridor. The Content Creator Laboratory is on your right.",
+            "From the staircase, cross to the south side and turn right.",
+            "The Content Creator Laboratory occupies the large room at the far right.",
         ],
     },
 ]
@@ -570,28 +580,20 @@ _ACADEMIC_5TH_ROOMS = [
             "From the staircase on the 5th floor, the Staff Room will be directly ahead on your left.",
         ],
     },
-    {
-        "name": "Control Room",
-        "left": 17.5, "top": 54.3, "width": 8.3, "height": 37.1,
-        "desc": "Control and monitoring room",
-        "directions": [
-            "From the staircase on the 5th floor, the Control Room will be on your left.",
-        ],
-    },
     {"name": "CR", "left": 83.3, "top": 8.6, "width": 10.0, "height": 37.1, "desc": "Comfort room"},
 ]
 
 _ACADEMIC_FLOORS = {
     1: {"label": "1st floor", "image": "images/floor_plans/academic_ground.svg", "rooms": _ACADEMIC_GROUND_ROOMS,
-        "entrance": {"x": 50, "y": 96, "hallway_y": 50}},
+        "entrance": {"x": 50, "y": 67, "hallway_y": 50}},
     2: {"label": "2nd floor", "image": "images/floor_plans/academic_2nd.svg",    "rooms": _ACADEMIC_2ND_ROOMS,
-        "entrance": {"x": 50, "y": 96, "hallway_y": 50}},
+        "entrance": {"x": 50, "y": 67, "hallway_y": 50}},
     3: {"label": "3rd floor", "image": "images/floor_plans/academic_3rd.svg",    "rooms": _ACADEMIC_3RD_ROOMS,
-        "entrance": {"x": 50, "y": 96, "hallway_y": 50}},
+        "entrance": {"x": 43, "y": 73, "hallway_y": 50}},
     4: {"label": "4th floor", "image": "images/floor_plans/academic_4th.svg",    "rooms": _ACADEMIC_4TH_ROOMS,
         "entrance": {"x": 50, "y": 67, "hallway_y": 50}},
     5: {"label": "5th floor", "image": "images/floor_plans/academic_5th.svg",    "rooms": _ACADEMIC_5TH_ROOMS,
-        "entrance": {"x": 50, "y": 96, "hallway_y": 50}},
+        "entrance": {"x": 12, "y": 30, "hallway_y": 45}},
 }
 
 _IT_FLOORS = {
@@ -632,6 +634,7 @@ _NEW_ADMIN_FLOORS = {
             {"name": "Repair and Maintenance",        "left": 60, "top": 57, "width": 11, "height": 32, "desc": "Facilities maintenance office"},
             {"name": "Function Hall",                 "left": 71, "top": 57, "width": 12, "height": 32, "desc": "Multi-purpose function hall"},
         ],
+        "entrance": {"x": 52, "y": 73, "hallway_y": 48},
     },
 }
 

@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ building_name }} — Floor {{ floor_number }}</title>
 <style>
 @font-face {
@@ -202,18 +203,21 @@ body {
   justify-content: center;
   text-align: center;
   cursor: pointer;
+  overflow: hidden;
+  word-break: break-word;
+  overflow-wrap: break-word;
 
   background: transparent;
   border: 2px solid transparent;
-  border-radius: 6px;
+  border-radius: 0;
 
   font-family: inherit;
-  font-size: clamp(9px, 1.1vw, 14px);
+  font-size: clamp(8px, 0.9vw, 12px);
   font-weight: 800;
   letter-spacing: 0.5px;
   color: #1a1a1a;
-  padding: 4px;
-  line-height: 1.2;
+  padding: 2px;
+  line-height: 1.15;
   text-transform: uppercase;
 
   transition: background 0.2s, border-color 0.2s, color 0.2s;
@@ -639,8 +643,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
-<script src="/static/js/toast.js"></script>
-<script src="/static/js/drag-scroll.js"></script>
-<script src="/static/js/keyboard.js"></script>
+<script src="/static/js/toast.js?v=2"></script>
+<script src="/static/js/drag-scroll.js?v=2"></script>
+<script src="/static/js/keyboard.js?v=2"></script>
 </body>
 </html>

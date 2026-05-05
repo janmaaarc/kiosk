@@ -36,6 +36,7 @@
     let startX, startY, scrollLeft, scrollTop;
     let moved = false;
 
+    // Mouse drag
     el.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return;
       isDown = true;
@@ -47,7 +48,6 @@
       scrollTop = el.scrollTop;
       el.style.cursor = 'grabbing';
 
-      // Track drag on document so fast gestures don't lose the scroll target
       function onMove(e) {
         if (!isDown) return;
         e.preventDefault();
@@ -64,7 +64,6 @@
         el.style.cursor = '';
         document.removeEventListener('mousemove', onMove);
         document.removeEventListener('mouseup', onUp);
-        // Reset moved after click suppression fires (click follows mouseup)
         setTimeout(() => { moved = false; }, 0);
       }
 
@@ -72,9 +71,29 @@
       document.addEventListener('mouseup', onUp);
     });
 
-    // Suppress click after drag — only if this element was the one dragged
+    // Touch drag (kiosk/TV touchscreen)
+    let touchStartX, touchStartY, touchScrollLeft, touchScrollTop, touchMoved = false;
+    el.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      touchStartX = t.clientX;
+      touchStartY = t.clientY;
+      touchScrollLeft = el.scrollLeft;
+      touchScrollTop = el.scrollTop;
+      touchMoved = false;
+    }, { passive: true });
+
+    el.addEventListener('touchmove', (e) => {
+      const t = e.touches[0];
+      const walkX = t.clientX - touchStartX;
+      const walkY = t.clientY - touchStartY;
+      if (Math.abs(walkX) > 3 || Math.abs(walkY) > 3) touchMoved = true;
+      el.scrollLeft = touchScrollLeft - walkX;
+      el.scrollTop = touchScrollTop - walkY;
+    }, { passive: true });
+
+    // Suppress click after drag
     el.addEventListener('click', (e) => {
-      if (moved && e.currentTarget === el) {
+      if ((moved || touchMoved) && e.currentTarget === el) {
         e.stopPropagation();
         e.preventDefault();
       }
