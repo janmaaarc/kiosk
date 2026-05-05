@@ -13,3 +13,7 @@ static/uploads/
 .claude/
 REFERENCE/
 kiosk recent/
+kiosk_recent/
+database.db
+FLOOR PLANS/
+.playwright-mcp/
