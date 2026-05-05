@@ -34,9 +34,17 @@
         </div>
         <div class="form-group">
             <label>Office Position <span style="font-weight:400;color:#888">(title within that office)</span></label>
-            <input type="text" name="office_position"
-                   value="{{ member['office_position'] if member else '' }}"
-                   placeholder="e.g. Head, Secretary, Coordinator">
+            {% set cur_pos = member['office_position'] if member else '' %}
+            {% set positions = ['Office Head','Assistant Head','Secretary','Administrative Staff','Coordinator','Registrar Staff','Cashier','Librarian','Guidance Counselor','Nurse / Physician','Staff'] %}
+            <select name="office_position" style="width:100%;padding:10px;border-radius:6px;border:1px solid #ddd;font-size:14px;">
+                <option value="">— None —</option>
+                {% for p in positions %}
+                <option value="{{ p }}" {% if cur_pos == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+                {% if cur_pos and cur_pos not in positions %}
+                <option value="{{ cur_pos }}" selected>{{ cur_pos }}</option>
+                {% endif %}
+            </select>
         </div>
         <div class="form-group">
             <label>Room</label>

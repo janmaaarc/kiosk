@@ -139,14 +139,21 @@
             <span style="font-weight:400;color:#aaa;font-size:12px;">(set position title for each member)</span>
         </h3>
         <div style="display:flex;flex-direction:column;gap:10px;">
+            {% set positions = ['Office Head','Assistant Head','Secretary','Administrative Staff','Coordinator','Registrar Staff','Cashier','Librarian','Guidance Counselor','Nurse / Physician','Staff'] %}
             {% for f in staff %}
+            {% set cur_pos = f['office_position'] or '' %}
             <div style="display:flex;align-items:center;gap:12px;background:#fafafa;border:1px solid #eee;border-radius:8px;padding:10px 14px;">
                 <span style="font-weight:700;font-size:14px;flex:1;">{{ f['name'] }}</span>
-                <input type="text"
-                       name="staff_position[{{ f['id'] }}]"
-                       value="{{ f['office_position'] or '' }}"
-                       placeholder="e.g. Head, Secretary, Coordinator"
-                       style="width:260px;padding:8px 12px;border-radius:6px;border:1px solid #ddd;font-size:13px;">
+                <select name="staff_position[{{ f['id'] }}]"
+                        style="width:260px;padding:8px 12px;border-radius:6px;border:1px solid #ddd;font-size:13px;">
+                    <option value="">— None —</option>
+                    {% for p in positions %}
+                    <option value="{{ p }}" {% if cur_pos == p %}selected{% endif %}>{{ p }}</option>
+                    {% endfor %}
+                    {% if cur_pos and cur_pos not in positions %}
+                    <option value="{{ cur_pos }}" selected>{{ cur_pos }}</option>
+                    {% endif %}
+                </select>
             </div>
             {% endfor %}
         </div>

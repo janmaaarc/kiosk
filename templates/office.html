@@ -358,6 +358,8 @@ body {
     <div class="section-label">OFFICE STAFF</div>
     <div class="staff-row">
       {% for m in staff %}
+      {% set _name_clean = m.name | replace('Mr. ','') | replace('Ms. ','') | replace('Mrs. ','') | replace('Dr. ','') | replace('Prof. ','') | replace('Engr. ','') %}
+      {% set _initial = _name_clean[0] | upper if _name_clean else '?' %}
       <div class="staff-card">
         {% set safe_photo = m.photo | replace('..', '') | replace('//', '') if m.photo else '' %}
         {% if safe_photo and safe_photo.startswith('images/') %}
@@ -365,9 +367,9 @@ body {
              src="/static/{{ safe_photo }}"
              onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
              alt="{{ m.name }}">
-        <div class="staff-initials" style="display:none;">{{ m.name[0] | upper }}</div>
+        <div class="staff-initials" style="display:none;">{{ _initial }}</div>
         {% else %}
-        <div class="staff-initials">{{ m.name[0] | upper }}</div>
+        <div class="staff-initials">{{ _initial }}</div>
         {% endif %}
         <span class="staff-name">{{ m.name }}</span>
         {% if m.office_position %}
