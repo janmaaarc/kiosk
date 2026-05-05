@@ -353,24 +353,9 @@ body {
       {% endif %}
     </div>
 
-    <!-- Forms & Memos -->
-    <div class="section-label">FORMS &amp; MEMOS</div>
-    <div class="pdf-list">
-      {% if selected.files %}
-        {% for file in selected.files %}
-        <div class="pdf-item" onclick="openPDF('{{ file.file }}', '{{ file.title }}')">
-          <span class="pdf-icon">📄</span>
-          {{ file.title }}
-        </div>
-        {% endfor %}
-      {% else %}
-        <p class="no-files">NO FILES AVAILABLE</p>
-      {% endif %}
-    </div>
-
     <!-- Office Staff -->
     {% if staff %}
-    <div class="section-label" style="margin-top:32px;">OFFICE STAFF</div>
+    <div class="section-label">OFFICE STAFF</div>
     <div class="staff-row">
       {% for m in staff %}
       <div class="staff-card">
@@ -392,6 +377,21 @@ body {
       {% endfor %}
     </div>
     {% endif %}
+
+    <!-- Forms & Memos -->
+    <div class="section-label" style="margin-top:32px;">FORMS &amp; MEMOS</div>
+    <div class="pdf-list">
+      {% if selected.files %}
+        {% for file in selected.files %}
+        <div class="pdf-item" onclick="openPDF({{ file.file | tojson }}, {{ file.title | tojson }})">
+          <span class="pdf-icon">📄</span>
+          {{ file.title }}
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="no-files">NO FILES AVAILABLE</p>
+      {% endif %}
+    </div>
 
     <!-- PDF fullscreen overlay -->
     <div id="pdf-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;flex-direction:column;">

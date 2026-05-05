@@ -98,6 +98,29 @@ def _safe_filename(original: str) -> str:
     return uuid.uuid4().hex + ext
 
 
+import re as _re
+_SAFE_FILE_RE = _re.compile(r'^uploads/[0-9a-f]{32}\.pdf$')
+
+
+def _safe_files_json(raw: str) -> str:
+    """Validate and sanitize files JSON array; returns '[]' on any error."""
+    try:
+        items = json.loads(raw or "[]")
+        if not isinstance(items, list):
+            return "[]"
+        safe = []
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            title = str(item.get("title", "")).strip()[:200]
+            path = str(item.get("file", "")).strip()
+            if title and _SAFE_FILE_RE.fullmatch(path):
+                safe.append({"title": title, "file": path})
+        return json.dumps(safe)
+    except (ValueError, TypeError):
+        return "[]"
+
+
 # ---------------------------------------------------------------------------
 # Image / file upload
 # ---------------------------------------------------------------------------
@@ -347,7 +370,7 @@ def office_add():
                     request.form.get("location", ""),
                     request.form.get("hours", ""),
                     request.form.get("desc", ""),
-                    "[]",
+                    _safe_files_json(request.form.get("files_json", "[]")),
                     request.form.get("building_url", ""),
                     visible_to,
                     _parse_dt(request.form.get("published_at", "")) or
@@ -378,7 +401,7 @@ def office_edit(office_id: int):
             conn.execute(
                 """UPDATE offices
                    SET key=?, name=?, image=?, location=?, hours=?, desc=?,
-                       files=COALESCE(files, '[]'), building_url=?, visible_to=?,
+                       files=?, building_url=?, visible_to=?,
                        published_at=?, expires_at=?
                    WHERE id=?""",
                 (
@@ -388,6 +411,7 @@ def office_edit(office_id: int):
                     request.form.get("location", ""),
                     request.form.get("hours", ""),
                     request.form.get("desc", ""),
+                    _safe_files_json(request.form.get("files_json", office.get("files") or "[]")),
                     request.form.get("building_url", ""),
                     visible_to,
                     _parse_dt(request.form.get("published_at", "")) or
