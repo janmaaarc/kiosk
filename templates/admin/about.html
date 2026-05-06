@@ -1,7 +1,7 @@
 {% extends "admin/base.html" %}
 {% block title %}About Us{% endblock %}
 {% block content %}
-<div class="page-title">About Us</div>
+<h1 class="page-title">About Us</h1>
 
 <!-- College Officials Image -->
 <div class="form-card" style="margin-bottom:28px;">
@@ -57,7 +57,11 @@
         <td>{{ r.sort_order }}</td>
         <td>
           <button class="btn btn-secondary btn-sm"
-                  onclick="openEdit({{ r.id }}, {{ r.name|tojson }}, {{ (r.photo or '')|tojson }}, {{ r.sort_order }})">
+                  data-id="{{ r.id }}"
+                  data-name="{{ r.name }}"
+                  data-photo="{{ r.photo or '' }}"
+                  data-order="{{ r.sort_order or 0 }}"
+                  onclick="openEditBtn(this)">
             Edit
           </button>
           <form method="post" action="{{ url_for('content.about_researcher_delete', rid=r.id) }}"
@@ -97,7 +101,12 @@
 </div>
 
 <!-- Edit modal -->
-<div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;align-items:center;justify-content:center;">
+<style>
+#editModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999;
+             align-items:center; justify-content:center; }
+#editModal.open { display:flex; }
+</style>
+<div id="editModal">
   <div style="background:#fff;border-radius:8px;padding:28px;width:420px;">
     <h3 style="font-size:16px;font-weight:700;color:#7b2d2d;margin-bottom:16px;">Edit Researcher</h3>
     <form id="editForm" method="post">
@@ -127,16 +136,18 @@
 </div>
 
 <script>
+function openEditBtn(btn) {
+  openEdit(btn.dataset.id, btn.dataset.name, btn.dataset.photo, btn.dataset.order);
+}
 function openEdit(id, name, photo, order) {
   document.getElementById('editForm').action = '/admin/about/researcher/' + id + '/edit';
   document.getElementById('edit_name').value = name;
   document.getElementById('edit_photo').value = photo;
   document.getElementById('edit_order').value = order;
-  const m = document.getElementById('editModal');
-  m.style.display = 'flex';
+  document.getElementById('editModal').classList.add('open');
 }
 function closeEdit() {
-  document.getElementById('editModal').style.display = 'none';
+  document.getElementById('editModal').classList.remove('open');
 }
 </script>
 {% endblock %}

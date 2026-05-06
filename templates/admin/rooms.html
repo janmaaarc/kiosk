@@ -1,0 +1,75 @@
+{% extends "admin/base.html" %}
+{% block title %}Room Labels{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <h1 class="page-title">Room Labels</h1>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <a href="{{ url_for('content.room_placer') }}" class="btn btn-primary">🗺 Place Rooms</a>
+    <a href="{{ url_for('content.room_add') }}" class="btn btn-secondary">+ Add Room</a>
+  </div>
+</div>
+
+<form method="get" style="margin-bottom:16px;display:flex;gap:10px;align-items:center;">
+  <select name="building" onchange="this.form.submit()"
+          style="padding:8px 12px;border-radius:5px;border:1px solid #ccc;font-size:14px;font-family:inherit;">
+    <option value="">— All Buildings —</option>
+    {% for b in buildings %}
+    <option value="{{ b }}" {% if b == building_filter %}selected{% endif %}>{{ b }}</option>
+    {% endfor %}
+  </select>
+  {% if building_filter %}
+  <a href="{{ url_for('content.rooms_list') }}" style="font-size:13px;color:#888;text-decoration:none;">Clear filter</a>
+  {% endif %}
+</form>
+
+<table>
+  <thead>
+    <tr>
+      <th>Building</th>
+      <th>Floor</th>
+      <th>Room Name</th>
+      <th>Position (L% × T%)</th>
+      <th>Size (W% × H%)</th>
+      <th>Type</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in rooms %}
+    <tr>
+      <td>{{ r['building'] }}</td>
+      <td>{{ r['floor'] }}</td>
+      <td><strong>{{ r['room'] }}</strong></td>
+      <td style="font-size:12px;color:#666;">{{ r['pos_left']|round(1) }}% × {{ r['pos_top']|round(1) }}%</td>
+      <td style="font-size:12px;color:#666;">{{ r['pos_width']|round(1) }}% × {{ r['pos_height']|round(1) }}%</td>
+      <td>
+        {% if r['room_color'] %}
+        <span style="padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;
+          {% if r['room_color']=='cr' %}background:#fde8e8;color:#c0392b;
+          {% elif r['room_color']=='fire-exit' %}background:#e8f8e8;color:#27ae60;
+          {% elif r['room_color']=='elevator' %}background:#e8eefa;color:#2980b9;
+          {% else %}background:#f0f0f0;color:#555;{% endif %}">
+          {{ r['room_color']|upper }}
+        </span>
+        {% else %}
+        <span style="color:#ccc;font-size:12px;">—</span>
+        {% endif %}
+      </td>
+      <td>
+        <a href="{{ url_for('content.room_edit', room_id=r['id']) }}" class="btn btn-secondary btn-sm">Edit</a>
+        <form method="post" action="{{ url_for('content.room_delete', room_id=r['id']) }}"
+              style="display:inline;" onsubmit="return confirm('Delete room?')">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" style="text-align:center;color:#888;padding:20px">
+      No room labels yet.
+      <a href="{{ url_for('content.room_placer') }}" style="color:#7b2d2d;font-weight:700;">Open the placement tool →</a>
+    </td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

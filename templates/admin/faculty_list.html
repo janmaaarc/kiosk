@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="toolbar">
-    <h1 class="page-title" style="margin:0">Faculty</h1>
+    <h1 class="page-title">Faculty</h1>
     <div style="display:flex;gap:8px;align-items:center">
         <form method="POST" action="{{ url_for('content.faculty_import_csv') }}"
               enctype="multipart/form-data" style="display:flex;gap:6px;align-items:center">
@@ -58,7 +58,7 @@
             </td>
         </tr>
         {% else %}
-        <tr><td colspan="6" style="text-align:center;color:#999;padding:20px">No faculty members yet.</td></tr>
+        <tr><td colspan="6" style="text-align:center;color:#888;padding:20px">No faculty members yet.</td></tr>
         {% endfor %}
     </tbody>
 </table>

@@ -1,0 +1,230 @@
+{% extends "admin/base.html" %}
+{% block title %}Room Placer{% endblock %}
+{% block content %}
+<h1 class="page-title">Room Placer</h1>
+<p style="font-size:13px;color:#666;margin-bottom:20px;">
+  Select a building and floor, then <strong>click on the floor plan</strong> to place a room label.
+</p>
+
+<!-- Building / Floor selector -->
+<form method="get" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:24px;">
+  <div>
+    <label style="font-size:12px;display:block;margin-bottom:4px;">Building</label>
+    <select name="building" id="sel-building" autocomplete="off" style="padding:9px 12px;border-radius:5px;border:1px solid #ccc;font-size:14px;font-family:inherit;min-width:220px;">
+      <option value="">— Select Building —</option>
+      {% for b in buildings %}
+      <option value="{{ b }}" {% if b == building %}selected{% endif %}>{{ b }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label style="font-size:12px;display:block;margin-bottom:4px;">Floor</label>
+    <select name="floor" id="sel-floor" style="padding:9px 12px;border-radius:5px;border:1px solid #ccc;font-size:14px;font-family:inherit;">
+      {% if floor_options %}
+        {% for fo in floor_options %}
+        <option value="{{ fo.number }}" {% if fo.number == floor_num %}selected{% endif %}>{{ fo.label }}</option>
+        {% endfor %}
+      {% else %}
+        <option value="1" disabled selected>— select building first —</option>
+      {% endif %}
+    </select>
+  </div>
+  <button type="submit" class="btn btn-secondary" style="font-size:12px;padding:7px 12px;">↺ Reload</button>
+  {% if building %}
+  <a href="{{ url_for('content.rooms_list', building=building) }}" class="btn btn-secondary">View Room List</a>
+  {% endif %}
+</form>
+
+{% if building and floor_image %}
+<div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
+
+  <!-- Floor plan click area -->
+  <div style="flex:1;min-width:400px;">
+    <p style="font-size:12px;color:#888;margin-bottom:8px;">Click anywhere on the image to set the room's top-left position.</p>
+    <div id="plan-container" style="position:relative;display:inline-block;cursor:crosshair;border:2px solid #ddd;border-radius:8px;overflow:hidden;max-width:100%;">
+      <img id="plan-img" src="/static/{{ floor_image }}"
+           style="display:block;max-width:100%;height:auto;user-select:none;pointer-events:none;">
+
+      <!-- Preview marker -->
+      <div id="place-marker" style="display:none;position:absolute;border:2px solid #7b2d2d;background:rgba(123,45,45,0.15);pointer-events:none;"></div>
+
+      <!-- Existing room labels -->
+      {% for r in placed_rooms %}
+      <div style="position:absolute;
+                  left:{{ r['pos_left'] }}%;top:{{ r['pos_top'] }}%;
+                  width:{{ r['pos_width'] }}%;height:{{ r['pos_height'] }}%;
+                  background:rgba(123,45,45,0.12);border:1.5px solid #7b2d2d;
+                  display:flex;align-items:center;justify-content:center;
+                  font-size:10px;font-weight:700;color:#7b2d2d;text-align:center;
+                  word-break:normal;overflow-wrap:break-word;padding:2px;pointer-events:none;">
+        {{ r['room'] }}
+      </div>
+      {% endfor %}
+    </div>
+    <p style="font-size:11px;color:#aaa;margin-top:4px;">Existing rooms shown in red. New marker shows in preview.</p>
+  </div>
+
+  <!-- Placement form -->
+  <div style="width:340px;flex-shrink:0;">
+    <div class="form-card" style="max-width:100%;">
+      <h3 style="font-size:15px;font-weight:700;color:#7b2d2d;margin-bottom:16px;">Place Room</h3>
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="building" value="{{ building }}">
+        <input type="hidden" name="floor" value="{{ floor_num }}">
+        <input type="hidden" name="pos_left" id="pos-left" value="5">
+        <input type="hidden" name="pos_top" id="pos-top" value="5">
+
+        <div class="form-group">
+          <label>Room Name *</label>
+          <input type="text" name="name" id="room-name" required placeholder="e.g. Registrar">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" name="desc" placeholder="Brief info">
+        </div>
+        <div class="form-group">
+          <label>Office Key</label>
+          <input type="text" name="office_key" placeholder="e.g. Registrar">
+        </div>
+        <div class="form-group">
+          <label>Room Type</label>
+          <select name="room_color" style="width:100%;padding:9px 12px;border:1px solid #ccc;border-radius:5px;font-size:14px;font-family:inherit;">
+            <option value="">Normal Room</option>
+            <option value="cr">🚻 CR / Comfort Room</option>
+            <option value="fire-exit">🚪 Fire Exit</option>
+            <option value="elevator">🛗 Elevator</option>
+          </select>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="form-group">
+            <label style="font-size:12px;">Width %</label>
+            <input type="number" name="pos_width" id="pos-width" value="10" min="1" max="100" step="0.5">
+          </div>
+          <div class="form-group">
+            <label style="font-size:12px;">Height %</label>
+            <input type="number" name="pos_height" id="pos-height" value="10" min="1" max="100" step="0.5">
+          </div>
+        </div>
+
+        <div style="background:#f8f4f4;border-radius:6px;padding:10px;margin-bottom:14px;font-size:12px;color:#666;">
+          Placed at: <strong id="coord-display">click image to set</strong>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%;">Place Room</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% elif building %}
+<div style="background:#fff3cd;border-radius:8px;padding:16px;color:#856404;font-size:14px;">
+  No floor image found for Floor {{ floor_num }} of <strong>{{ building }}</strong>.
+  <a href="{{ url_for('content.building_floors_list') }}" style="color:#7b2d2d;">Manage floor images →</a>
+</div>
+{% endif %}
+
+<!-- Placed rooms table -->
+{% if placed_rooms %}
+<div style="margin-top:32px;">
+  <h3 style="font-size:14px;font-weight:700;color:#555;letter-spacing:1px;margin-bottom:12px;">
+    ROOMS ON THIS FLOOR ({{ placed_rooms|length }})
+  </h3>
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Position</th><th>Type</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      {% for r in placed_rooms %}
+      <tr>
+        <td><strong>{{ r['room'] }}</strong></td>
+        <td style="font-size:12px;color:#666;">{{ r['pos_left']|round(1) }}%, {{ r['pos_top']|round(1) }}%</td>
+        <td>{{ r['room_color'] or '—' }}</td>
+        <td>
+          <a href="{{ url_for('content.room_edit', room_id=r['id']) }}" class="btn btn-secondary btn-sm">Edit</a>
+          <form method="post" action="{{ url_for('content.room_delete', room_id=r['id']) }}"
+                style="display:inline;" onsubmit="return confirm('Delete?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<script>
+(function() {
+  // Building select: change + restore-guard must run regardless of floor image
+  function navTo(b, f) {
+    window.location.href = '{{ url_for("content.room_placer") }}?building=' + encodeURIComponent(b) + '&floor=' + f;
+  }
+
+  var selBuilding = document.getElementById('sel-building');
+  var selFloor = document.getElementById('sel-floor');
+
+  if (selBuilding) {
+    selBuilding.addEventListener('change', function() {
+      if (this.value) navTo(this.value, 1);
+    });
+    var urlBuilding = new URLSearchParams(window.location.search).get('building') || '';
+    if (selBuilding.value && selBuilding.value !== urlBuilding) {
+      navTo(selBuilding.value, 1);
+    }
+  }
+
+  if (selFloor) {
+    selFloor.addEventListener('change', function() {
+      var b = selBuilding ? selBuilding.value : '';
+      if (b && this.value) navTo(b, this.value);
+    });
+  }
+
+  var container = document.getElementById('plan-container');
+  var img = document.getElementById('plan-img');
+  var marker = document.getElementById('place-marker');
+  var posLeft = document.getElementById('pos-left');
+  var posTop = document.getElementById('pos-top');
+  var coordDisplay = document.getElementById('coord-display');
+  var widthInp = document.getElementById('pos-width');
+  var heightInp = document.getElementById('pos-height');
+
+  if (!container || !img) return;
+
+  function updateMarker(lPct, tPct) {
+    var w = parseFloat(widthInp.value) || 10;
+    var h = parseFloat(heightInp.value) || 10;
+    marker.style.left = lPct + '%';
+    marker.style.top = tPct + '%';
+    marker.style.width = w + '%';
+    marker.style.height = h + '%';
+    marker.style.display = 'block';
+    coordDisplay.textContent = 'Left ' + lPct.toFixed(1) + '%, Top ' + tPct.toFixed(1) + '%';
+  }
+
+  container.addEventListener('click', function(e) {
+    var rect = container.getBoundingClientRect();
+    var xPct = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+    var yPct = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+    posLeft.value = xPct;
+    posTop.value = yPct;
+    updateMarker(parseFloat(xPct), parseFloat(yPct));
+    var nameInp = document.getElementById('room-name');
+    if (nameInp) nameInp.focus();
+  });
+
+  [widthInp, heightInp].forEach(function(inp) {
+    if (!inp) return;
+    inp.addEventListener('input', function() {
+      if (posLeft.value && posTop.value) {
+        updateMarker(parseFloat(posLeft.value), parseFloat(posTop.value));
+      }
+    });
+  });
+
+})();
+</script>
+{% endblock %}

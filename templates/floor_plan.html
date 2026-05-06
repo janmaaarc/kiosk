@@ -204,7 +204,7 @@ body {
   text-align: center;
   cursor: pointer;
   overflow: hidden;
-  word-break: break-word;
+  word-break: normal;
   overflow-wrap: break-word;
 
   background: transparent;
@@ -229,7 +229,33 @@ body {
   color: white;
 }
 
-.room-label[data-name="CR"] { color: white; }
+.room-type-cr {
+  background: rgba(192, 57, 43, 0.12) !important;
+  border-color: #c0392b !important;
+  color: #c0392b !important;
+}
+.room-type-cr:hover {
+  background: rgba(192, 57, 43, 0.85) !important;
+  color: white !important;
+}
+.room-type-fire-exit {
+  background: rgba(39, 174, 96, 0.12) !important;
+  border-color: #27ae60 !important;
+  color: #1e8449 !important;
+}
+.room-type-fire-exit:hover {
+  background: rgba(39, 174, 96, 0.85) !important;
+  color: white !important;
+}
+.room-type-elevator {
+  background: rgba(41, 128, 185, 0.12) !important;
+  border-color: #2980b9 !important;
+  color: #1a5276 !important;
+}
+.room-type-elevator:hover {
+  background: rgba(41, 128, 185, 0.85) !important;
+  color: white !important;
+}
 
 .indoor-pin {
   position:absolute;
@@ -402,11 +428,12 @@ body {
     </div>
 
     {% for room in rooms %}
-    <button class="room-label {% if highlight and highlight|lower == room.name|lower %}highlighted{% endif %}"
+    <button class="room-label {% if highlight and highlight|lower == room.name|lower %}highlighted{% endif %} {% if room.color %}room-type-{{ room.color }}{% endif %}"
             style="left:{{ room.left }}%; top:{{ room.top }}%; width:{{ room.width }}%; height:{{ room.height }}%;"
             data-name="{{ room.name }}"
             data-desc="{{ room.desc | default('') }}"
             data-office-key="{{ room.office_key | default('') }}"
+            data-color="{{ room.color | default('') }}"
             data-directions="{{ room.directions | default([]) | tojson | forceescape }}"
             data-left="{{ room.left }}"
             data-top="{{ room.top }}"
@@ -592,24 +619,75 @@ if (loc) {
 
 function drawIndoorRoute(targetBtn) {
   const left = parseFloat(targetBtn.dataset.left);
-  const top = parseFloat(targetBtn.dataset.top);
-  const width = parseFloat(targetBtn.dataset.width);
-  const height = parseFloat(targetBtn.dataset.height);
-  if ([left, top, width, height].some(Number.isNaN)) return;
+  const top  = parseFloat(targetBtn.dataset.top);
+  const w    = parseFloat(targetBtn.dataset.width);
+  const h    = parseFloat(targetBtn.dataset.height);
+  if ([left, top, w, h].some(Number.isNaN)) return;
 
-  const roomCx = left + width / 2;
-  const roomCy = top + height / 2;
-  const d = `M ${ENTRANCE_X} ${ENTRANCE_Y} L ${ENTRANCE_X} ${HALLWAY_Y} L ${roomCx} ${HALLWAY_Y} L ${roomCx} ${roomCy}`;
+  // All coordinates converted from image-% to wrapper-% for SVG
+  const ex = imgToW(ENTRANCE_X), ey = imgToH(ENTRANCE_Y);
+  const hy = imgToH(HALLWAY_Y);
+  const rx = imgToW(left + w / 2), ry = imgToH(top + h / 2);
 
+  const d = `M ${ex} ${ey} L ${ex} ${hy} L ${rx} ${hy} L ${rx} ${ry}`;
   const line = document.getElementById('indoorRouteLine');
   line.setAttribute('d', d);
   line.style.display = 'block';
 
   const pin = document.getElementById('indoorYouHere');
-  pin.style.left = ENTRANCE_X + '%';
-  pin.style.top = ENTRANCE_Y + '%';
+  pin.style.left = ex + '%';
+  pin.style.top  = ey + '%';
   pin.style.display = 'block';
 }
+
+let _lb = null; // letterbox transform cache
+
+function repositionRoomLabels() {
+  const img = document.querySelector('.plan-wrapper .floor-img');
+  const wrapper = document.getElementById('planWrapper');
+  if (!img || !wrapper) return;
+  const iw = img.naturalWidth, ih = img.naturalHeight;
+  const cw = wrapper.offsetWidth, ch = wrapper.offsetHeight;
+  if (!iw || !ih || !cw || !ch) return;
+
+  const imgAspect = iw / ih, cAspect = cw / ch;
+  let rw, rh, ox, oy;
+  if (imgAspect > cAspect) {
+    rw = cw; rh = cw / imgAspect; ox = 0; oy = (ch - rh) / 2;
+  } else {
+    rh = ch; rw = ch * imgAspect; ox = (cw - rw) / 2; oy = 0;
+  }
+  _lb = {ox, oy, rw, rh, cw, ch};
+
+  document.querySelectorAll('.room-label').forEach(btn => {
+    const l = parseFloat(btn.dataset.left),  t = parseFloat(btn.dataset.top);
+    const w = parseFloat(btn.dataset.width), h = parseFloat(btn.dataset.height);
+    btn.style.left   = imgToW(l) + '%';
+    btn.style.top    = imgToH(t) + '%';
+    btn.style.width  = (w / 100 * rw) / cw * 100 + '%';
+    btn.style.height = (h / 100 * rh) / ch * 100 + '%';
+  });
+}
+
+// Convert image-% coordinate to wrapper-% (for SVG viewBox 0-100)
+function imgToW(xPct) {
+  if (!_lb) return xPct;
+  return (_lb.ox + xPct / 100 * _lb.rw) / _lb.cw * 100;
+}
+function imgToH(yPct) {
+  if (!_lb) return yPct;
+  return (_lb.oy + yPct / 100 * _lb.rh) / _lb.ch * 100;
+}
+
+const _floorImg = document.querySelector('.plan-wrapper .floor-img');
+if (_floorImg) {
+  if (_floorImg.complete && _floorImg.naturalWidth) {
+    repositionRoomLabels();
+  } else {
+    _floorImg.addEventListener('load', repositionRoomLabels);
+  }
+}
+window.addEventListener('resize', repositionRoomLabels);
 
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.room-label').forEach((b, i) => {

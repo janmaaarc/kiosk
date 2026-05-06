@@ -41,7 +41,7 @@
 
     <div class="form-group">
         <label>Building URL <span style="font-weight:400;color:#888">(links "Get Directions" to the floor plan)</span></label>
-        <select name="building_url" style="width:100%;padding:10px;border-radius:6px;border:1px solid #ddd;font-size:14px;">
+        <select name="building_url">
             <option value="">— No directions link —</option>
             {% set burl = office['building_url'] if office and office['building_url'] else '' %}
             {% for slug, label in [
@@ -114,7 +114,7 @@
     <div style="margin-top:24px;border-top:2px solid #eee;padding-top:20px;">
         <h3 style="font-size:14px;font-weight:700;letter-spacing:1px;color:#555;margin-bottom:14px;">
             FORMS &amp; MEMOS
-            <span style="font-weight:400;color:#aaa;font-size:12px;">(PDF documents shown on office page)</span>
+            <span style="font-weight:400;color:#888;font-size:12px;">(PDF documents shown on office page)</span>
         </h3>
         <input type="hidden" name="files_json" id="files-json"
                value="{{ office['files'] if office and office['files'] else '[]' }}">
@@ -122,9 +122,8 @@
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
             <input type="text" id="new-file-title" placeholder="Document title"
                    style="flex:1;min-width:160px;padding:8px 12px;border-radius:6px;border:1px solid #ddd;font-size:13px;">
-            <label style="background:#7b2d2d;color:white;padding:8px 14px;border-radius:6px;
-                          font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.5px;">
-                UPLOAD PDF
+            <label class="btn btn-primary" style="cursor:pointer;">
+                Upload PDF
                 <input type="file" accept=".pdf,application/pdf" id="new-file-input"
                        style="display:none;" onchange="uploadOfficeFile(this)">
             </label>
@@ -136,24 +135,30 @@
     <div style="margin-top:24px;border-top:2px solid #eee;padding-top:20px;">
         <h3 style="font-size:14px;font-weight:700;letter-spacing:1px;color:#555;margin-bottom:14px;">
             OFFICE STAFF
-            <span style="font-weight:400;color:#aaa;font-size:12px;">(set position title for each member)</span>
+            <span style="font-weight:400;color:#888;font-size:12px;">(set position title for each member)</span>
         </h3>
+        <datalist id="position-suggestions">
+            <option value="Office Head">
+            <option value="Assistant Head">
+            <option value="Secretary">
+            <option value="Administrative Staff">
+            <option value="Coordinator">
+            <option value="Registrar Staff">
+            <option value="Cashier">
+            <option value="Librarian">
+            <option value="Guidance Counselor">
+            <option value="Nurse / Physician">
+            <option value="Staff">
+        </datalist>
         <div style="display:flex;flex-direction:column;gap:10px;">
-            {% set positions = ['Office Head','Assistant Head','Secretary','Administrative Staff','Coordinator','Registrar Staff','Cashier','Librarian','Guidance Counselor','Nurse / Physician','Staff'] %}
             {% for f in staff %}
             {% set cur_pos = f['office_position'] or '' %}
             <div style="display:flex;align-items:center;gap:12px;background:#fafafa;border:1px solid #eee;border-radius:8px;padding:10px 14px;">
                 <span style="font-weight:700;font-size:14px;flex:1;">{{ f['name'] }}</span>
-                <select name="staff_position[{{ f['id'] }}]"
-                        style="width:260px;padding:8px 12px;border-radius:6px;border:1px solid #ddd;font-size:13px;">
-                    <option value="">— None —</option>
-                    {% for p in positions %}
-                    <option value="{{ p }}" {% if cur_pos == p %}selected{% endif %}>{{ p }}</option>
-                    {% endfor %}
-                    {% if cur_pos and cur_pos not in positions %}
-                    <option value="{{ cur_pos }}" selected>{{ cur_pos }}</option>
-                    {% endif %}
-                </select>
+                <input type="text" name="staff_position[{{ f['id'] }}]"
+                       value="{{ cur_pos }}" list="position-suggestions"
+                       placeholder="e.g. Office Head, or type custom…"
+                       style="width:260px;">
             </div>
             {% endfor %}
         </div>
@@ -194,7 +199,7 @@
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.textContent = '✕';
-    btn.style.cssText = 'background:#e74c3c;color:white;border:none;border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;font-weight:700;';
+    btn.style.cssText = 'background:#c0392b;color:white;border:none;border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;font-weight:700;';
     btn.addEventListener('click', (function(idx) {
       return function() { files.splice(idx, 1); render(); sync(); };
     })(i));

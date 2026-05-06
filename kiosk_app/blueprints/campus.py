@@ -137,6 +137,21 @@ def api_floor_rooms():
     return Response(json.dumps(data), content_type="application/json")
 
 
+# Per-building, per-floor entrance points (image % coordinates).
+# x/y = "you are here" pin position, hallway_y = main corridor Y for routing.
+_BUILDING_ENTRANCES: dict = {
+    "Tech Building": {
+        # Floor 1: main entrance at bottom-center
+        1: {"x": 50, "y": 92, "hallway_y": 55},
+        # Floors 2-5: staircase on left side (beside staff room area)
+        2: {"x": 9, "y": 20, "hallway_y": 55},
+        3: {"x": 9, "y": 20, "hallway_y": 55},
+        4: {"x": 9, "y": 20, "hallway_y": 55},
+        5: {"x": 9, "y": 20, "hallway_y": 55},
+    },
+}
+
+
 def _floor_plan(building_name: str, floor_count: int = 3, base_url: str = "",
                 custom_floors: dict | None = None):
     """Generic floor_plan.html renderer for any building."""
@@ -158,8 +173,9 @@ def _floor_plan(building_name: str, floor_count: int = 3, base_url: str = "",
             if bf_rows:
                 rm_rows = conn.execute(
                     "SELECT room, description, pos_left, pos_top, pos_width,"
-                    " pos_height, office_key, floor FROM rooms"
-                    " WHERE LOWER(building)=LOWER(?)",
+                    " pos_height, office_key, floor, room_color FROM rooms"
+                    " WHERE LOWER(building)=LOWER(?)"
+                    " ORDER BY floor, pos_top, pos_left",
                     (building_name,),
                 ).fetchall()
 
@@ -173,6 +189,7 @@ def _floor_plan(building_name: str, floor_count: int = 3, base_url: str = "",
                         "width": rm["pos_width"],
                         "height": rm["pos_height"],
                         "office_key": rm["office_key"] or "",
+                        "color": rm["room_color"] or "",
                     })
 
                 floors = {
@@ -198,7 +215,11 @@ def _floor_plan(building_name: str, floor_count: int = 3, base_url: str = "",
 
     floor_data = floors[floor_number]
     highlight = request.args.get("location")
-    entrance = floor_data.get("entrance", {"x": 50, "y": 96, "hallway_y": 50})
+    entrance = (
+        _BUILDING_ENTRANCES.get(building_name, {}).get(floor_number)
+        or floor_data.get("entrance")
+        or {"x": 50, "y": 96, "hallway_y": 50}
+    )
 
     all_rooms_index = [
         {
@@ -606,9 +627,7 @@ _IT_FLOORS = {
 
 @campus_bp.route("/academic_building")
 def academic_building():
-    return _floor_plan("Academic Building", floor_count=3,
-                       base_url="academic_building",
-                       custom_floors=_ACADEMIC_FLOORS)
+    return _floor_plan("Academic Building", floor_count=5, base_url="academic_building")
 
 
 @campus_bp.route("/waf_&_rac_building")
@@ -658,7 +677,7 @@ def fsm_building():
 
 @campus_bp.route("/civil_tech_building")
 def civil_tech_building():
-    return _floor_plan("Civil Tech Building", floor_count=3, base_url="civil_tech_building")
+    return _floor_plan("Civil Technology Building", floor_count=4, base_url="civil_tech_building")
 
 
 @campus_bp.route("/waf_&_fsm_building")
@@ -668,7 +687,7 @@ def waf_fsm_building():
 
 @campus_bp.route("/tech_building")
 def tech_building():
-    return _floor_plan("Tech Building", floor_count=4, base_url="tech_building")
+    return _floor_plan("Tech Building", floor_count=5, base_url="tech_building")
 
 
 @campus_bp.route("/graduate_school_building")
@@ -693,9 +712,7 @@ def science_building():
 
 @campus_bp.route("/it_building")
 def it_building():
-    return _floor_plan("IT Building", floor_count=4,
-                       base_url="it_building",
-                       custom_floors=_IT_FLOORS)
+    return _floor_plan("IT Building", floor_count=3, base_url="it_building")
 
 
 @campus_bp.route("/engineering-floor1")

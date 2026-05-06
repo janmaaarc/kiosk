@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>{% block title %}Admin{% endblock %} — Kiosk CMS</title>
 <style>
@@ -21,9 +22,10 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f4f4; color: #
 .sidebar nav .section { font-size: 11px; letter-spacing: 1px; opacity: .5;
     margin: 16px 0 6px; text-transform: uppercase; }
 
-.main { margin-left: 220px; padding: 32px; height: 100vh; overflow-y: auto; }
+.main { position: fixed; left: 220px; right: 0; top: 0; bottom: 0; overflow-y: scroll; scrollbar-gutter: stable; padding: 32px 32px 64px; }
 
 .page-title { font-size: 24px; font-weight: 700; margin-bottom: 20px; color: #7b2d2d; }
+.toolbar .page-title { margin-bottom: 0; }
 
 table { width: 100%; border-collapse: collapse; background: #fff;
     border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
@@ -105,6 +107,8 @@ textarea { resize: vertical; min-height: 100px; }
         <div class="section">Data</div>
         <a href="{{ url_for('admin.rooms') }}" class="{% if request.endpoint == 'admin.rooms' %}active{% endif %}">Rooms</a>
         <a href="{{ url_for('content.building_floors_list') }}" class="{% if 'building_floor' in request.endpoint %}active{% endif %}">Building Floors</a>
+        <a href="{{ url_for('content.rooms_list') }}" class="{% if request.endpoint == 'content.rooms_list' or request.endpoint == 'content.room_add' or request.endpoint == 'content.room_edit' %}active{% endif %}">Room Labels</a>
+        <a href="{{ url_for('content.room_placer') }}" class="{% if request.endpoint == 'content.room_placer' %}active{% endif %}">Room Placer</a>
         <a href="{{ url_for('content.faculty_list') }}" class="{% if 'faculty' in request.endpoint %}active{% endif %}">Faculty</a>
         <div class="section">RFID</div>
         <a href="{{ url_for('content.rfid_logs') }}" class="{% if request.endpoint == 'content.rfid_logs' %}active{% endif %}">Scan Logs</a>
@@ -142,7 +146,6 @@ function previewUpload(inputId, pathId) {
 }
 </script>
 <script src="/static/js/toast.js?v=2"></script>
-<script src="/static/js/drag-scroll.js?v=2"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.flash').forEach(el => {

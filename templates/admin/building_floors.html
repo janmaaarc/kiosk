@@ -3,7 +3,7 @@
 
 {% block content %}
 <div class="toolbar">
-    <h1 class="page-title" style="margin:0">Building Floors</h1>
+    <h1 class="page-title">Building Floors</h1>
     <a href="{{ url_for('content.building_floor_add') }}" class="btn btn-primary">+ Add Floor</a>
 </div>
 
@@ -44,7 +44,7 @@
             </td>
         </tr>
         {% else %}
-        <tr><td colspan="5" style="text-align:center;color:#999;padding:20px">No floors configured yet.</td></tr>
+        <tr><td colspan="5" style="text-align:center;color:#888;padding:20px">No floors configured yet.</td></tr>
         {% endfor %}
     </tbody>
 </table>

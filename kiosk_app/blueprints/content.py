@@ -534,6 +534,180 @@ def building_floor_delete(floor_id: int):
 
 
 # ---------------------------------------------------------------------------
+# Rooms
+# ---------------------------------------------------------------------------
+
+@content_bp.route("/admin/rooms")
+@login_required
+def rooms_list():
+    building_filter = request.args.get("building", "")
+    with db_connection() as conn:
+        buildings = [r[0] for r in conn.execute(
+            "SELECT DISTINCT building FROM rooms ORDER BY building"
+        ).fetchall()]
+        if building_filter:
+            rows = conn.execute(
+                "SELECT * FROM rooms WHERE building=? ORDER BY floor, pos_top, pos_left",
+                (building_filter,),
+            ).fetchall()
+        else:
+            rows = conn.execute(
+                "SELECT * FROM rooms ORDER BY building, floor, pos_top, pos_left"
+            ).fetchall()
+    return render_template("admin/rooms.html", rooms=rows,
+                           buildings=buildings, building_filter=building_filter)
+
+
+@content_bp.route("/admin/rooms/add", methods=["GET", "POST"])
+@login_required
+def room_add():
+    if request.method == "POST":
+        with db_connection() as conn:
+            conn.execute(
+                """INSERT INTO rooms
+                   (building, floor, room, description, pos_left, pos_top,
+                    pos_width, pos_height, office_key, room_color)
+                   VALUES (?,?,?,?,?,?,?,?,?,?)""",
+                (
+                    request.form["building"].strip(),
+                    int(request.form.get("floor", 1)),
+                    request.form["name"].strip(),
+                    request.form.get("desc", "").strip(),
+                    float(request.form.get("pos_left", 0)),
+                    float(request.form.get("pos_top", 0)),
+                    float(request.form.get("pos_width", 10)),
+                    float(request.form.get("pos_height", 10)),
+                    request.form.get("office_key", "").strip(),
+                    request.form.get("room_color", "").strip(),
+                ),
+            )
+            conn.commit()
+        flash("Room added.", "success")
+        return redirect(url_for("content.rooms_list"))
+    buildings = []
+    with db_connection() as conn:
+        buildings = [r[0] for r in conn.execute(
+            "SELECT DISTINCT building FROM building_floors ORDER BY building"
+        ).fetchall()]
+    return render_template("admin/room_form.html", room=None, buildings=buildings)
+
+
+@content_bp.route("/admin/rooms/<int:room_id>/edit", methods=["GET", "POST"])
+@login_required
+def room_edit(room_id: int):
+    with db_connection() as conn:
+        room = conn.execute("SELECT * FROM rooms WHERE id=?", (room_id,)).fetchone()
+        if room is None:
+            abort(404)
+        if request.method == "POST":
+            conn.execute(
+                """UPDATE rooms SET building=?, floor=?, room=?, description=?,
+                   pos_left=?, pos_top=?, pos_width=?, pos_height=?,
+                   office_key=?, room_color=? WHERE id=?""",
+                (
+                    request.form["building"].strip(),
+                    int(request.form.get("floor", 1)),
+                    request.form["name"].strip(),
+                    request.form.get("desc", "").strip(),
+                    float(request.form.get("pos_left", 0)),
+                    float(request.form.get("pos_top", 0)),
+                    float(request.form.get("pos_width", 10)),
+                    float(request.form.get("pos_height", 10)),
+                    request.form.get("office_key", "").strip(),
+                    request.form.get("room_color", "").strip(),
+                    room_id,
+                ),
+            )
+            conn.commit()
+            flash("Room updated.", "success")
+            return redirect(url_for("content.rooms_list",
+                                    building=request.form["building"].strip()))
+        buildings = [r[0] for r in conn.execute(
+            "SELECT DISTINCT building FROM building_floors ORDER BY building"
+        ).fetchall()]
+    return render_template("admin/room_form.html", room=room, buildings=buildings)
+
+
+@content_bp.route("/admin/rooms/<int:room_id>/delete", methods=["POST"])
+@login_required
+def room_delete(room_id: int):
+    with db_connection() as conn:
+        room = conn.execute("SELECT building FROM rooms WHERE id=?", (room_id,)).fetchone()
+        building = room["building"] if room else ""
+        conn.execute("DELETE FROM rooms WHERE id=?", (room_id,))
+        conn.commit()
+    flash("Room deleted.", "success")
+    return redirect(url_for("content.rooms_list", building=building))
+
+
+@content_bp.route("/admin/room-placer", methods=["GET", "POST"])
+@login_required
+def room_placer():
+    building = request.args.get("building", "").strip()
+    try:
+        floor_num = int(request.args.get("floor", 1))
+    except (ValueError, TypeError):
+        floor_num = 1
+
+    if request.method == "POST":
+        b = request.form.get("building", "").strip()
+        f = int(request.form.get("floor", 1))
+        with db_connection() as conn:
+            conn.execute(
+                """INSERT INTO rooms
+                   (building, floor, room, description, pos_left, pos_top,
+                    pos_width, pos_height, office_key, room_color)
+                   VALUES (?,?,?,?,?,?,?,?,?,?)""",
+                (
+                    b, f,
+                    request.form.get("name", "").strip(),
+                    request.form.get("desc", "").strip(),
+                    float(request.form.get("pos_left", 0)),
+                    float(request.form.get("pos_top", 0)),
+                    float(request.form.get("pos_width", 10)),
+                    float(request.form.get("pos_height", 10)),
+                    request.form.get("office_key", "").strip(),
+                    request.form.get("room_color", "").strip(),
+                ),
+            )
+            conn.commit()
+        flash(f"Room '{request.form.get('name')}' placed.", "success")
+        return redirect(url_for("content.room_placer", building=b, floor=f))
+
+    floor_image = None
+    placed_rooms = []
+    buildings = []
+    floor_options = []
+
+    with db_connection() as conn:
+        buildings = [r[0] for r in conn.execute(
+            "SELECT DISTINCT building FROM building_floors ORDER BY building"
+        ).fetchall()]
+        if building:
+            bf = conn.execute(
+                "SELECT floor_number, floor_label, floor_image FROM building_floors"
+                " WHERE building=? ORDER BY floor_number",
+                (building,),
+            ).fetchall()
+            floor_options = [{"number": r["floor_number"], "label": r["floor_label"]} for r in bf]
+            row = conn.execute(
+                "SELECT floor_image FROM building_floors WHERE building=? AND floor_number=?",
+                (building, floor_num),
+            ).fetchone()
+            if row:
+                floor_image = row["floor_image"]
+            placed_rooms = conn.execute(
+                "SELECT * FROM rooms WHERE building=? AND floor=? ORDER BY pos_top, pos_left",
+                (building, floor_num),
+            ).fetchall()
+
+    return render_template("admin/room_placer.html",
+                           buildings=buildings, building=building,
+                           floor_num=floor_num, floor_options=floor_options,
+                           floor_image=floor_image, placed_rooms=placed_rooms)
+
+
+# ---------------------------------------------------------------------------
 # Faculty
 # ---------------------------------------------------------------------------
 

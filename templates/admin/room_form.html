@@ -1,0 +1,92 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ 'Edit' if room else 'Add' }} Room Label{% endblock %}
+{% block content %}
+<h1 class="page-title">{{ 'Edit' if room else 'Add' }} Room Label</h1>
+
+<div class="form-card">
+<form method="POST">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+    <div class="form-group">
+      <label>Building *</label>
+      <input type="text" name="building" list="building-list" required
+             value="{{ room['building'] if room else '' }}"
+             placeholder="e.g. Academic Building">
+      <datalist id="building-list">
+        {% for b in buildings %}<option value="{{ b }}">{% endfor %}
+      </datalist>
+    </div>
+    <div class="form-group">
+      <label>Floor *</label>
+      <input type="number" name="floor" min="1" max="20" required
+             value="{{ room['floor'] if room else 1 }}">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>Room Name *</label>
+    <input type="text" name="name" required
+           value="{{ room['room'] if room else '' }}"
+           placeholder="e.g. Record and Information Center">
+  </div>
+
+  <div class="form-group">
+    <label>Description</label>
+    <input type="text" name="desc"
+           value="{{ room['description'] if room else '' }}"
+           placeholder="Brief description shown on click">
+  </div>
+
+  <div class="form-group">
+    <label>Office Key <span style="font-weight:400;color:#888">(links to office info page)</span></label>
+    <input type="text" name="office_key"
+           value="{{ room['office_key'] if room else '' }}"
+           placeholder="e.g. Registrar">
+  </div>
+
+  <div class="form-group">
+    <label>Room Type <span style="font-weight:400;color:#888">(for highlighting)</span></label>
+    <select name="room_color" style="width:100%;padding:9px 12px;border:1px solid #ccc;border-radius:5px;font-size:14px;font-family:inherit;">
+      {% set cur = room['room_color'] if room and room['room_color'] else '' %}
+      <option value="" {% if not cur %}selected{% endif %}>Normal Room</option>
+      <option value="cr" {% if cur=='cr' %}selected{% endif %}>🚻 CR / Comfort Room</option>
+      <option value="fire-exit" {% if cur=='fire-exit' %}selected{% endif %}>🚪 Fire Exit</option>
+      <option value="elevator" {% if cur=='elevator' %}selected{% endif %}>🛗 Elevator</option>
+    </select>
+  </div>
+
+  <h4 style="font-size:13px;font-weight:700;color:#555;letter-spacing:1px;margin:20px 0 12px;border-top:2px solid #eee;padding-top:16px;">
+    POSITION &amp; SIZE <span style="font-weight:400;color:#888;">(% of floor image)</span>
+  </h4>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;">
+    <div class="form-group">
+      <label>Left %</label>
+      <input type="number" name="pos_left" step="0.1" min="0" max="100" id="inp-left"
+             value="{{ room['pos_left'] if room else 0 }}">
+    </div>
+    <div class="form-group">
+      <label>Top %</label>
+      <input type="number" name="pos_top" step="0.1" min="0" max="100" id="inp-top"
+             value="{{ room['pos_top'] if room else 0 }}">
+    </div>
+    <div class="form-group">
+      <label>Width %</label>
+      <input type="number" name="pos_width" step="0.1" min="1" max="100" id="inp-width"
+             value="{{ room['pos_width'] if room else 10 }}">
+    </div>
+    <div class="form-group">
+      <label>Height %</label>
+      <input type="number" name="pos_height" step="0.1" min="1" max="100" id="inp-height"
+             value="{{ room['pos_height'] if room else 10 }}">
+    </div>
+  </div>
+  <p class="hint">Use the <a href="{{ url_for('content.room_placer') }}" style="color:#7b2d2d;">Room Placer tool</a> to set positions visually by clicking on the floor plan image.</p>
+
+  <div style="display:flex;gap:10px;margin-top:8px;">
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="{{ url_for('content.rooms_list') }}" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>
+</div>
+{% endblock %}
