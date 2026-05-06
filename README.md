@@ -36,7 +36,7 @@ dashboard — no coding required.
 | Feature | Description |
 |---|---|
 | **Interactive campus map** | 20+ buildings with A* routing from the main gate. Click a building to open a slide-in panel with photo, **ENTER BUILDING**, **SHOW DIRECTION**, and **CANCEL**. Route line animates along the roads with a "YOU ARE HERE" pin at the gate. OUTSIDE / INSIDE toggle switches between the campus route and the building's floor plan. |
-| **Floor plans** | Every building supports multi-floor plans. The Academic Building ships with 5 hand-drawn SVG floors (Ground, 2nd, 3rd, 4th, 5th), the New Admin Building with 1 SVG floor. Each room is clickable and draws an indoor route line from the building entrance to the room. |
+| **Floor plans** | Every building supports multi-floor plans. Floor plan images and room positions are fully database-driven and managed through the admin dashboard. Each room is clickable and draws an indoor route line from the building entrance to the room. |
 | **In-building search** | Every floor plan has a live search bar that finds rooms across all floors of that building. Match jumps to the correct floor and draws the route automatically. |
 | **Full route (outdoor → indoor)** | Click a room → **SHOW FULL ROUTE** → campus map draws the outdoor route, then after 3.5 seconds automatically navigates to the floor plan and draws the indoor route to the specific room. |
 | **Office directory** | Offices with location, hours, a live open/closed badge, downloadable forms/memos, an inline PDF viewer, and a **GET DIRECTIONS** link on each office. |
@@ -176,26 +176,10 @@ Each building has its own URL. The floor plan page has:
 - If the page loads with `?location=<room>`, that room is auto-highlighted
   and the indoor route draws on load.
 
-#### Academic Building — 5 hand-drawn SVG floors
-
-| Floor | Rooms |
-|---|---|
-| 1st (Ground) | Medical & Dental Services, Record & Information Center, MPC Cares, Faculty Room, CR, Quality Assurance Office, Conference Room, Repair & Maintenance, Function Hall |
-| 2nd | Director for Student Affairs, Guidance Scholarship & Admission, Placement and Follow-Up, Faculty Room, CR, Classroom, Command Centers |
-| 3rd | VP for Admin & Finance, VP for Academic Affairs, Program Chair's Office, Dean for Technology and Instruction, Dean for Graduate School, Classroom, Command Centers |
-| 4th | Library, Computer Library, Educational Technology Room, CR |
-| 5th | Staff Room, Control Room, CR |
-
-#### New Admin Building — 1 SVG floor
-
-Ground floor rooms with office linkage.
-
-#### IT Building — 3 JPG floors
-
-Client-supplied JPG floor plans for floors 1–3.
-
-All other buildings fall back to an empty placeholder until rooms are added
-via the admin dashboard.
+All buildings use database-driven floor plans. Floor plan images are uploaded
+via **Admin → Building Floors** and rooms are placed visually via the
+**Room Placer** tool. Buildings with no floor plan image fall back to an empty
+placeholder until one is uploaded and rooms are added.
 
 Full list of building URLs:
 
@@ -316,17 +300,29 @@ PDF documents (forms, memos).
 | Field | Notes |
 |---|---|
 | Building | Must exactly match the building name in `building_floors`. |
-| Floor | Floor number as text (e.g. `1`, `2`). |
+| Floor | Floor number (e.g. `1`, `2`). |
 | Room | Room name shown on the overlay label. |
 | Description | Short description shown in the room info panel. |
 | Pos Left / Top / Width / Height | Position as percentages of the floor plan image dimensions. |
 | Office Key | If this room belongs to an office, paste the office's Key here. |
-| Room Color | Optional CSS color to tint the room rectangle. |
+| Room Type | `Normal Room`, `CR / Comfort Room`, `Fire Exit`, or `Elevator` — controls highlight color. |
 
-> **Tip:** Open the floor plan image in any image editor, note the pixel
-> coordinates of the room rectangle corners, then divide by image dimensions to
-> get percentages. For a 1000×800 image, a room at pixel (100, 80) with size
-> 150×100 → left=10, top=10, width=15, height=12.5.
+> **Tip:** Use the **Room Placer** tool (below) to set positions visually by
+> clicking directly on the floor plan image — no manual % calculation needed.
+
+---
+
+### Room Placer — `/admin/room-placer`
+
+A visual room placement tool. Select a building → the floor plan image loads
+automatically. Select a different floor from the dropdown to switch floors.
+Click anywhere on the image to set the room's top-left anchor point. Adjust
+width and height percentages in the form, fill in the room name and type, then
+click **Place Room**.
+
+Placed rooms appear immediately as red outlines on the image so you can see
+what has already been labeled. The table below the image lists all rooms on
+the current floor with edit and delete actions.
 
 ---
 
@@ -762,15 +758,15 @@ kiosk/
 │       │                         /api/faculty/<id>/schedule,
 │       │                         /rfid, /check_rfid, /qr, /offline, /healthz
 │       ├── campus.py             /campus, all /building_name routes,
-│       │                         _floor_plan() helper, _ACADEMIC_FLOORS,
-│       │                         _NEW_ADMIN_FLOORS, _ENTRANCE_BY_FLOOR
+│       │                         _floor_plan() helper, _BUILDING_ENTRANCES
 │       ├── offices.py            /office-selection, /office
 │       ├── announcements.py      /announcements, /announcement-view
 │       ├── events.py             /events, /event/<id>
-│       ├── admin.py              /admin login, /dashboard, /rooms CRUD,
+│       ├── admin.py              /admin login, /dashboard,
 │       │                         /rooms/import-csv
 │       └── content.py            /admin/events|announcements|offices|
-│                                 building-floors|faculty CRUD,
+│                                 building-floors|faculty|rooms CRUD,
+│                                 /admin/room-placer,
 │                                 /admin/rfid-logs, /admin/rfid-logs/clear,
 │                                 /admin/upload
 │
@@ -796,6 +792,9 @@ kiosk/
 │       ├── faculty_list.html
 │       ├── faculty_form.html     Faculty editor with schedule row builder
 │       ├── rfid_logs.html        RFID scan log table + clear button
+│       ├── rooms.html            Room list with building filter + actions
+│       ├── room_form.html        Add/Edit room form
+│       ├── room_placer.html      Visual click-to-place room tool
 │       └── …                    Event, announcement, office forms
 │
 ├── static/
@@ -814,10 +813,7 @@ kiosk/
 │   ├── images/
 │   │   ├── icon/                 Home / back / menu icons
 │   │   ├── building/             Campus map building photos
-│   │   ├── floor_plans/          Hand-drawn SVGs + client JPGs
-│   │   │   ├── academic_ground.svg … academic_5th.svg
-│   │   │   ├── new_admin_f1.svg  New Admin Building ground floor
-│   │   │   └── IT_1ST.JPG / IT_2ND.JPG / IT_3RD.JPG
+│   │   ├── floor_plans/          Legacy floor plan assets (SVGs/JPGs)
 │   │   ├── offices/              Office cover photos
 │   │   ├── screensaver/          Lock screen slideshow images (slide1–4.png)
 │   │   └── KIOSK BACKGROUND.png  Menu and faculty page background
