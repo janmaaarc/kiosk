@@ -8,7 +8,8 @@ logs/
 .env
 .env.*
 !deploy/kiosk.env.example
-static/uploads/
+static/uploads/*
+!static/uploads/floors/
 .DS_Store
 .claude/
 REFERENCE/
