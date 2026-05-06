@@ -799,6 +799,77 @@ def screensaver_order(image_id: int):
     return redirect(url_for("content.screensaver_list"))
 
 
+# ---------------------------------------------------------------------------
+# About Us admin
+# ---------------------------------------------------------------------------
+
+@content_bp.route("/admin/about", methods=["GET", "POST"])
+@login_required
+def about_admin():
+    if request.method == "POST":
+        officials_image = request.form.get("officials_image", "").strip()
+        with db_connection() as conn:
+            conn.execute(
+                "INSERT OR REPLACE INTO about_settings (key, value) VALUES ('officials_image', ?)",
+                (officials_image,),
+            )
+            conn.commit()
+        flash("Saved.", "success")
+        return redirect(url_for("content.about_admin"))
+    with db_connection() as conn:
+        row = conn.execute(
+            "SELECT value FROM about_settings WHERE key='officials_image'"
+        ).fetchone()
+        researchers = conn.execute(
+            "SELECT * FROM about_researchers ORDER BY sort_order, id"
+        ).fetchall()
+    officials_image = row["value"] if row else ""
+    return render_template("admin/about.html",
+                           officials_image=officials_image,
+                           researchers=[dict(r) for r in researchers])
+
+
+@content_bp.route("/admin/about/researcher/add", methods=["POST"])
+@login_required
+def about_researcher_add():
+    name = request.form.get("name", "").strip()[:200]
+    photo = request.form.get("photo", "").strip()
+    order = request.form.get("sort_order", 0, type=int)
+    if name:
+        with db_connection() as conn:
+            conn.execute(
+                "INSERT INTO about_researchers (name, photo, sort_order) VALUES (?, ?, ?)",
+                (name, photo, order),
+            )
+            conn.commit()
+    return redirect(url_for("content.about_admin"))
+
+
+@content_bp.route("/admin/about/researcher/<int:rid>/edit", methods=["POST"])
+@login_required
+def about_researcher_edit(rid: int):
+    name = request.form.get("name", "").strip()[:200]
+    photo = request.form.get("photo", "").strip()
+    order = request.form.get("sort_order", 0, type=int)
+    if name:
+        with db_connection() as conn:
+            conn.execute(
+                "UPDATE about_researchers SET name=?, photo=?, sort_order=? WHERE id=?",
+                (name, photo, order, rid),
+            )
+            conn.commit()
+    return redirect(url_for("content.about_admin"))
+
+
+@content_bp.route("/admin/about/researcher/<int:rid>/delete", methods=["POST"])
+@login_required
+def about_researcher_delete(rid: int):
+    with db_connection() as conn:
+        conn.execute("DELETE FROM about_researchers WHERE id=?", (rid,))
+        conn.commit()
+    return redirect(url_for("content.about_admin"))
+
+
 @content_bp.route("/api/screensaver-images")
 def api_screensaver_images():
     with db_connection() as conn:

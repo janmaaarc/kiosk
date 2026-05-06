@@ -115,7 +115,17 @@ def profile():
 
 @main_bp.route("/about")
 def about():
-    return render_template("about.html")
+    with db_connection() as conn:
+        researchers = conn.execute(
+            "SELECT * FROM about_researchers ORDER BY sort_order, id"
+        ).fetchall()
+        row = conn.execute(
+            "SELECT value FROM about_settings WHERE key='officials_image'"
+        ).fetchone()
+    officials_image = row["value"] if row else None
+    return render_template("about.html",
+                           researchers=[dict(r) for r in researchers],
+                           officials_image=officials_image)
 
 
 @main_bp.route("/search", methods=["GET", "POST"])

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About Us — Kiosk</title>
+<style>
+@font-face {
+  font-family: 'League Spartan';
+  src: url('/static/font/LeagueSpartan-VariableFont_wght.ttf');
+}
+* { margin:0; padding:0; box-sizing:border-box; font-family:'League Spartan',sans-serif; }
+
+body { height:100vh; overflow:hidden; display:flex; position:relative; }
+
+/* ── Sidebar ─────────────────────────────────────── */
+.sidebar {
+  width: 260px;
+  background: linear-gradient(180deg,#7b2d2d,#b85757);
+  color: white;
+  padding: 22px 25px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+.sidebar::-webkit-scrollbar { display:none; }
+
+.sidebar h1 {
+  letter-spacing: 4px;
+  font-size: 17px;
+  margin-bottom: 24px;
+  line-height: 1.4;
+}
+
+.menu { display:flex; flex-direction:column; gap:6px; }
+
+.menu button {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.75);
+  text-align: left;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 0.2s;
+  font-family: inherit;
+  width: 100%;
+  line-height: 1.3;
+}
+.menu button.active { background:#f1dede; color:#7b2d2d; }
+.menu button:hover { color:white; }
+
+/* ── Main ────────────────────────────────────────── */
+.main {
+  flex: 1;
+  position: relative;
+  background: url("/static/images/KIOSK BACKGROUND.png") center/cover no-repeat;
+  overflow: hidden;
+}
+
+/* ── Top icons (home/back) ───────────────────────── */
+.top-icons {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  gap: 10px;
+  z-index: 20;
+}
+.top-icon { width:44px; height:44px; cursor:pointer; transition:0.2s; }
+.top-icon:hover { transform:scale(1.1); }
+
+/* ── Top bar (search + admin) ────────────────────── */
+.topbar {
+  position: absolute;
+  top: 20px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  z-index: 20;
+}
+
+.search-wrap { position:relative; }
+.search-wrap::before {
+  content: "⌕";
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #aaa;
+  pointer-events: none;
+}
+.search {
+  padding: 14px 20px 14px 48px;
+  border-radius: 30px;
+  border: 3px solid rgba(255,255,255,0.85);
+  width: 320px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-family: inherit;
+  background: rgba(255,255,255,0.92);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  color: #333;
+}
+.search:focus { border-color:#8b2e2e; box-shadow:0 4px 20px rgba(139,46,46,0.25); }
+.search::placeholder { color:#999; font-weight:600; }
+
+.icon {
+  width: 38px;
+  height: 38px;
+  border: 2px solid rgba(255,255,255,0.85);
+  border-radius: 50%;
+  background: rgba(255,255,255,0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  color: #333;
+}
+
+/* ── Content area ────────────────────────────────── */
+.content-area {
+  position: absolute;
+  inset: 0;
+  padding: 90px 60px 40px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(123,45,45,0.3) transparent;
+}
+.content-area::-webkit-scrollbar { width:6px; }
+.content-area::-webkit-scrollbar-thumb { background:rgba(123,45,45,0.3); border-radius:3px; }
+
+.section { display:none; }
+.section.active { display:block; }
+
+/* ── Glass card ──────────────────────────────────── */
+.glass-card {
+  background: rgba(255,255,255,0.88);
+  border-radius: 16px;
+  padding: 36px 44px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  max-width: 860px;
+}
+
+/* ── Typography ──────────────────────────────────── */
+.section-title {
+  font-size: 28px;
+  font-weight: 900;
+  color: #7b2d2d;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+}
+.body-text {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.8;
+  color: #222;
+  margin-bottom: 16px;
+  text-align: justify;
+}
+.sub-heading {
+  font-size: 17px;
+  font-weight: 900;
+  color: #7b2d2d;
+  letter-spacing: 1px;
+  margin: 20px 0 8px;
+  text-transform: uppercase;
+}
+
+/* ── Hymn ────────────────────────────────────────── */
+.hymn-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #8b2e2e;
+  letter-spacing: 1px;
+  margin: 20px 0 4px;
+  text-transform: uppercase;
+}
+
+/* ── Officials image ─────────────────────────────── */
+.officials-img {
+  max-width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+.no-officials { color:#888; font-size:14px; font-style:italic; }
+
+/* ── Researchers grid ────────────────────────────── */
+.researchers-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  margin-top: 24px;
+}
+.researcher-card { text-align:center; width:110px; }
+.researcher-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+  display: block;
+  margin: 0 auto;
+}
+.researcher-initials {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,#7b2d2d,#c0706a);
+  color: white;
+  font-size: 22px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+}
+.researcher-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #333;
+  margin-top: 10px;
+  line-height: 1.3;
+  letter-spacing: 0.3px;
+}
+.adviser-row {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 2px solid rgba(123,45,45,0.15);
+  font-size: 14px;
+  font-weight: 700;
+  color: #555;
+}
+.adviser-label {
+  font-size: 12px;
+  color: #999;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h1>ABOUT US</h1>
+  <div class="menu" id="menu">
+    <button onclick="showSection('history')">MPC History</button>
+    <button onclick="showSection('vision')">MPC Vision and Mission</button>
+    <button onclick="showSection('hymn')">MPC Hymn</button>
+    <button onclick="showSection('officials')">MPC College Officials</button>
+    <button onclick="showSection('devteam')">Development Team</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="top-icons">
+    <img src="{{ url_for('static', filename='images/icon/home_button.png') }}"
+         class="top-icon" alt="Home" onclick="goHome()">
+    <img src="{{ url_for('static', filename='images/icon/back_button.png') }}"
+         class="top-icon" alt="Back" onclick="goBack()">
+  </div>
+
+  <div class="topbar">
+    <div class="search-wrap">
+      <input type="text" class="search" placeholder="Search…">
+    </div>
+    <a href="/admin" class="icon" title="Admin">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#333"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
+    </a>
+  </div>
+
+  <div class="content-area">
+
+    <!-- MPC History -->
+    <div class="section active" id="sec-history">
+      <div class="glass-card">
+        <div class="section-title">MPC History</div>
+        <p class="body-text">The school was first established on July 18, 1947 as the Marikina Junior High School by virtue of Municipal Council Resolution No. 59, s. 1947.</p>
+        <p class="body-text">On July 18, 1949, the school was renamed Marikina High School since the full four-year secondary general course was offered.</p>
+        <p class="body-text">Then on July 18, 1952, the name of the school was again changed to Leodegario Victorino Memorial High School in honor of Leodegario Victorino, the first Marikenian to become Division Superintendent of Schools in the province of Rizal. The school retained its name until its conversion into a National School of Arts and Trades on July 1, 1957 by virtue of Republic Act No. 1586 authored by Rep. Serafin Salvador, Second District of Rizal. The school was then named as Marikina School of Arts and Trades (MSAT).</p>
+        <p class="body-text">During the school year 1957–1958, the first year of the Four-Year Secondary Trade Curriculum commenced and the first batch of graduates finished in March 1961.</p>
+        <p class="body-text">Beginning the school year 1960–1961, the Two-Year Trade Technical Education Curriculum was offered with specializations in Applied Electronics, Industrial Electricity and Woodworking.</p>
+        <p class="body-text">It was during the school year 1960–1961 when the Evening Opportunity Classes were organized to offer vocational courses which were highly in demand in the industries. The areas of specialization offered were: Electronics, Electricity, Machine Shop Practice and Dressmaking.</p>
+        <p class="body-text">In 1962, the SEATO Textile Training Center was put up to provide a pool of textile technicians for the growing textile industry. It offered a One-Year Course in Mill Maintenance and One-Year Special Mechanical Technology.</p>
+        <p class="body-text">In 1965, the Philippines-France Pilot Training Center for Electrical Trades was established as an additional curricular offering by virtue of Republic Act No. 4815 sponsored by the then Congressman Frisco San Juan. It provided a pool of electrical technicians for the electrical industry.</p>
+        <p class="body-text">In school year 1967–1968, the Four-Year Teacher Education Program leading to the degree of Bachelor of Science in Industrial Education (BSIE) was offered. This was organized to provide the various high schools in the service area with qualified vocational teachers.</p>
+        <p class="body-text">In Summer 1969, the Graduate Education Program was organized by the Bureau of Vocational Education. The initial graduate education courses were the Master of Education for vocational school administrators and supervisors and the Master of Arts in Teaching for vocational teachers and instructors of Technology, Science and Mathematics.</p>
+        <p class="body-text">In 1975, the MSAT Graduate Education Program was included under the Ministry of Education (MEC) Integrated Scholarship Program upon the reorganization of the Department of Education and Culture.</p>
+        <p class="body-text">On May 8, 1978, the name of the school was again changed to Marikina Institute of Science and Technology (MIST) by virtue of a Malacañang approval.</p>
+        <p class="body-text">In November 1982, some key officials of MIST headed by Supt. Avelino Asuncion were involved in the conceptualization and implementation of the Technical Vocational Education Project (TVEP) of the Philippines. The school was chosen as the National Center for Technical Education and Staff Development (NCTESD) which was one of the components of the project.</p>
+        <p class="body-text">In June 1983, the technical vocational education project formally started with the Diploma in Industrial Technician (DIT). In July 1983, the Master of Technician Education (MTE) curriculum was offered with 78 scholars from the 23 Technical Education Institutes (TEIs) of the Philippines.</p>
+        <p class="body-text">In 1993, the Bachelor of Secondary Education (BSE) was offered by virtue of DECS Order No. 3, s. 1993 with fields of specialization in Chemistry, Physics, Mathematics, English and the different technology areas.</p>
+        <p class="body-text">In 1996, DECS transferred the Institute's supervision to the Commission on Higher Education (CHED) hence, MIST became a CHED-Supervised Institute (CSI). However, in 2000 MIST's supervision was transferred to the Technical Education and Skills Development Authority (TESDA) in accordance with Special Provision No. 8 of the General Appropriation Act (GAA), FY 2000. The special provision included the phasing out of the baccalaureate degree programs namely: the Bachelor of Science in Industrial Education and the Bachelor of Secondary Education as well as the Laboratory High School and the Graduate Education Programs. The abolition of the degree programs caused clamor from the people of Marikina City and its neighboring town and cities for the re-opening of the degree courses.</p>
+        <p class="body-text">Having realized the educational needs of his constituents, Hon. Congressman Del R. De Guzman of Marikina City sponsored a bill converting the Institute into a State College which was supported by a counterpart bill in the Senate sponsored by Hon. Edgardo J. Angara. The bill was finally approved and became a law as Republic Act No. 9289 on April 14, 2004, thus the birth of Marikina Polytechnic College.</p>
+        <p class="body-text">In May 2004, Mrs. Yolanda E. Olano, being the Superintendent of the then MIST, was designated by the Board of Trustees as the Officer-In-Charge of the College.</p>
+        <p class="body-text">In December 1, 2004, Dr. Manuel R. Pangilinan was appointed as the first President of the College.</p>
+        <p class="body-text">In January 2007, Dr. Henry L. Lañada was appointed OIC-President by virtue of BOT Resolution No. 4, s. 2007 then to Acting President on June 18, 2007 through BOT Resolution No. 65, s. 2007. Dr. Lañada assumed office as President of the College in November 2008 by virtue of Board Resolution No. 25, s. 2008 after a national search for President of MPC was conducted.</p>
+        <p class="body-text">In 2009, the Doctorate Program major in Educational Management and Industrial Education Management was offered by virtue of Board Resolution No. 11, s. 2009 with an initial enrolment of 25 students. Dr. Lañada was re-appointed for his second term on Dec. 1, 2012.</p>
+        <p class="body-text">To date, the undergraduate programs include the Bachelor of Technical Vocational Teacher Education (BTVTED), Level II AACCUP Accredited Bachelor of Technical Teacher Education (BTTE) and the Bachelor of Industrial Technology (BIT). The College offers a three-year non-degree program, which has TESDA UTPRAS Recognition, and short-term non-credit courses. The shoe and leathercraft center has also been continuously enhanced as one of the College mandate.</p>
+        <p class="body-text">In November 17, 2015, Dr. Virginia D. Bacay was designated as the OIC-President through CHED Special Order. Dr. Luna G. Madera took over as OIC-President from April 1, 2016 up to October 19, 2016 by virtue of a Special CHED Memorandum Order No. 19, s. 2016. Dr. Joselito B. Gutierrez came in on October 20, 2016 and took his oath as College President on December 1, 2016.</p>
+        <p class="body-text">As to reach the end of presidential term of Dr. Joselito B. Guiterrez on December 1, 2020, Dr. Virginia D. Akiate, CHED-NCR Regional Director assumed the position as the Officer-In-Charge of the College. During her term, she managed to operationalize the Department of Trade and Industry (DTI) Shared Services Facilities located within the Civil Technology Building.</p>
+        <p class="body-text">On January 26, 2021, Atty. Lily Freida M. Milla, CESO IV, assumed the duties and responsibilities as the Officer-In-Charge of the College. During her term as the OIC, she introduced the EDU-Tourism project entitled "CheRISH Marikina" that aims to showcase the culture and history of the city and to deliver opportunity for the advancement of shoe industry. The SMART Campus project is one of the promising commencements under her term that let interconnectivity of the buildings and the integration of the learning management system.</p>
+        <p class="body-text">On October 28, 2021, Dr. Rene M. Colocar was chosen among the four applicants as the newly elected president for MPC. In his first day, he inspected the area of the College and directed general cleaning and improvement of the buildings and structures. He led the preparation of migration plan for the academic year 2021 to 2022, and initiated the big project of the College, the MPC ICT Modernization.</p>
+      </div>
+    </div>
+
+    <!-- MPC Vision and Mission -->
+    <div class="section" id="sec-vision">
+      <div class="glass-card">
+        <div class="section-title">MPC Vision and Mission</div>
+        <div class="sub-heading">Mission</div>
+        <p class="body-text">The Marikina Polytechnic College is committed to provide cutting edge SMART and GREEN application system and to produce technology, educators, experts, through its administration, research, relevant curricula, and extension program with National and International linkages.</p>
+        <div class="sub-heading">Vision</div>
+        <p class="body-text">By 2040, MPC is a Future-Ready Higher Education Institution that trademarks excellence in technology towards Global Citizenship, Advancement of Shoe and Leathercraft, and community-based industries.</p>
+        <div class="sub-heading">Quality Policy</div>
+        <p class="body-text">MPC commits to future-ready quality TVET and higher education along with continuous improvement in quality management system, ensuring adherence to global standards and compliance to national statutory and regulatory requirements while fostering climate resilience and advancing the UN sustainable development goals through instruction, research, extension and good governance.</p>
+        <div class="sub-heading">Core Values</div>
+        <p class="body-text">The College upholds the following Core Values:</p>
+        <p class="body-text" style="margin-bottom:8px;"><strong>M — MINDFUL.</strong> Integrity, Public Service, Patriotism, Transparency</p>
+        <p class="body-text" style="margin-bottom:8px;"><strong>P — PROACTIVE.</strong> Excellence, Partnership and Collaboration, United in Purpose.</p>
+        <p class="body-text"><strong>C — COMPASSIONATE.</strong> Responsive to community, Good Governance.</p>
+      </div>
+    </div>
+
+    <!-- MPC Hymn -->
+    <div class="section" id="sec-hymn">
+      <div class="glass-card">
+        <div class="section-title">MPC Hymn</div>
+        <p class="body-text" style="font-style:italic;margin-bottom:6px;">Sa pagsikat ng araw, aking natatanaw</p>
+        <p class="body-text" style="font-style:italic;margin-bottom:6px;">Makinang na kinabukasan, aking makakamtan</p>
+        <p class="body-text" style="font-style:italic;margin-bottom:6px;">Hinding-hindi maninimdim sa banta ng kahirapan</p>
+        <p class="body-text" style="font-style:italic;">Ako na inihanda ng mahal kong paaralan.</p>
+        <div class="hymn-label">Koro:</div>
+        <p class="body-text" style="font-style:italic;margin-bottom:6px;">Politeknikong Kolehiyo ng Marikina</p>
+        <p class="body-text" style="font-style:italic;margin-bottom:6px;">Ang teknikal na edukasyon, kinintal mo t'wina</p>
+        <p class="body-text" style="font-style:italic;margin-bottom:6px;">Politeknikong Kolehiyo ng Marikina</p>
+        <p class="body-text" style="font-style:italic;margin-bottom:6px;">Talino ko'y pinapanday, turo mo'y pag-asa.</p>
+        <p class="body-text" style="font-style:italic;margin-bottom:6px;">Sinisintang paaralan, ikaw ang katuwang</p>
+        <p class="body-text" style="font-style:italic;margin-bottom:6px;">Sa pagkamit ng mithiin, siya mong hahangarin</p>
+        <p class="body-text" style="font-style:italic;margin-bottom:6px;">Kahit saan man mapadpad ay hindi mababagabag</p>
+        <p class="body-text" style="font-style:italic;">Dunong ng iyong bigay ang magsisilbing gabay.</p>
+        <p class="body-text" style="color:#888;margin-top:16px;">(Ulit koro)</p>
+        <p class="body-text" style="font-weight:900;color:#7b2d2d;letter-spacing:1px;">Marikina Polytechnic College, Mabuhay ka!!!</p>
+      </div>
+    </div>
+
+    <!-- MPC College Officials -->
+    <div class="section" id="sec-officials">
+      <div class="glass-card">
+        <div class="section-title">MPC College Officials</div>
+        {% if officials_image %}
+        <img src="/static/{{ officials_image }}" class="officials-img" alt="MPC College Officials">
+        {% else %}
+        <p class="no-officials">No image uploaded yet. An admin can upload the officials table image from Admin → About Us.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Development Team -->
+    <div class="section" id="sec-devteam">
+      <div class="glass-card">
+        <div class="section-title">Development Team</div>
+        <p class="body-text">The Interactive Campus Navigation Kiosk was designed and developed by the researchers of Marikina Polytechnic College as part of an academic study aimed at improving campus navigation and accessibility for students, college personnel, and visitors. The system was created to provide a more efficient and convenient way to locate offices, facilities, and campus services through a digital, interactive platform.</p>
+        <p class="body-text">The following researchers from Marikina Polytechnic College:</p>
+        <div class="researchers-grid">
+          {% for r in researchers %}
+          <div class="researcher-card">
+            {% if r.photo %}
+            <img src="/static/{{ r.photo }}" class="researcher-avatar" alt="{{ r.name }}">
+            {% else %}
+            {% set _clean = r.name | replace('Mr. ','') | replace('Ms. ','') | replace('Mrs. ','') | replace('Dr. ','') | replace('Prof. ','') | replace('Engr. ','') %}
+            <div class="researcher-initials">{{ _clean[0]|upper if _clean else '?' }}</div>
+            {% endif %}
+            <div class="researcher-name">{{ r.name }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        <p class="body-text" style="margin-top:28px;">The development team was responsible for the planning, design, implementation, and evaluation of the Interactive Campus Navigation Kiosk.</p>
+        <div class="adviser-row">
+          <div class="adviser-label">Research Adviser</div>
+          Ms. Alfie Dilag
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const SECTIONS = ['history','vision','hymn','officials','devteam'];
+
+function showSection(key) {
+  SECTIONS.forEach(k => {
+    document.getElementById('sec-' + k).classList.toggle('active', k === key);
+  });
+  document.querySelectorAll('.menu button').forEach((btn, i) => {
+    btn.classList.toggle('active', SECTIONS[i] === key);
+  });
+  document.querySelector('.content-area').scrollTop = 0;
+}
+
+document.querySelectorAll('.menu button')[0].classList.add('active');
+
+function goBack() { window.history.back(); }
+function goHome() { window.location.href = '/menu'; }
+</script>
+
+<script src="/static/js/drag-scroll.js?v=2"></script>
+<script src="/static/js/keyboard.js?v=2"></script>
+</body>
+</html>

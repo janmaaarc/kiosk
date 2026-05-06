@@ -99,6 +99,9 @@ textarea { resize: vertical; min-height: 100px; }
         <a href="{{ url_for('content.screensaver_list') }}" class="{% if 'screensaver' in request.endpoint %}active{% endif %}">
             Screensaver
         </a>
+        <a href="{{ url_for('content.about_admin') }}" class="{% if 'about' in request.endpoint %}active{% endif %}">
+            About Us
+        </a>
         <div class="section">Data</div>
         <a href="{{ url_for('admin.rooms') }}" class="{% if request.endpoint == 'admin.rooms' %}active{% endif %}">Rooms</a>
         <a href="{{ url_for('content.building_floors_list') }}" class="{% if 'building_floor' in request.endpoint %}active{% endif %}">Building Floors</a>

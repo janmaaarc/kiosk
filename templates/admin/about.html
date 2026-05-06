@@ -1,0 +1,142 @@
+{% extends "admin/base.html" %}
+{% block title %}About Us{% endblock %}
+{% block content %}
+<div class="page-title">About Us</div>
+
+<!-- College Officials Image -->
+<div class="form-card" style="margin-bottom:28px;">
+  <h3 style="font-size:16px;font-weight:700;color:#7b2d2d;margin-bottom:16px;">College Officials Image</h3>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="form-group">
+      <label>Officials Table Image</label>
+      <div class="upload-row">
+        <input type="text" name="officials_image" id="officials_image"
+               value="{{ officials_image or '' }}" placeholder="uploads/images/…">
+        <input type="file" id="officials_file" accept="image/*"
+               onchange="previewUpload('officials_file','officials_image')">
+      </div>
+      {% if officials_image %}
+      <img src="/static/{{ officials_image }}" style="margin-top:10px;max-width:400px;border-radius:6px;">
+      {% endif %}
+    </div>
+    <button type="submit" class="btn btn-primary">Save Image</button>
+  </form>
+</div>
+
+<!-- Researchers -->
+<div style="background:#fff;border-radius:8px;padding:28px 32px;box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:28px;">
+  <div class="toolbar">
+    <h3 style="font-size:16px;font-weight:700;color:#7b2d2d;">Development Team Researchers</h3>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Photo</th>
+        <th>Name</th>
+        <th>Order</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in researchers %}
+      <tr>
+        <td>{{ r.id }}</td>
+        <td>
+          {% if r.photo %}
+          <img src="/static/{{ r.photo }}" class="img-thumb" style="border-radius:50%;width:44px;height:44px;object-fit:cover;">
+          {% else %}
+          <div style="width:44px;height:44px;border-radius:50%;background:#e0c0c0;display:flex;align-items:center;justify-content:center;font-weight:700;color:#7b2d2d;font-size:16px;">
+            {{ r.name[0]|upper }}
+          </div>
+          {% endif %}
+        </td>
+        <td>{{ r.name }}</td>
+        <td>{{ r.sort_order }}</td>
+        <td>
+          <button class="btn btn-secondary btn-sm"
+                  onclick="openEdit({{ r.id }}, {{ r.name|tojson }}, {{ (r.photo or '')|tojson }}, {{ r.sort_order }})">
+            Edit
+          </button>
+          <form method="post" action="{{ url_for('content.about_researcher_delete', rid=r.id) }}"
+                style="display:inline;" onsubmit="return confirm('Delete?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Add researcher -->
+  <h4 style="margin-top:24px;margin-bottom:12px;font-size:14px;color:#555;">Add Researcher</h4>
+  <form method="post" action="{{ url_for('content.about_researcher_add') }}"
+        style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div>
+      <label style="font-size:12px;">Name</label>
+      <input type="text" name="name" placeholder="Surname, First Name" style="width:240px;">
+    </div>
+    <div>
+      <label style="font-size:12px;">Photo path</label>
+      <div class="upload-row">
+        <input type="text" name="photo" id="new_photo" placeholder="uploads/images/…" style="width:200px;">
+        <input type="file" id="new_photo_file" accept="image/*"
+               onchange="previewUpload('new_photo_file','new_photo')">
+      </div>
+    </div>
+    <div>
+      <label style="font-size:12px;">Order</label>
+      <input type="number" name="sort_order" value="10" style="width:70px;">
+    </div>
+    <button type="submit" class="btn btn-primary">Add</button>
+  </form>
+</div>
+
+<!-- Edit modal -->
+<div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:8px;padding:28px;width:420px;">
+    <h3 style="font-size:16px;font-weight:700;color:#7b2d2d;margin-bottom:16px;">Edit Researcher</h3>
+    <form id="editForm" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" name="name" id="edit_name">
+      </div>
+      <div class="form-group">
+        <label>Photo</label>
+        <div class="upload-row">
+          <input type="text" name="photo" id="edit_photo">
+          <input type="file" id="edit_photo_file" accept="image/*"
+                 onchange="previewUpload('edit_photo_file','edit_photo')">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Sort Order</label>
+        <input type="number" name="sort_order" id="edit_order">
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-secondary" onclick="closeEdit()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openEdit(id, name, photo, order) {
+  document.getElementById('editForm').action = '/admin/about/researcher/' + id + '/edit';
+  document.getElementById('edit_name').value = name;
+  document.getElementById('edit_photo').value = photo;
+  document.getElementById('edit_order').value = order;
+  const m = document.getElementById('editModal');
+  m.style.display = 'flex';
+}
+function closeEdit() {
+  document.getElementById('editModal').style.display = 'none';
+}
+</script>
+{% endblock %}

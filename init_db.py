@@ -310,6 +310,39 @@ def _migrate(conn: sqlite3.Connection) -> None:
         )
 
 
+def _ensure_about_tables(conn: sqlite3.Connection) -> None:
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS about_settings (
+            key   TEXT PRIMARY KEY,
+            value TEXT
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS about_researchers (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            name       TEXT NOT NULL,
+            photo      TEXT,
+            sort_order INTEGER DEFAULT 0
+        )
+    """)
+    _DEFAULT_RESEARCHERS = [
+        ("Peril, Eros Richena H.",    1),
+        ("Navarro, Keane Giuseppe S.", 2),
+        ("Beguia, Marcus Louis L.",   3),
+        ("Blanca, Mariel G.",         4),
+        ("Atienza, Marlon M.",        5),
+        ("De Vera, Lia Deniz S.",     6),
+        ("Duhay, George Vincent P.",  7),
+        ("Bancolita, Kenneth D.C.",   8),
+        ("Pacifico, Jason Miguel S.", 9),
+    ]
+    for name, order in _DEFAULT_RESEARCHERS:
+        conn.execute(
+            "INSERT OR IGNORE INTO about_researchers (name, sort_order) VALUES (?, ?)",
+            (name, order),
+        )
+
+
 def _ensure_rfid_logs(conn: sqlite3.Connection) -> None:
     conn.execute("""
         CREATE TABLE IF NOT EXISTS rfid_logs (
@@ -353,6 +386,7 @@ def main() -> None:
         _create_tables(cur)
         _migrate(conn)
         _ensure_rfid_logs(conn)
+        _ensure_about_tables(conn)
         conn.commit()
 
         _seed_events(cur)
