@@ -10,6 +10,7 @@ logs/
 !deploy/kiosk.env.example
 static/uploads/*
 !static/uploads/floors/
+!static/uploads/images/
 .DS_Store
 .claude/
 REFERENCE/
