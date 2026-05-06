@@ -18,6 +18,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         h1 {
@@ -75,31 +76,47 @@
             transform:scale(1.1);
         }
 
-        .icon{
-            width:35px;
-            height:35px;
-            border:2px solid black;
-            border-radius:50%;
+        .topbar {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 20;
         }
 
-        .admin-btn {
-            position: fixed;
-            bottom: 18px;
-            right: 18px;
-            width: 44px;
-            height: 44px;
-            background: rgba(0,0,0,0.18);
+        .search {
+            padding: 14px 20px 14px 48px;
+            border-radius: 30px;
+            border: 3px solid rgba(255,255,255,0.85);
+            width: 320px;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            font-family: inherit;
+            background: rgba(255,255,255,0.92);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            color: #333;
+        }
+        .search:focus { border-color: #8b2e2e; box-shadow: 0 4px 20px rgba(139,46,46,0.25); }
+        .search::placeholder { color: #999; font-weight: 600; }
+
+        .icon {
+            width: 38px;
+            height: 38px;
+            border: 2px solid rgba(255,255,255,0.85);
             border-radius: 50%;
+            background: rgba(255,255,255,0.92);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: background 0.2s;
-            z-index: 100;
             text-decoration: none;
+            color: #333;
         }
-        .admin-btn:hover { background: rgba(0,0,0,0.4); }
-        .admin-btn svg { width: 18px; height: 18px; fill: rgba(255,255,255,0.7); }
 
         .pagination {
             display: flex;
@@ -133,27 +150,6 @@
             text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
         }
 
-        .search-bar {
-            display: flex;
-            justify-content: center;
-            padding: 0 80px 10px;
-            flex-shrink: 0;
-        }
-        .search-bar input {
-            width: 100%;
-            max-width: 600px;
-            padding: 14px 24px;
-            border-radius: 50px;
-            border: none;
-            font-family: 'League Spartan', sans-serif;
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            background: rgba(255,255,255,0.92);
-            color: #333;
-            outline: none;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-        }
     </style>
 </head>
 
@@ -161,8 +157,11 @@
 
 <h1>EVENTS AND ACTIVITIES</h1>
 
-<div class="search-bar">
-    <input type="text" id="eventSearch" placeholder="Search events..." oninput="filterEvents(this.value)">
+<div class="topbar">
+    <input type="text" id="eventSearch" class="search" placeholder="Search events…" oninput="filterEvents(this.value)">
+    <a href="/admin" class="icon" title="Admin">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#333"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
+    </a>
 </div>
 
 <div class="grid" id="eventsGrid"></div>
@@ -244,9 +243,6 @@ function goHome(){
 
 </script>
 
-<a href="/admin" class="admin-btn" title="Admin">
-    <svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
-</a>
 <script src="/static/js/toast.js?v=2"></script>
 <script src="/static/js/drag-scroll.js?v=2"></script>
 <script src="/static/js/keyboard.js?v=2"></script>

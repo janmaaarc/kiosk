@@ -77,10 +77,17 @@ body{
 .search:focus { border-color:#8b2e2e; }
 
 .icon{
-  width:35px;
-  height:35px;
-  border:2px solid black;
+  width:38px;
+  height:38px;
+  border:2px solid rgba(255,255,255,0.85);
   border-radius:50%;
+  background:rgba(255,255,255,0.92);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  text-decoration:none;
+  color:#333;
 }
 
 /* TITLE (MATCH MENU) */
@@ -141,9 +148,9 @@ body{
 </div>
 <!-- TOP BAR -->
 <div class="topbar">
-  <input class="search" id="officeSearch" placeholder="Search office..." oninput="filterCards(this.value)">
-  <a href="/admin" class="icon" title="Admin Login" style="display:flex;align-items:center;justify-content:center;text-decoration:none;color:#333;font-size:13px;font-weight:900;letter-spacing:1px;">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+  <input class="search" id="officeSearch" placeholder="Search office…" oninput="filterCards(this.value)">
+  <a href="/admin" class="icon" title="Admin Login">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="#333"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
   </a>
 </div>
 
