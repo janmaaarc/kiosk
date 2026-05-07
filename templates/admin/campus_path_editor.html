@@ -220,6 +220,7 @@
     csrf.name  = 'csrf_token';
     csrf.value = document.querySelector('meta[name=csrf-token]').getAttribute('content');
     f.appendChild(csrf);
+    sessionStorage.setItem('campusPathMode', mode);
     document.body.appendChild(f);
     f.submit();
   }
@@ -244,6 +245,12 @@
 
   setMode(sessionStorage.getItem('campusPathMode') || 'node');
   sessionStorage.removeItem('campusPathMode');
+
+  document.querySelectorAll('form[method=post]').forEach(function(f) {
+    f.addEventListener('submit', function() {
+      sessionStorage.setItem('campusPathMode', mode);
+    });
+  });
 })();
 </script>
 {% endblock %}

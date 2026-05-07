@@ -288,6 +288,7 @@
       inp.type = 'hidden'; inp.name = k; inp.value = fields[k];
       f.appendChild(inp);
     });
+    sessionStorage.setItem('floorPathMode', mode);
     document.body.appendChild(f);
     f.submit();
   }
@@ -310,6 +311,12 @@
 
   setMode(sessionStorage.getItem('floorPathMode') || 'node');
   sessionStorage.removeItem('floorPathMode');
+
+  document.querySelectorAll('form[method=post]').forEach(function(f) {
+    f.addEventListener('submit', function() {
+      sessionStorage.setItem('floorPathMode', mode);
+    });
+  });
 })();
 </script>
 {% endif %}
