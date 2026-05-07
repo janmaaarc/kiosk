@@ -11,8 +11,11 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f4f4; color: #
 
 .sidebar {
     position: fixed; top: 0; left: 0; width: 220px; height: 100vh;
-    background: #7b2d2d; color: #fff; padding: 24px 16px; overflow-y: auto;
+    background: #7b2d2d; color: #fff; padding: 24px 16px 48px; overflow-y: auto;
+    scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.3) transparent;
 }
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 2px; }
 .sidebar h2 { font-size: 15px; letter-spacing: 2px; margin-bottom: 28px; opacity: .7; }
 .sidebar nav a {
     display: block; padding: 10px 12px; border-radius: 6px;
