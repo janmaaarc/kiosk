@@ -203,7 +203,7 @@
     clearHighlights();
     var hints = {
       node:   'Click floor plan to place a node.',
-      edge:   'Click first node, then second node to connect.',
+      edge:   'Click first node to start. Keep clicking to chain. Click same node to stop.',
       delete: 'Click a node or edge line to delete it.'
     };
     document.getElementById('modeHint').textContent = hints[m];
@@ -259,12 +259,15 @@
         clearHighlights();
         target.setAttribute('fill', '#f39c12');
         target.setAttribute('r', '12');
-        document.getElementById('modeHint').textContent = 'Now click the second node.';
+        document.getElementById('modeHint').textContent = 'Now click the next node. Click same node to stop.';
       } else {
-        if (edgeSrc === nodeId) { edgeSrc = null; clearHighlights(); return; }
+        if (edgeSrc === nodeId) { edgeSrc = null; clearHighlights(); document.getElementById('modeHint').textContent = 'Click first node to start a chain.'; return; }
         submitEdge(edgeSrc, nodeId);
-        edgeSrc = null;
+        edgeSrc = nodeId;
         clearHighlights();
+        target.setAttribute('fill', '#f39c12');
+        target.setAttribute('r', '12');
+        document.getElementById('modeHint').textContent = 'Continue clicking nodes. Click same node to stop.';
       }
       e.stopPropagation();
     }
