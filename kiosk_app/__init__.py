@@ -25,9 +25,6 @@ _KIOSK_SCRIPTS = (
 _PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-_BODY_CLOSE_RE = re.compile(r"</body>", re.IGNORECASE)
-
-
 _MOBILE_PATHS = {
     "/directions",
     "/academic_building",
@@ -174,8 +171,8 @@ def create_app() -> Flask:
                         (_hash,)
                     )
                     _conn.commit()
-        except Exception:
-            pass
+        except Exception as exc:
+            app.logger.error("DB init failed: %s", exc)
 
     import json as _json
     def _from_json(s):

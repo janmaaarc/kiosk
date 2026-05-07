@@ -17,6 +17,9 @@ def admin_login():
         username = request.form["username"]
         password = request.form["password"]
 
+        if len(password) > 72:
+            return render_template("admin_login.html")
+
         with db_connection() as conn:
             user = conn.execute(
                 "SELECT password_hash FROM admins WHERE username=?",

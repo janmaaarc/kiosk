@@ -368,9 +368,9 @@ function render(){
     if (d.building && d.room) {
       const btn = document.createElement("button");
       btn.textContent = "FIND ON MAP";
-      btn.style.cssText = "margin-top:6px;background:#8b2e2e;color:#fff;border:none;"
-        + "border-radius:10px;padding:4px 10px;font-size:11px;letter-spacing:1px;"
-        + "cursor:pointer;font-family:inherit";
+      btn.style.cssText = "margin-top:6px;background:#7b2d2d;color:#fff;border:none;"
+        + "border-radius:10px;padding:10px 16px;font-size:13px;letter-spacing:1px;"
+        + "cursor:pointer;font-family:inherit;min-height:44px;";
       btn.addEventListener("click", e => {
         e.stopPropagation();
         findOnMap(d.building, d.room);

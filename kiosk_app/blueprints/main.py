@@ -206,12 +206,27 @@ def offline():
     return render_template("offline.html")
 
 
+def _is_local_url(url: str) -> bool:
+    from urllib.parse import urlparse
+    if not url.startswith("http"):
+        return True  # bare path is fine
+    host = urlparse(url).hostname or ""
+    return (
+        host in ("localhost", "127.0.0.1")
+        or host.startswith("192.168.")
+        or host.startswith("10.")
+        or (host.startswith("172.") and 16 <= int(host.split(".")[1]) <= 31)
+    )
+
+
 @main_bp.route("/qr")
 @limiter.limit("60 per minute")
 def qr_code():
     data = request.args.get("data", "").strip()
     if not data:
         return ("missing data", 400)
+    if not _is_local_url(data):
+        return ("only local URLs allowed", 403)
     try:
         size = max(64, min(int(request.args.get("size", 200)), 512))
     except (TypeError, ValueError):
@@ -244,24 +259,10 @@ def healthz():
         with db_connection() as conn:
             conn.execute("SELECT 1").fetchone()
         return jsonify({"status": "ok"}), 200
-    except Exception:
+    except Exception as exc:
+        from flask import current_app
+        current_app.logger.error("healthz DB check failed: %s", exc)
         return jsonify({"status": "degraded"}), 503
-
-
-@main_bp.route("/api/faculty/<int:faculty_id>/schedule")
-def api_faculty_schedule(faculty_id: int):
-    with db_connection() as conn:
-        row = conn.execute(
-            "SELECT schedule FROM faculty WHERE id = ?", (faculty_id,)
-        ).fetchone()
-    if not row:
-        return jsonify([])
-    import json as _json
-    try:
-        entries = _json.loads(row["schedule"] or "[]")
-    except (ValueError, TypeError):
-        entries = []
-    return jsonify(entries)
 
 
 @main_bp.route("/api/departments")

@@ -22,5 +22,8 @@ def db_connection() -> Iterator[sqlite3.Connection]:
     conn = get_db_connection()
     try:
         yield conn
+    except Exception:
+        conn.rollback()
+        raise
     finally:
         conn.close()

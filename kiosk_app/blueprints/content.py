@@ -1,3 +1,5 @@
+import csv
+import io
 import json
 import os
 import uuid
@@ -176,9 +178,8 @@ def events_list():
     per  = 20
     with db_connection() as conn:
         total = conn.execute("SELECT COUNT(*) FROM events").fetchone()[0]
-    total_pages = max(1, -(-total // per))
-    page = max(1, min(request.args.get("page", 1, type=int), total_pages))
-    with db_connection() as conn:
+        total_pages = max(1, -(-total // per))
+        page = max(1, min(request.args.get("page", 1, type=int), total_pages))
         rows = conn.execute("SELECT * FROM events ORDER BY id DESC LIMIT ? OFFSET ?",
                             (per, (page - 1) * per)).fetchall()
     return render_template("admin/events.html", events=rows,
@@ -265,9 +266,8 @@ def announcements_list():
     per  = 20
     with db_connection() as conn:
         total = conn.execute("SELECT COUNT(*) FROM announcements").fetchone()[0]
-    total_pages = max(1, -(-total // per))
-    page = max(1, min(request.args.get("page", 1, type=int), total_pages))
-    with db_connection() as conn:
+        total_pages = max(1, -(-total // per))
+        page = max(1, min(request.args.get("page", 1, type=int), total_pages))
         rows = conn.execute("SELECT * FROM announcements ORDER BY id DESC LIMIT ? OFFSET ?",
                             (per, (page - 1) * per)).fetchall()
     return render_template("admin/announcements.html", announcements=rows,
@@ -717,9 +717,8 @@ def faculty_list():
     per  = 20
     with db_connection() as conn:
         total = conn.execute("SELECT COUNT(*) FROM faculty").fetchone()[0]
-    total_pages = max(1, -(-total // per))
-    page = max(1, min(request.args.get("page", 1, type=int), total_pages))
-    with db_connection() as conn:
+        total_pages = max(1, -(-total // per))
+        page = max(1, min(request.args.get("page", 1, type=int), total_pages))
         rows = conn.execute("SELECT * FROM faculty ORDER BY name LIMIT ? OFFSET ?",
                             (per, (page - 1) * per)).fetchall()
     return render_template("admin/faculty_list.html", faculty=rows,
@@ -801,9 +800,8 @@ def rfid_logs():
     per  = 30
     with db_connection() as conn:
         total = conn.execute("SELECT COUNT(*) FROM rfid_logs").fetchone()[0]
-    total_pages = max(1, -(-total // per))
-    page = max(1, min(request.args.get("page", 1, type=int), total_pages))
-    with db_connection() as conn:
+        total_pages = max(1, -(-total // per))
+        page = max(1, min(request.args.get("page", 1, type=int), total_pages))
         rows = conn.execute(
             "SELECT * FROM rfid_logs ORDER BY id DESC LIMIT ? OFFSET ?",
             (per, (page - 1) * per)

@@ -8,12 +8,19 @@ from kiosk_app.db import db_connection
 campus_bp = Blueprint("campus", __name__)
 
 
+_cached_lan_ip: str | None = None
+
+
 def _lan_ip() -> str:
+    global _cached_lan_ip
+    if _cached_lan_ip is not None:
+        return _cached_lan_ip
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("8.8.8.8", 80))
         ip = s.getsockname()[0]
         s.close()
+        _cached_lan_ip = ip
         return ip
     except Exception:
         return "127.0.0.1"
@@ -21,13 +28,9 @@ def _lan_ip() -> str:
 
 @campus_bp.route("/campus")
 def campus():
-    with db_connection() as conn:
-        rows = conn.execute("SELECT DISTINCT building FROM rooms").fetchall()
-    buildings = [row[0] for row in rows]
-
     port = request.host.split(":")[-1] if ":" in request.host else "5000"
     lan_base_url = f"http://{_lan_ip()}:{port}"
-    return render_template("campus.html", buildings=buildings, lan_base_url=lan_base_url)
+    return render_template("campus.html", lan_base_url=lan_base_url)
 
 
 @campus_bp.route("/campus_map")

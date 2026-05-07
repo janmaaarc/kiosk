@@ -10,10 +10,12 @@
       margin: 0; font-family: 'League Spartan', sans-serif;
       overflow: hidden;
       height: 100vh;
+      font-size: 16px;
       background: url('/static/images/KIOSK BACKGROUND.png') center/cover no-repeat;
       position: relative; }
 
       h1 { display: none; }
+      button { padding: revert; font-size: revert; width: revert; }
       .map-container {
         position: relative;
         width: 1920px;
@@ -495,14 +497,11 @@
                 <img src="{{ url_for('static', filename='images/icon/back_button.png') }}"
                 onclick="goBack()">
               </div>
-              <div class="top-right search-wrap" style="display:flex;align-items:center;gap:10px;">
+              <div id="searchWrap" class="top-right search-wrap" style="display:flex;align-items:center;gap:10px;">
                 <div style="position:relative;">
                   <input id="buildingSearch" type="text" placeholder="Search buildings…" autocomplete="off">
                   <div id="searchSuggestions"></div>
                 </div>
-                <a href="/admin" class="icon" title="Admin">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#333"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
-                </a>
               </div>
             
             <div class="map-wrapper"> 
@@ -805,7 +804,7 @@ const nodes = {
   "TE BUILDING":              {x:1756, y:637},
 };
 
-const graph = {
+var graph = {
   // MAIN ROAD
   "GATE":    ["INT_A", "MIST_BLD_ENT", "NEW_ADM_ENT"],
   "INT_A":   ["GATE", "INT_B", "TOP_A", "OLD_ADM_ENT"],
@@ -881,11 +880,13 @@ var _campusPathsReady = fetch('/api/campus-paths').then(function(r){ return r.js
     labelById[n.id] = n.label;
     nodes[n.label] = { x: n.x_pct / 100 * 1920, y: n.y_pct / 100 * 813 };
   });
-  Object.keys(nodes).forEach(function(k) { edges[k] = []; });
+  var dbGraph = {};
+  Object.keys(nodes).forEach(function(k) { dbGraph[k] = []; });
   data.edges.forEach(function(e) {
     var a = labelById[e.node_a], b = labelById[e.node_b];
-    if (a && b) { edges[a].push(b); edges[b].push(a); }
+    if (a && b) { dbGraph[a].push(b); dbGraph[b].push(a); }
   });
+  graph = dbGraph;
 }).catch(function(){});
 
                             function drawPath(path){
@@ -996,20 +997,22 @@ function updateYouHere(x, y){
                             return "Continue straight"; 
                           } 
 
+                            var _dotRafId = null;
                             function animateDot(path){
+                              if (_dotRafId !== null) { cancelAnimationFrame(_dotRafId); _dotRafId = null; }
 
                               const dot = document.getElementById("routeDot");
 
-                              let i = 0; 
-                              let progress = 0; 
+                              let i = 0;
+                              let progress = 0;
 
-                              function animate(){ 
+                              function animate(){
 
                                 if(i >= path.length - 1) return;
 
-                              const A = nodes[path[i]]; 
+                              const A = nodes[path[i]];
                               const B = nodes[path[i+1]]; progress += 0.01;
-                              
+
                               const x = A.x + (B.x - A.x) * progress;
                               const y = A.y + (B.y - A.y) * progress;
 
@@ -1021,10 +1024,10 @@ function updateYouHere(x, y){
                                 i++;
                               }
 
-                              requestAnimationFrame(animate);
+                              _dotRafId = requestAnimationFrame(animate);
                             }
 
-                            animate();
+                            _dotRafId = requestAnimationFrame(animate);
                           }
 
 
@@ -1071,6 +1074,8 @@ function showDirections(destination){
     dp.style.display = "block";
     dp.classList.remove("collapsed");
     document.getElementById("panelToggle").style.display = "none";
+    document.getElementById("viewToggle").style.display = "flex";
+    document.getElementById("qrBtnFloat").style.display = "flex";
     _directionsActive = true;
     return;
   }
@@ -1199,7 +1204,7 @@ function openBuildingPanel(name, pageUrl) {
   p.style.pointerEvents = 'auto';
   document.getElementById('viewToggle').style.display = 'none';
   document.getElementById('qrBtnFloat').style.display = 'none';
-  document.getElementById('buildingSearch').style.display = 'none';
+  document.getElementById('searchWrap').style.setProperty('display', 'none', 'important');
 }
 document.querySelectorAll('.building[data-page]').forEach(b => {
   b.onclick = function(e) {
@@ -1218,7 +1223,7 @@ function closeBuildingPanel() {
   const p = document.getElementById('buildingPanel');
   p.style.right = '-500px';
   p.style.pointerEvents = 'none';
-  document.getElementById('buildingSearch').style.display = '';
+  document.getElementById('searchWrap').style.removeProperty('display');
   if (_directionsActive) {
     document.getElementById('viewToggle').style.display = 'flex';
     document.getElementById('qrBtnFloat').style.display = 'flex';
@@ -1438,6 +1443,7 @@ updateYouHere(80, 395);
         var el = document.createElement('div');
         el.className = 'building';
         el.dataset.name = pin.name;
+        if (pin.page_url) el.dataset.page = pin.page_url;
         el.style.cssText = [
           'position:absolute',
           'left:' + pin.left_pct + '%',
@@ -1637,43 +1643,42 @@ var _mapScale = 0.7;
 </script>
 
 <div id="buildingPanel" style="
-  position:fixed;top:0;right:-500px;width:360px;height:100vh;pointer-events:none;
+  position:fixed;top:0;right:-500px;width:340px;height:100vh;pointer-events:none;
   background:rgba(255,255,255,0.97);
   box-shadow:-4px 0 24px rgba(0,0,0,0.25);
   display:flex;flex-direction:column;justify-content:flex-start;
-  padding:40px 32px 32px;z-index:2000;overflow-y:auto;
+  padding:24px 24px 24px;z-index:2000;overflow-y:auto;
   transition:right 0.35s cubic-bezier(0.16,1,0.3,1);">
-  <div style="font-size:12px;letter-spacing:3px;color:#888;margin-bottom:12px">BUILDING</div>
-  <h2 id="panelBuildingName" style="font-size:22px;font-weight:900;color:#7b2d2d;
-    letter-spacing:2px;margin-bottom:16px;line-height:1.3"></h2>
+  <h2 id="panelBuildingName" style="font-size:20px;font-weight:900;color:#7b2d2d;
+    letter-spacing:2px;margin-bottom:12px;line-height:1.3"></h2>
   <img id="panelBuildingImage" src="" alt=""
-       style="display:none;width:100%;height:180px;object-fit:cover;
-              border-radius:12px;margin-bottom:20px;box-shadow:0 4px 12px rgba(0,0,0,0.15)">
+       style="display:none;width:100%;height:160px;object-fit:cover;
+              border-radius:10px;margin-bottom:14px;box-shadow:0 4px 12px rgba(0,0,0,0.15)">
   <button id="panelEnterBtn" onclick="enterBuilding()" style="
-    background:#7b2d2d;color:#fff;border:none;border-radius:12px;
-    padding:12px 24px;font-size:14px;font-weight:900;letter-spacing:2px;
-    cursor:pointer;font-family:inherit;margin-bottom:12px;width:100%;
+    background:#7b2d2d;color:#fff;border:none;border-radius:10px;
+    padding:10px 20px;font-size:13px;font-weight:900;letter-spacing:2px;
+    cursor:pointer;font-family:inherit;margin-bottom:8px;width:100%;
     transition:background 0.2s"
     onmouseover="this.style.background='#5a1f1f'"
     onmouseout="this.style.background='#7b2d2d'">
     ENTER BUILDING
   </button>
-  <div id="panelComingSoon" style="display:none;background:#f5f0f0;border-radius:12px;
-    padding:14px 18px;font-size:13px;font-weight:700;letter-spacing:1.5px;
-    color:#8b2e2e;text-align:center;margin-bottom:12px">
+  <div id="panelComingSoon" style="display:none;background:#f5f0f0;border-radius:10px;
+    padding:10px 16px;font-size:12px;font-weight:700;letter-spacing:1.5px;
+    color:#8b2e2e;text-align:center;margin-bottom:8px">
     FLOOR PLAN COMING SOON
   </div>
   <button onclick="showDirectionFromPanel()" style="
-    background:transparent;color:#7b2d2d;border:2px solid #7b2d2d;border-radius:12px;
-    padding:12px 24px;font-size:14px;font-weight:900;letter-spacing:1px;
-    cursor:pointer;font-family:inherit;margin-bottom:12px;transition:all 0.2s;width:100%"
+    background:transparent;color:#7b2d2d;border:2px solid #7b2d2d;border-radius:10px;
+    padding:10px 20px;font-size:13px;font-weight:900;letter-spacing:1px;
+    cursor:pointer;font-family:inherit;margin-bottom:8px;transition:all 0.2s;width:100%"
     onmouseover="this.style.background='#7b2d2d';this.style.color='#fff'"
     onmouseout="this.style.background='transparent';this.style.color='#7b2d2d'">
     GET DIRECTIONS
   </button>
   <button onclick="closeBuildingPanel()" style="
-    background:transparent;color:#555;border:2px solid #ddd;border-radius:12px;
-    padding:12px 24px;font-size:14px;font-weight:700;letter-spacing:1px;
+    background:transparent;color:#888;border:1px solid #ddd;border-radius:10px;
+    padding:10px 20px;font-size:13px;font-weight:700;letter-spacing:1px;
     cursor:pointer;font-family:inherit;transition:border-color 0.2s;width:100%"
     onmouseover="this.style.borderColor='#999'"
     onmouseout="this.style.borderColor='#ddd'">
@@ -1697,7 +1702,7 @@ var _mapScale = 0.7;
 ">
   <span style="font-size:9px;font-weight:900;letter-spacing:2px;color:rgba(255,255,255,0.45);padding:0 10px;flex-shrink:0;text-transform:uppercase;">BUILDINGS</span>
   <div id="pinLegendScroll" style="display:flex;gap:0;flex:1;overflow:hidden;align-items:center;">
-    <div id="pinLegendTrack" style="display:flex;gap:0;align-items:center;animation:legendScroll 40s linear infinite;will-change:transform;"></div>
+    <div id="pinLegendTrack" style="display:flex;gap:0;align-items:center;animation:legendScroll 80s linear infinite;will-change:transform;"></div>
   </div>
 </div>
 <style>

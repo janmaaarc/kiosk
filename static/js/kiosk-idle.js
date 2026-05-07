@@ -2,12 +2,17 @@
   var MENU_TIMEOUT_MS = 60 * 1000;
   var SCREENSAVER_TIMEOUT_MS = 120 * 1000;
   var SLIDE_INTERVAL_MS = 4000;
-  var SCREENSAVER_IMAGES = [
-    '/static/images/screensaver/slide1.png',
-    '/static/images/screensaver/slide2.png',
-    '/static/images/screensaver/slide3.png',
-    '/static/images/screensaver/slide4.png',
-  ];
+  var SCREENSAVER_IMAGES = [];
+
+  fetch('/api/screensaver-images')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var imgs = (data.images || []).filter(function(i) { return i.active; });
+      if (imgs.length) {
+        SCREENSAVER_IMAGES = imgs.map(function(i) { return '/static/images/screensaver/' + i.filename; });
+      }
+    })
+    .catch(function() {});
 
   var menuTimer = null;
   var screensaverTimer = null;
@@ -134,7 +139,7 @@
 
   function goToLockScreen() {
     localStorage.removeItem('rfid_user');
-    window.location.href = '/';
+    window.location.href = '/logout';
   }
 
   function resetTimers() {
