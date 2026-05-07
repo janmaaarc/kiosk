@@ -10,86 +10,148 @@
       margin: 0; font-family: 'League Spartan', sans-serif;
       overflow: hidden;
       height: 100vh;
-      background: url("/static/images/KIOSK BACKGROUND.png") no-repeat center center fixed;
-      background-size: cover; }
+      background: url('/static/images/KIOSK BACKGROUND.png') center/cover no-repeat;
+      position: relative; }
 
-      h1 { 
-        text-align: center; 
-        color: #7b2d2d; 
-        font-size: 50px; 
-        
-      font-weight: 900; letter-spacing: 6px;
-      margin-top: 110px;
-      }
+      h1 { display: none; }
       .map-container {
         position: relative;
         width: 1920px;
-        height: 1080px;
+        height: 813px;
         transform: scale(0.7);
         transform-origin: top left; margin:auto;
+        overflow: hidden;
       }
 
-      .top-right { 
-        position: absolute; 
-        top: 20px; 
-        right: 30px; 
-      } 
+      .top-right {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        z-index: 3000;
+      }
 
-      .top-right input {
-        padding: 20px 28px 20px 68px;
-        border-radius: 43px;
-        border: 4px solid rgba(255,255,255,0.85);
-        width: 457px;
+      .top-right.search-wrap input {
+        padding: 14px 20px 14px 48px;
+        border-radius: 30px;
+        border: 3px solid rgba(255,255,255,0.85);
+        width: 320px;
         background: rgba(255,255,255,0.92);
-        font-family: 'League Spartan', sans-serif;
-        font-size: 21px;
+        font-family: inherit;
+        font-size: 15px;
         font-weight: 700;
         letter-spacing: 1px;
         outline: none;
-        box-shadow: 0 6px 22px rgba(0,0,0,0.12);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
         color: #333;
         transition: border-color 0.2s, box-shadow 0.2s;
       }
-      .top-right input:focus { border-color: #8b2e2e; box-shadow: 0 6px 28px rgba(139,46,46,0.25); }
-      .top-right input::placeholder { color: #999; font-weight: 600; }
-
-      .road {
+      .top-right.search-wrap input:focus { border-color: #8b2e2e; box-shadow: 0 4px 20px rgba(139,46,46,0.25); }
+      .top-right.search-wrap input::placeholder { color: #999; font-weight: 600; }
+      .top-right.search-wrap::before {
+        content: "⌕";
         position: absolute;
-        top: 400px;
-        left: 150px; 
-        width: 1100px; 
-        height: 80px; 
-        background: lightgray; 
-        z-index: 1; 
-      } 
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 16px;
+        color: #aaa;
+        pointer-events: none;
+      }
 
-        .building { 
-          position: absolute; 
-          background: #f4d35e; 
-          border-radius: 8px; 
-          border: 2px solid rgba(0,0,0,0.2); 
-          text-align: center; 
-          font-weight: bold; 
-          padding-top: 10px; 
-          cursor: pointer; 
-          font-size: 14px; 
-          line-height: 1.2; 
-          box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
-          transition: all 0.2s ease; 
-          z-index: 2; } 
-          
-          .building:hover { 
-            transform: scale(1.05); 
-          background: #ffd54f; 
-          } 
-          
-          .building.active {
-            background: #ff5722;
-            transform: scale(1.08); 
-            box-shadow: 0 0 25px rgba(255,87,34,0.9); 
-            border: 3px solid white; 
-            animation: pulse 1s infinite alternate; 
-          } 
+      .building {
+        position: absolute;
+        background: transparent;
+        border: 2px solid transparent;
+        border-radius: 6px;
+        cursor: pointer;
+        z-index: 2;
+        transition: background 0.15s, border-color 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .building:hover {
+        background: rgba(255,255,255,0.18);
+        border-color: rgba(255,255,255,0.7);
+        box-shadow: 0 0 12px rgba(255,255,255,0.25);
+      }
+      .building.active {
+        background: rgba(255,87,34,0.25);
+        border: 3px solid #ff5722;
+        animation: pulse 1s infinite alternate;
+      }
+      .bld-label {
+        background: rgba(20,8,8,0.8);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: 0.8px;
+        padding: 3px 7px;
+        border-radius: 4px;
+        pointer-events: none;
+        white-space: nowrap;
+        max-width: 95%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .legend-bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 48px;
+        background: rgba(12,4,4,0.93);
+        border-top: 1px solid rgba(255,255,255,0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        z-index: 500;
+        padding: 0 16px;
+      }
+      .legend-bar .leg-title {
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: 2px;
+        color: rgba(255,255,255,0.5);
+        margin-right: 4px;
+        text-transform: uppercase;
+        flex-shrink: 0;
+      }
+      .leg-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 8.5px;
+        font-weight: 800;
+        letter-spacing: 0.8px;
+        color: rgba(255,255,255,0.8);
+        white-space: nowrap;
+      }
+      .leg-swatch {
+        width: 18px;
+        height: 11px;
+        border-radius: 2px;
+        flex-shrink: 0;
+      }
+      .leg-swatch.dashed {
+        background: transparent;
+        border-top: 2px dashed rgba(255,255,255,0.55);
+        height: 0;
+        border-radius: 0;
+        width: 26px;
+      }
+      .leg-swatch.hatched {
+        background: repeating-linear-gradient(
+          45deg,
+          rgba(255,255,255,0.15),
+          rgba(255,255,255,0.15) 3px,
+          rgba(200,190,170,0.3) 3px,
+          rgba(200,190,170,0.3) 6px
+        );
+        border: 1px dashed rgba(255,255,255,0.3);
+      }
 
           @keyframes pulse { 
             from { transform: scale(1.05); } to { transform: scale(1.1); } 
@@ -104,14 +166,25 @@
             100% { r: 25; opacity: 0; } 
           } 
           
-          .top-icons { 
-            position: absolute; 
+          .icon {
+            width: 44px; height: 44px;
+            border: 2px solid #e0c0c0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.92);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; text-decoration: none; color: #333;
+            flex-shrink: 0; transition: transform 0.2s;
+          }
+          .icon:hover { transform: scale(1.1); }
+
+          .top-icons {
+            position: absolute;
             top: 20px;
-            left: 40px;
+            left: 20px;
             display: flex;
-            gap: 12px; 
-            z-index: 100; 
-            } 
+            gap: 12px;
+            z-index: 100;
+            }
             
             .top-icons img {
               width: 44px;
@@ -321,7 +394,7 @@
             .qr-card-close:hover { color:#333; }
 
 
-            .map-wrapper { overflow: hidden; }
+            .map-wrapper { overflow: hidden; margin-top: 84px; }
 
             @media (max-width: 1024px) {
               .directions-panel {
@@ -345,174 +418,107 @@
                 <img src="{{ url_for('static', filename='images/icon/back_button.png') }}"
                 onclick="goBack()">
               </div>
+              <div class="top-right search-wrap" style="display:flex;align-items:center;gap:10px;">
+                <input type="text" placeholder="Search buildings…">
+              </div>
+              <a href="/admin" class="icon" style="position:absolute;top:20px;right:30px;z-index:3000;" title="Admin">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#333"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
+              </a>
             
             <div class="map-wrapper"> 
               <div class="map-container"> 
-                <svg id="routeSVG" width="1920" height="1080" style="position:absolute; top:0; left:0; pointer-events:none; z-index: 999;"> 
+                <img src="/static/images/roofs.png"
+                     style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:fill;z-index:0;display:block;">
+                <svg id="routeSVG" width="1920" height="813" style="position:absolute; top:0; left:0; pointer-events:none; z-index: 999;"> 
                   <path id="routeLine" fill="none" stroke="#8e44ad" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/> 
                   <circle id="routeDot" r="8" fill="#8e44ad"/> 
                 </svg> 
 
-                 <h1>CAMPUS MAP</h1> 
+                  <!-- BUILDING OVERLAYS — pixel-accurate from roofs.png flood-fill + labeled map analysis -->
 
-                 <div class="top-right"> 
-                  <input type="text" placeholder="Search…">
-                  </div> 
-                  
-                <div class="road"></div> 
-                <!-- BUILDINGS --> 
-                 <!-- TOP ROW --> 
-                  <div class="building"
-                    data-name="RODRIGUEZ BUILDING"
-                    data-page="/rodriguez_building"
-                    style="top:90px; left:250px; width:650px; height:20px;">
-                    RODRIGUEZ BUILDING
-                  </div> 
-                  
-                  <div class="building" data-name="MIST-NCESTD DORM"
-                    data-page="/mist_ncestd_dorm"
-                    style="top:90px; left:965px; width:350px; height:130px;">
-                    MIST-NCESTD DORM
-                  </div>
-                      <div class="building" data-name="MULTI-PURPOSE BUILDING"
-                      data-page="/multi_purpose_building"
-                      style="top:100px; left:1460px; width:170px; height:80px;">
-                      MULTI-PURPOSE BUILDING
-                    </div> 
-                      <div class="building" data-name="Ylagan Hall" 
-                        style="top:220px; left:390px; width:170px; height:100px;" 
-                        data-page="/ylagan_hall"> 
-                        Ylagan Hall 
-                    </div> 
-                      
-                    <!-- LEFT SIDE --> 
-                      <div class="building"
-                        data-name="MIST-NCESTD BUILDING"
-                        data-page="/mist_ncestd_building"
-                        style="top:180px; left:50px; width:250px; height:185px;">
-                        MIST-NCESTD BUILDING
-                      </div> 
-                        
-                      <div class="building" 
-                        data-name="AUTOMOTIVE BUILDING" 
-                        style="top:210px; left:1460px; width:170px; height:130px;" 
-                        data-page="/automotive_building"> 
-                        AUTOMOTIVE BUILDING 
-                      </div> 
-                        
-                      <!-- CENTER BIG -->
-                       <div class="building"
-                       data-name="ACADEMIC BUILDING"
-                       style="top:185px; left:600px; width:280px; height:130px;"
-                       data-page="/academic_building">
-                       ACADEMIC BLDG
-                      </div> 
-                       
-                       <!-- SMALL CLUSTERS (RIGHT) -->
-                      <div class="building" 
-                        data-name="WAF & RAC BUILDING" 
-                        style="top:290px; left:935px; width:250px; height:75px;" 
-                        data-page="/waf_&_rac_building"> 
-                        WAF & RAC BUILDING 
-                      </div> 
+                  <!-- TOP AREA -->
+                  <div class="building" data-name="RODRIGUEZ BUILDING" data-page="/rodriguez_building"
+                    style="top:21px; left:513px; width:668px; height:78px;">
+                    <span class="bld-label">RODRIGUEZ BLDG</span></div>
 
-                      <div class="building" 
-                        data-name="WAF & RAC BUILDING" 
-                        style="top:210px; left:1375px; width:75px; height:40px;" 
-                        data-page="/waf_&_rac_building"> 
-                      </div> 
-                        
-                      <div class="building" data-name="WAF & RAC BUILDING" 
-                        style="top:275px; left:1375px; width:75px; height:40px;" 
-                        data-page="/waf_&_rac_building">
-                      </div> 
-                        
-                      <div class="building"
-                        data-name="POWER ROOM"
-                        data-page="/power_room"
-                        style="top:340px; left:1380px; width:70px; height:35px;">
-                        POWER ROOM
-                      </div> 
-                        
-                      <!-- BOTTOM LEFT --> 
-                      <div class="building" 
-                        data-name="NEW ADMIN BUILDING" 
-                        style="top:500px; left:50px; width:150px; height:200px;" 
-                        data-page="/new_admin_building"> 
-                        NEW ADMIN BUILDING 
-                      </div> 
-                        
-                      <div class="building" 
-                        data-name="OLD ADMIN BUILDING" 
-                        style="top:550px; left:355px; width:80px; height:150px;" 
-                        data-page="/old_admin_building"> OLD ADMIN BUILDING 
-                        </div>
-                      
-                      <!-- BOTTOM CENTER --> 
-                      <div class="building" 
-                        data-name="FSM BUILDING" 
-                        style="top:550px; left:600px; width:200px; height:150px;" 
-                        data-page="/fsm_building"> 
-                        FSM BUILDING 
-                      </div> 
+                  <div class="building" data-name="MIST-NCESTD BUILDING" data-page="/mist_ncestd_building"
+                    style="top:63px; left:130px; width:305px; height:175px;">
+                    <span class="bld-label">MIST-NCESTD BLDG</span></div>
 
-                      <div class="building" 
-                        data-name="CIVIL TECH BUILDING" 
-                        style="top: 480px; left:810px; width:80px; height:220px;" 
-                        data-page="/civil_tech_building"> 
-                        Civil Tech BUILDING 
-                      </div> 
-                        
-                      <div class="building" 
-                        data-name="WAF & FSM BUILDING"
-                        style="top:780px; left:680px; width:600px; height:30px;" 
-                        data-page="/waf_&_fsm_building"> WAF & FSM BUILDING </div> 
-                        
-                        <!-- BOTTOM RIGHT LONG --> 
-                        <div class="building" data-name="TECH BUILDING" 
-                        style="top:550px; left:1205px; width:410px; height:150px;" 
-                        data-page="/tech_building"> 
-                        TECH BUILDING </div> 
+                  <div class="building" data-name="Ylagan Hall" data-page="/ylagan_hall"
+                    style="top:100px; left:430px; width:80px; height:95px;">
+                    <span class="bld-label">YLAGAN HALL</span></div>
 
-                        <div class="building" 
-                        style="top:480px; left:950px; width:90px; height:220px;" 
-                        data-page="/graduate_school_building"> 
-                          GRADUATE SCHOOL BUILDING 
-                        </div> 
-                          
-                        <div class="building" 
-                        style="top:480px; left:1080px; width:105px; height: 220px;" 
-                        data-page="/mechanical_building"> 
-                        MECHANICAL & ELECTRONICS BUILDING</div> 
-                        
-                        <!-- RIGHT SIDE VERTICAL --> 
-                         <div class="building" 
-                         data-name="IT BUILDING" 
-                         style="top:100px; left:1720px; width:120px; height:150px;" 
-                         data-page="/it_building"> 
-                         IT BUILDING </div> 
-                         
-                         <div class="building" 
-                         data-name="SCIENCE BUILDING" 
-                         style="top:270px; left:1720px; width:120px; height:150px;" 
-                         data-page="/science_building"> 
-                         SCIENCE BUILDING 
-                        </div> 
-                         
-                         <div class="building" data-name="TE BUILDING" style="top:445px; left:1720px; width:120px; height:340px;"
-                         data-page="/te_building"> TE BUILDING </div>
+                  <div class="building" data-name="MIST-NCESTD DORM" data-page="/mist_ncestd_dorm"
+                    style="top:60px; left:1190px; width:265px; height:220px;">
+                    <span class="bld-label">MIST-NCESTD DORM</span></div>
+
+                  <div class="building" data-name="MULTI-PURPOSE BUILDING" data-page="/multi_purpose_building"
+                    style="top:60px; left:1460px; width:220px; height:190px;">
+                    <span class="bld-label">MULTI-PURPOSE</span></div>
+
+                  <!-- CENTER -->
+                  <div class="building" data-name="ACADEMIC BUILDING" data-page="/academic_building"
+                    style="top:220px; left:743px; width:315px; height:118px;">
+                    <span class="bld-label">ACADEMIC BLDG</span></div>
+
+                  <div class="building" data-name="WAF & RAC BUILDING" data-page="/waf_&_rac_building"
+                    style="top:287px; left:1211px; width:132px; height:115px;">
+                    <span class="bld-label">WAF &amp; RAC BLDG</span></div>
+
+                  <div class="building" data-name="AUTOMOTIVE BUILDING" data-page="/automotive_building"
+                    style="top:198px; left:1673px; width:112px; height:100px;">
+                    <span class="bld-label">AUTOMOTIVE BLDG</span></div>
+
+                  <!-- RIGHT COLUMN — IT / SCIENCE / TE (cyan strip) -->
+                  <div class="building" data-name="IT BUILDING" data-page="/it_building"
+                    style="top:19px; left:1826px; width:56px; height:190px;">
+                    <span class="bld-label">IT BLDG</span></div>
+
+                  <div class="building" data-name="SCIENCE BUILDING" data-page="/science_building"
+                    style="top:210px; left:1826px; width:56px; height:170px;">
+                    <span class="bld-label">SCIENCE BLDG</span></div>
+
+                  <div class="building" data-name="TE BUILDING" data-page="/te_building"
+                    style="top:380px; left:1826px; width:56px; height:335px;">
+                    <span class="bld-label">TE BLDG</span></div>
+
+                  <!-- BOTTOM LEFT -->
+                  <div class="building" data-name="OLD ADMIN BUILDING" data-page="/old_admin_building"
+                    style="top:444px; left:76px; width:42px; height:285px;">
+                    <span class="bld-label">OLD ADMIN</span></div>
+
+                  <div class="building" data-name="NEW ADMIN BUILDING" data-page="/new_admin_building"
+                    style="top:444px; left:121px; width:44px; height:285px;">
+                    <span class="bld-label">NEW ADMIN BLDG</span></div>
+
+                  <!-- BOTTOM CENTER -->
+                  <div class="building" data-name="FSM BUILDING" data-page="/fsm_building"
+                    style="top:595px; left:731px; width:264px; height:114px;">
+                    <span class="bld-label">FSM BLDG</span></div>
+
+                  <div class="building" data-name="CIVIL TECH BUILDING" data-page="/civil_tech_building"
+                    style="top:465px; left:1020px; width:57px; height:245px;">
+                    <span class="bld-label">CIVIL TECH</span></div>
+
+                  <div class="building" data-name="GRADUATE SCHOOL BUILDING" data-page="/graduate_school_building"
+                    style="top:465px; left:1156px; width:80px; height:245px;">
+                    <span class="bld-label">GRAD SCHOOL</span></div>
+
+                  <div class="building" data-name="MECHANICAL BUILDING" data-page="/mechanical_building"
+                    style="top:465px; left:1236px; width:130px; height:248px;">
+                    <span class="bld-label">MECHANICAL BLDG</span></div>
+
+                  <div class="building" data-name="TECH BUILDING" data-page="/tech_building"
+                    style="top:617px; left:1403px; width:342px; height:160px;">
+                    <span class="bld-label">TECH BLDG</span></div>
+
+                  <!-- BOTTOM BAR — cyan canteen strip -->
+                  <div class="building" data-name="WAF & FSM BUILDING" data-page="/waf_&_fsm_building"
+                    style="top:753px; left:946px; width:484px; height:49px;">
+                    <span class="bld-label">WAF &amp; FSM BLDG</span></div>
 
 
-                         <div class="road" data-name="MAIN HORIZONTAL ROAD" style="top:400px; left:150px; width:1500px;"></div>
-                          <div class="road" data-name="SECOND HORIZONTAL ROAD" style="top:140px; left:150px; width:800px; height:35px;"></div>
-                          <div class="road" data-name="LAST HORIZONTAL ROAD" style="top:730px; left:150px; width:1500px; height:45px"></div>
-                          <div class="road" data-name="1ST VERTICAL ROAD" style="top:480px; left:210px; width:140px; height:340px;"></div>
-                          <div class="road" data-name="2ND VERTICAL ROAD" style="top:150px; left:305px; width:40px; height:340px;"></div>
-                          <div class="road" data-name="3RD VERTICAL ROAD" style="top:140px; left:565px; width:30px; height:635px;"></div>
-                           <div class="road" data-name="3RD VERTICAL ROAD" style="top:140px; left:895px; width:40px; height:600px;"></div>
-                           <div class="road" data-name="4TH VERTICAL ROAD" style="top:300px; left:1190px; width:20px; height:150px;"></div>
-                          <div class="road" data-name="5TH VERTICAL ROAD" style="top:90px; left:1345px; width:30px; height:390px;"></div>
-                           <div class="road" data-name="LAST VERTICAL ROAD" style="top:100px; left:1650px; width:50px; height:700px;"></div> 
                            
                           <div class="you-are-here" id="youHerePin">
                             <div class="pin"><div class="pin-text">YOU<br>ARE<br>HERE.</div></div>
@@ -590,8 +596,8 @@
                             } 
                               
                               const GRID_SIZE = 40; 
-                              const cols = 1920 / GRID_SIZE; 
-                              const rows = 1080 / GRID_SIZE; 
+                              const cols = 1920 / GRID_SIZE;
+                              const rows = 813 / GRID_SIZE;
 
                               let grid = []; 
                               
@@ -738,67 +744,67 @@
                           } 
 
 const nodes = {
-  // MAIN HORIZONTAL ROAD (y=420)
-  "GATE":      {x:150,  y:420},
-  "INT_A":     {x:325,  y:420},
-  "INT_B":     {x:580,  y:420},
-  "INT_C":     {x:915,  y:420},
-  "INT_D":     {x:1200, y:420},
-  "INT_E":     {x:1360, y:420},
-  "INT_MID":   {x:1545, y:420},
-  "INT_F":     {x:1675, y:420},
+  // MAIN HORIZONTAL ROAD (y≈395)
+  "GATE":      {x:80,   y:395},
+  "INT_A":     {x:320,  y:395},
+  "INT_B":     {x:560,  y:395},
+  "INT_C":     {x:900,  y:395},
+  "INT_D":     {x:1150, y:395},
+  "INT_E":     {x:1380, y:395},
+  "INT_MID":   {x:1560, y:395},
+  "INT_F":     {x:1668, y:395},
 
-  // TOP HORIZONTAL ROAD (y=157)
-  "TOP_A":     {x:325,  y:157},
-  "TOP_B":     {x:580,  y:157},
-  "TOP_C":     {x:915,  y:157},
+  // TOP HORIZONTAL ROAD (y≈155)
+  "TOP_A":     {x:320,  y:155},
+  "TOP_B":     {x:560,  y:155},
+  "TOP_C":     {x:900,  y:155},
 
-  // BOTTOM HORIZONTAL ROAD (y=752)
-  "BOT_B":     {x:580,  y:752},
-  "BOT_C":     {x:915,  y:752},
-  "BOT_F":     {x:1675, y:752},
+  // BOTTOM HORIZONTAL ROAD (y≈640)
+  "BOT_B":     {x:560,  y:640},
+  "BOT_C":     {x:900,  y:640},
+  "BOT_F":     {x:1668, y:640},
 
-  // APPROACH / ENTRY NODES (on roads, just outside buildings)
-  "MIST_BLD_ENT":  {x:150,  y:280},
-  "NEW_ADM_ENT":   {x:150,  y:580},
-  "OLD_ADM_ENT":   {x:325,  y:500},
-  "YLAGAN_ENT":    {x:475,  y:157},
-  "MIST_DORM_ENT": {x:965,  y:157},
-  "ACADEMIC_ENT":  {x:740,  y:420},
-  "WAF_RAC_ENT":   {x:915,  y:327},
-  "FSM_ENT":       {x:580,  y:590},
-  "CIVIL_ENT":     {x:915,  y:500},
-  "GRAD_ENT":      {x:915,  y:600},
-  "MECH_ENT":      {x:1090, y:500},
-  "TECH_ENT":      {x:1360, y:590},
-  "MID_5TH":       {x:1360, y:290},
-  "UP_5TH":        {x:1360, y:140},
-  "UP_MID":        {x:1545, y:200},
-  "IT_ENT":        {x:1675, y:200},
-  "SCI_ENT":       {x:1675, y:345},
-  "TE_ENT":        {x:1675, y:590},
+  // APPROACH / ENTRY NODES
+  "MIST_BLD_ENT":  {x:80,   y:255},
+  "NEW_ADM_ENT":   {x:80,   y:510},
+  "OLD_ADM_ENT":   {x:320,  y:460},
+  "YLAGAN_ENT":    {x:455,  y:155},
+  "MIST_DORM_ENT": {x:900,  y:155},
+  "ACADEMIC_ENT":  {x:725,  y:395},
+  "WAF_RAC_ENT":   {x:900,  y:300},
+  "FSM_ENT":       {x:560,  y:510},
+  "CIVIL_ENT":     {x:900,  y:455},
+  "GRAD_ENT":      {x:900,  y:540},
+  "MECH_ENT":      {x:1060, y:455},
+  "TECH_ENT":      {x:1380, y:500},
+  "MID_5TH":       {x:1380, y:265},
+  "UP_5TH":        {x:1380, y:145},
+  "UP_MID":        {x:1560, y:200},
+  "IT_ENT":        {x:1668, y:180},
+  "SCI_ENT":       {x:1668, y:340},
+  "TE_ENT":        {x:1668, y:510},
 
-  // BUILDINGS — EXACT CENTERS MATCHING THE DIV POSITIONS
-  "RODRIGUEZ BUILDING":       {x:575,  y:100},
-  "MIST-NCESTD DORM":         {x:1140, y:155},
-  "MULTI-PURPOSE BUILDING":   {x:1545, y:140},
-  "YLAGAN HALL":              {x:475,  y:270},
-  "MIST-NCESTD BUILDING":     {x:175,  y:272},
-  "AUTOMOTIVE BUILDING":      {x:1545, y:275},
-  "ACADEMIC BUILDING":        {x:740,  y:315},
-  "WAF & RAC BUILDING":       {x:1060, y:327},
-  "POWER ROOM":               {x:1415, y:357},
-  "NEW ADMIN BUILDING":       {x:125,  y:600},
-  "OLD ADMIN BUILDING":       {x:395,  y:625},
-  "FSM BUILDING":             {x:700,  y:625},
-  "CIVIL TECH BUILDING":      {x:850,  y:590},
-  "WAF & FSM BUILDING":       {x:980,  y:795},
-  "TECH BUILDING":            {x:1410, y:625},
-  "GRADUATE SCHOOL BUILDING": {x:995,  y:590},
-  "MECHANICAL BUILDING":      {x:1132, y:590},
-  "IT BUILDING":              {x:1780, y:175},
-  "SCIENCE BUILDING":         {x:1780, y:345},
-  "TE BUILDING":              {x:1780, y:615},
+  // BUILDING CENTERS
+  "RODRIGUEZ BUILDING":       {x:600,  y:77},
+  "MIST-NCESTD DORM":         {x:1148, y:125},
+  "MULTI-PURPOSE BUILDING":   {x:1571, y:110},
+  "YLAGAN HALL":              {x:455,  y:265},
+  "MIST-NCESTD BUILDING":     {x:116,  y:292},
+  "AUTOMOTIVE BUILDING":      {x:1573, y:275},
+  "ACADEMIC BUILDING":        {x:725,  y:243},
+  "WAF & RAC BUILDING":       {x:1035, y:313},
+  "POWER ROOM":               {x:1395, y:345},
+  "NEW ADMIN BUILDING":       {x:94,   y:574},
+  "OLD ADMIN BUILDING":       {x:379,  y:528},
+  "FSM BUILDING":             {x:701,  y:521},
+  "CIVIL TECH BUILDING":      {x:858,  y:566},
+  "WAF & FSM BUILDING":       {x:992,  y:742},
+  "TECH BUILDING":            {x:1433, y:534},
+  "GRADUATE SCHOOL BUILDING": {x:982,  y:528},
+  "MECHANICAL BUILDING":      {x:1113, y:528},
+  "IT BUILDING":              {x:1756, y:122},
+  "SCIENCE BUILDING":         {x:1756, y:311},
+  "TE BUILDING":              {x:1756, y:637},
 };
 
 const graph = {
@@ -955,12 +961,7 @@ const graph = {
                                 return closest; 
                               } 
 
-function openBuilding(building){
-  window.location.href =
-    `/building?from=campus&building=${encodeURIComponent(building)}`;
-}
-                              
-                              function updateYouHere(x, y){
+function updateYouHere(x, y){
                                 const pin = document.getElementById("youHerePin");
                                 if (!pin) return;
                                 pin.style.left = x + "px";
@@ -1182,6 +1183,7 @@ document.querySelectorAll('.building[data-page]').forEach(b => {
     p.style.pointerEvents = 'auto';
     document.getElementById('viewToggle').style.display = 'none';
     document.getElementById('qrBtnFloat').style.display = 'none';
+    document.querySelector('.top-right').style.display = 'none';
   };
 });
 function toggleDirectionsPanel() {
@@ -1195,6 +1197,7 @@ function closeBuildingPanel() {
   const p = document.getElementById('buildingPanel');
   p.style.right = '-500px';
   p.style.pointerEvents = 'none';
+  document.querySelector('.top-right').style.display = '';
   if (_directionsActive) {
     document.getElementById('viewToggle').style.display = 'flex';
     document.getElementById('qrBtnFloat').style.display = 'flex';
@@ -1337,7 +1340,7 @@ input.addEventListener('keypress', (e) => {
 });
 
 
-updateYouHere(150, 420);
+updateYouHere(80, 395);
 
 </script>
 <script src="{{ url_for('static', filename='js/kiosk.js') }}"></script>
@@ -1386,5 +1389,40 @@ var _mapScale = 0.7;
 
 <script src="/static/js/drag-scroll.js?v=2"></script>
 <script src="{{ url_for('static', filename='js/keyboard.js') }}?v=2"></script>
+
+<div class="legend-bar">
+  <span class="leg-title">LEGENDS</span>
+  <div class="leg-item">
+    <svg width="16" height="14" viewBox="0 0 16 14" fill="none" style="flex-shrink:0">
+      <rect x="1" y="1" width="14" height="12" rx="1" stroke="rgba(255,255,255,0.8)" stroke-width="1.5"/>
+      <rect x="5" y="4" width="5" height="7" rx="0.5" fill="rgba(255,255,255,0.8)"/>
+      <circle cx="9.5" cy="7.5" r="0.8" fill="#0f0404"/>
+    </svg>ENTRANCE/EXIT
+  </div>
+  <div class="leg-item">
+    <div class="leg-swatch" style="background:#3b6fd4;"></div>ACADEMIC CORE
+  </div>
+  <div class="leg-item">
+    <div class="leg-swatch" style="background:#f5d800;"></div>ACADEMIC SUPPORT
+  </div>
+  <div class="leg-item">
+    <div class="leg-swatch" style="background:#f4821f;"></div>MIXED USED
+  </div>
+  <div class="leg-item">
+    <div class="leg-swatch" style="background:#c0392b;"></div>CONSTRAINED AREA
+  </div>
+  <div class="leg-item">
+    <div class="leg-swatch" style="background:#7d5a2f;"></div>INCOME GENERATING
+  </div>
+  <div class="leg-item">
+    <div class="leg-swatch hatched"></div>UNDER CONSTRUCTION
+  </div>
+  <div class="leg-item">
+    <div class="leg-swatch" style="background:#27ae60;"></div>UTILITIES/BENCHES
+  </div>
+  <div class="leg-item">
+    <div class="leg-swatch dashed"></div>MPC PROPERTY LINE
+  </div>
+</div>
 </body>
 </html>

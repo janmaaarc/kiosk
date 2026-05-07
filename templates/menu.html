@@ -95,47 +95,25 @@
             color: inherit;
         }
 
-        .admin-btn {
-            position: fixed;
-            bottom: 18px;
-            right: 18px;
-            width: 44px;
-            height: 44px;
-            background: rgba(0,0,0,0.18);
+        .topbar {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 100;
+        }
+        .icon {
+            width: 44px; height: 44px;
+            border: 2px solid #e0c0c0;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background 0.2s;
-            z-index: 100;
-            text-decoration: none;
+            background: rgba(255,255,255,0.92);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; text-decoration: none; color: #333;
+            flex-shrink: 0; transition: transform 0.2s;
         }
-        .admin-btn:hover { background: rgba(0,0,0,0.4); }
-        .admin-btn svg { width: 18px; height: 18px; fill: rgba(255,255,255,0.7); }
-
-        .logout-btn {
-            position: fixed;
-            bottom: 18px;
-            left: 18px;
-            padding: 10px 22px;
-            background: rgba(123,45,45,0.85);
-            color: #fff;
-            border: none;
-            border-radius: 24px;
-            font-family: 'League Spartan', sans-serif;
-            font-size: 13px;
-            font-weight: 900;
-            letter-spacing: 2px;
-            cursor: pointer;
-            z-index: 100;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background 0.2s;
-        }
-        .logout-btn:hover { background: rgba(123,45,45,1); }
+        .icon:hover { transform: scale(1.1); }
 
         .restricted-notice {
             position: fixed;
@@ -157,13 +135,19 @@
             0%,70% { opacity:1; } 100% { opacity:0; pointer-events:none; }
         }
 
+        .greeting-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            margin-top: 6px;
+            flex-shrink: 0;
+        }
         .user-greeting {
             font-size: 22px;
             font-weight: 700;
             color: #7b2d2d;
             letter-spacing: 2px;
-            margin-top: 6px;
-            margin-bottom: 0;
             text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
         }
         .role-tag {
@@ -179,13 +163,45 @@
         .role-faculty { background: #7b2d2d; color: #fff; }
         .role-student { background: #1a5c8a; color: #fff; }
         .role-visitor { background: #555;    color: #fff; }
+        .logout-btn {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            background: rgba(123,45,45,0.85);
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            font-family: 'League Spartan', sans-serif;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .logout-btn:hover { background: rgba(123,45,45,1); }
+        .logout-btn.visible { display: flex; }
     </style>
 </head>
 
 <body>
 
+    <div class="topbar">
+        <a href="/admin" class="icon" title="Admin">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#333"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
+        </a>
+    </div>
+
     <h1 class="title">MENU</h1>
-    <p class="user-greeting" id="userGreeting"></p>
+    <div class="greeting-row">
+        <p class="user-greeting" id="userGreeting"></p>
+        <a href="/logout" class="logout-btn" id="logoutBtn">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="#fff"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+            LOGOUT
+        </a>
+    </div>
 
     <div class="menu-container">
 
@@ -233,25 +249,31 @@
 
     </div>
 
-    <a href="/logout" class="logout-btn">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
-        LOGOUT
-    </a>
-
 <script>
 (function() {
+  const sessionName = {{ user_name | tojson }};
+  const sessionRole = {{ user_role | tojson }};
+  const ROLES = ['faculty', 'student', 'visitor'];
+
+  function showGreeting(name, role) {
+    const safeRole = ROLES.includes(role) ? role : 'visitor';
+    const el = document.getElementById('userGreeting');
+    el.textContent = 'Welcome, ' + name;
+    const tag = document.createElement('span');
+    tag.className = 'role-tag role-' + safeRole;
+    tag.textContent = safeRole.toUpperCase();
+    el.appendChild(tag);
+    if (safeRole !== 'visitor') {
+      document.getElementById('logoutBtn').classList.add('visible');
+    }
+  }
+
   try {
-    const u = JSON.parse(localStorage.getItem('rfid_user'));
-    if (u && u.name) {
-      const ROLES = ['faculty', 'student', 'visitor'];
-      const rawRole = (u.role || 'visitor').toLowerCase();
-      const role  = ROLES.includes(rawRole) ? rawRole : 'visitor';
-      const el    = document.getElementById('userGreeting');
-      el.textContent = 'Welcome, ' + u.name;
-      const tag = document.createElement('span');
-      tag.className = 'role-tag role-' + role;
-      tag.textContent = u.role.toUpperCase();
-      el.appendChild(tag);
+    if (sessionName) {
+      showGreeting(sessionName, sessionRole);
+    } else {
+      const u = JSON.parse(localStorage.getItem('rfid_user'));
+      if (u && u.name) { showGreeting(u.name, u.role || 'visitor'); }
     }
   } catch(e) {}
 

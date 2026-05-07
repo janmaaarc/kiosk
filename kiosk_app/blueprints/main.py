@@ -248,6 +248,22 @@ def healthz():
         return jsonify({"status": "degraded"}), 503
 
 
+@main_bp.route("/api/faculty/<int:faculty_id>/schedule")
+def api_faculty_schedule(faculty_id: int):
+    with db_connection() as conn:
+        row = conn.execute(
+            "SELECT schedule FROM faculty WHERE id = ?", (faculty_id,)
+        ).fetchone()
+    if not row:
+        return jsonify([])
+    import json as _json
+    try:
+        entries = _json.loads(row["schedule"] or "[]")
+    except (ValueError, TypeError):
+        entries = []
+    return jsonify(entries)
+
+
 @main_bp.route("/api/departments")
 def api_departments():
     with db_connection() as conn:

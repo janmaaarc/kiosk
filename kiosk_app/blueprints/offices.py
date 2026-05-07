@@ -73,7 +73,7 @@ def office():
         staff = []
         if row:
             staff = [dict(r) for r in conn.execute(
-                "SELECT name, photo, office_position FROM faculty"
+                "SELECT id, name, photo, office_position, department, building, room, schedule_image, office_key FROM faculty"
                 " WHERE office_key = ? AND office_key != '' ORDER BY office_position, name",
                 (row["key"],),
             ).fetchall()]

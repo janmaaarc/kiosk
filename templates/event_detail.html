@@ -17,21 +17,43 @@
         }
 
         .top-icons {
-            position: fixed;
-            top: 16px;
-            left: 16px;
+            position: absolute;
+            top: 20px;
+            left: 20px;
             display: flex;
-            gap: 10px;
+            gap: 12px;
             z-index: 100;
         }
 
         .top-icon {
             width: 44px;
+            height: 44px;
             cursor: pointer;
             transition: transform 0.2s;
         }
 
         .top-icon:hover { transform: scale(1.1); }
+
+        .icon {
+            width: 44px; height: 44px;
+            border: 2px solid #e0c0c0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.92);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; text-decoration: none; color: #333;
+            flex-shrink: 0; transition: transform 0.2s;
+        }
+        .icon:hover { transform: scale(1.1); }
+
+        .topbar {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 20;
+        }
 
         .container {
             display: flex;
@@ -68,6 +90,12 @@
          class="top-icon" alt="Home" onclick="window.location.href='/menu'">
     <img src="{{ url_for('static', filename='images/icon/back_button.png') }}"
          class="top-icon" alt="Back" onclick="history.back()">
+</div>
+
+<div class="topbar">
+    <a href="/admin" class="icon" title="Admin">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#333"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
+    </a>
 </div>
 
 <div class="container">
