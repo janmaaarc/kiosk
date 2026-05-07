@@ -1167,7 +1167,7 @@ def campus_path_node_add():
     label = request.form.get("label", "").strip()[:100]
     x_pct = request.form.get("x_pct", type=float)
     y_pct = request.form.get("y_pct", type=float)
-    if label and x_pct is not None and y_pct is not None:
+    if x_pct is not None and y_pct is not None:
         with db_connection() as conn:
             conn.execute(
                 "INSERT INTO campus_nodes (label, x_pct, y_pct) VALUES (?, ?, ?)",

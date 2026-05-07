@@ -304,10 +304,12 @@
       f.appendChild(inp);
     });
     document.body.appendChild(f);
+    sessionStorage.setItem('floorPathMode', mode);
     f.submit();
   }
 
-  setMode('node');
+  setMode(sessionStorage.getItem('floorPathMode') || 'node');
+  sessionStorage.removeItem('floorPathMode');
 })();
 </script>
 {% endif %}

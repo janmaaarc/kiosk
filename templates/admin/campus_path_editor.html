@@ -65,8 +65,8 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="x_pct" id="nodePctX">
         <input type="hidden" name="y_pct" id="nodePctY">
-        <label style="display:block;font-size:13px;font-weight:700;margin-bottom:4px;">Label</label>
-        <input type="text" name="label" id="nodeLabel" required maxlength="50"
+        <label style="display:block;font-size:13px;font-weight:700;margin-bottom:4px;">Label <span style="font-weight:400;color:#aaa;">(optional)</span></label>
+        <input type="text" name="label" id="nodeLabel" maxlength="50"
           style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:14px;margin-bottom:10px;box-sizing:border-box;"
           placeholder="e.g. GATE1 or B18A">
         <div id="nodeCoord" style="font-size:12px;color:#888;margin-bottom:10px;">Click map to set position.</div>
@@ -238,10 +238,12 @@
       f.appendChild(inp);
     });
     document.body.appendChild(f);
+    sessionStorage.setItem('campusPathMode', mode);
     f.submit();
   }
 
-  setMode('node');
+  setMode(sessionStorage.getItem('campusPathMode') || 'node');
+  sessionStorage.removeItem('campusPathMode');
 })();
 </script>
 {% endblock %}
