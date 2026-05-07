@@ -1246,12 +1246,18 @@ def floor_path_editor():
                 "SELECT floor_number, floor_label FROM building_floors WHERE building=? ORDER BY floor_number",
                 (building,),
             ).fetchall()
+        rooms = []
         if building and floor:
             row = conn.execute(
                 "SELECT floor_image FROM building_floors WHERE building=? AND floor_number=?",
                 (building, floor),
             ).fetchone()
             floor_image = row["floor_image"] if row else None
+            rooms = conn.execute(
+                "SELECT room, pos_left, pos_top, width, height FROM rooms "
+                "WHERE building=? AND floor=? ORDER BY pos_top, pos_left",
+                (building, floor),
+            ).fetchall()
             nodes = conn.execute(
                 "SELECT * FROM floor_nodes WHERE building=? AND floor=? ORDER BY id",
                 (building, floor),
@@ -1274,6 +1280,7 @@ def floor_path_editor():
                            nodes=nodes_list,
                            edges=[dict(e) for e in edges],
                            nodes_by_id=nodes_by_id,
+                           rooms=[dict(r) for r in rooms],
                            selected_building=building,
                            selected_floor=floor)
 

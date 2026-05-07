@@ -40,6 +40,32 @@
   <div style="flex:1;min-width:0;">
     <div id="mapWrap" style="position:relative;display:inline-block;width:100%;cursor:crosshair;border:2px solid #ddd;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1);">
       <img src="{{ url_for('static', filename=floor_image) if floor_image else '' }}" id="mapImg" style="width:100%;height:auto;display:block;" alt="Floor Plan">
+
+      <!-- Room labels overlay -->
+      {% for room in rooms %}
+      {% if room.pos_left is not none and room.pos_top is not none %}
+      <div style="
+        position:absolute;
+        left:{{ room.pos_left }}%;
+        top:{{ room.pos_top }}%;
+        width:{{ room.width or 8 }}%;
+        height:{{ room.height or 4 }}%;
+        display:flex;align-items:center;justify-content:center;
+        background:rgba(41,128,185,0.15);
+        border:1px solid rgba(41,128,185,0.5);
+        border-radius:3px;
+        font-size:9px;font-weight:700;
+        color:#1a5276;
+        pointer-events:none;
+        text-align:center;
+        overflow:hidden;
+        line-height:1.1;
+        padding:1px;
+        box-sizing:border-box;
+      ">{{ room.room }}</div>
+      {% endif %}
+      {% endfor %}
+
       <svg id="editorSVG" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;">
         {% for edge in edges %}
         {% set na = nodes_by_id[edge.from_id] %}
