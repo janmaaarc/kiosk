@@ -54,9 +54,9 @@
                 <input type="hidden" name="top_pct" id="topPct">
 
                 <label style="display:block;font-size:13px;font-weight:700;margin-bottom:4px;">Building Number</label>
-                <input type="number" name="number" id="pinNumber" min="1" max="99"
+                <input type="text" name="number" id="pinNumber" maxlength="10"
                     style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:14px;margin-bottom:12px;box-sizing:border-box;"
-                    placeholder="e.g. 1">
+                    placeholder="e.g. 18A">
 
                 <label style="display:block;font-size:13px;font-weight:700;margin-bottom:4px;">Building Name</label>
                 <input type="text" name="name" id="pinName" required
@@ -87,6 +87,7 @@
                     <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ pin.name }}</span>
                     <form method="post" action="{{ url_for('content.campus_pin_delete', pin_id=pin.id) }}" style="margin:0;">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="next" value="placer">
                         <button type="submit" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:14px;padding:0;" title="Delete"
                             onclick="return confirm('Delete?')">×</button>
                     </form>

@@ -28,6 +28,10 @@
             <td style="padding:12px 16px;text-align:center;">{{ "%.2f"|format(pin.left_pct) }}%</td>
             <td style="padding:12px 16px;text-align:center;">{{ "%.2f"|format(pin.top_pct) }}%</td>
             <td style="padding:12px 16px;text-align:center;">
+                <a href="{{ url_for('content.campus_pin_edit', pin_id=pin.id) }}"
+                   style="background:#7b2d2d;color:#fff;padding:6px 14px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;margin-right:6px;">
+                    Edit
+                </a>
                 <form method="post" action="{{ url_for('content.campus_pin_delete', pin_id=pin.id) }}"
                       style="display:inline;">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">

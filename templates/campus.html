@@ -58,6 +58,82 @@
         pointer-events: none;
       }
 
+      /* Lock admin icon — style.css sets size but no display/flex, so SVG bleeds out */
+      a.icon {
+        width: 44px !important; height: 44px !important;
+        min-width: 44px !important; min-height: 44px !important;
+        max-width: 44px !important; max-height: 44px !important;
+        display: flex !important; align-items: center !important; justify-content: center !important;
+        border: 2px solid #e0c0c0;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.92);
+        cursor: pointer; text-decoration: none; color: #333;
+        flex-shrink: 0;
+      }
+
+      /* Defeat style.css: input { font-size:1.3rem; padding:15px } */
+      .top-right.search-wrap input {
+        font-size: 15px !important;
+        padding: 14px 20px 14px 48px !important;
+      }
+
+      #searchSuggestions {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        width: 320px;
+        background: rgba(255,255,255,0.97);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+        overflow: hidden;
+        display: none;
+        z-index: 3100;
+        max-height: 360px;
+        overflow-y: auto;
+      }
+      #searchSuggestions.open { display: block; }
+      .search-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        cursor: pointer;
+        border-bottom: 1px solid #f5f0f0;
+        transition: background 0.12s;
+      }
+      .search-item:last-child { border-bottom: none; }
+      .search-item:hover, .search-item:active { background: #fdf5f5; }
+      .search-item-badge {
+        background: #7b2d2d;
+        color: #fff;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 900;
+        flex-shrink: 0;
+      }
+      .search-item-name {
+        font-size: 14px;
+        font-weight: 700;
+        color: #222;
+        letter-spacing: 0.3px;
+      }
+      .search-item-name em {
+        color: #7b2d2d;
+        font-style: normal;
+      }
+      .search-no-results {
+        padding: 18px;
+        text-align: center;
+        font-size: 13px;
+        color: #aaa;
+        font-weight: 600;
+      }
+
       .building {
         position: absolute;
         background: transparent;
@@ -420,7 +496,10 @@
                 onclick="goBack()">
               </div>
               <div class="top-right search-wrap" style="display:flex;align-items:center;gap:10px;">
-                <input id="buildingSearch" type="text" placeholder="Search buildings…">
+                <div style="position:relative;">
+                  <input id="buildingSearch" type="text" placeholder="Search buildings…" autocomplete="off">
+                  <div id="searchSuggestions"></div>
+                </div>
                 <a href="/admin" class="icon" title="Admin">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="#333"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
                 </a>
@@ -1241,33 +1320,96 @@ if(new URLSearchParams(window.location.search).get("mobile") === "1"){
   document.head.appendChild(style);
 }
 
-const input = document.querySelector('.top-right input');
+(function() {
+  var input = document.getElementById('buildingSearch');
+  var sugBox = document.getElementById('searchSuggestions');
+  var _pins  = [];
 
-input.addEventListener('input', () => {
-  const value = input.value.toLowerCase();
+  // Populated after loadCampusPins fetches
+  window._registerPinsForSearch = function(pins) { _pins = pins; };
 
-  document.querySelectorAll('.building').forEach(b => {
-    if(b.innerText.toLowerCase().includes(value)){
-      b.classList.add("active");
-    } else {
-      b.classList.remove("active");
-    }
-  });
-});
+  function highlight(text, query) {
+    if (!query) return document.createTextNode(text);
+    var idx = text.toLowerCase().indexOf(query.toLowerCase());
+    if (idx === -1) return document.createTextNode(text);
+    var span = document.createElement('span');
+    span.appendChild(document.createTextNode(text.slice(0, idx)));
+    var em = document.createElement('em');
+    em.textContent = text.slice(idx, idx + query.length);
+    span.appendChild(em);
+    span.appendChild(document.createTextNode(text.slice(idx + query.length)));
+    return span;
+  }
 
-input.addEventListener('keypress', (e) => {
-  if (e.key === "Enter") {
-    const value = input.value.toUpperCase().trim();
+  function openSuggestions(query) {
+    sugBox.innerHTML = '';
+    var q = query.trim().toLowerCase();
+    if (!q) { sugBox.classList.remove('open'); return; }
 
-    showDirections(value);
-
-    const query = new URLSearchParams({
-      location: value
+    var matches = _pins.filter(function(p) {
+      return p.name.toLowerCase().includes(q) ||
+             (p.number && p.number.toString().toLowerCase().includes(q));
     });
 
-    window.history.replaceState(null, "", "?" + query.toString());
+    if (!matches.length) {
+      var none = document.createElement('div');
+      none.className = 'search-no-results';
+      none.textContent = 'No buildings found';
+      sugBox.appendChild(none);
+      sugBox.classList.add('open');
+      return;
+    }
+
+    matches.forEach(function(pin) {
+      var item = document.createElement('div');
+      item.className = 'search-item';
+
+      var badge = document.createElement('div');
+      badge.className = 'search-item-badge';
+      badge.textContent = pin.number || '•';
+
+      var nameEl = document.createElement('div');
+      nameEl.className = 'search-item-name';
+      nameEl.appendChild(highlight(pin.name, q));
+
+      item.appendChild(badge);
+      item.appendChild(nameEl);
+
+      item.addEventListener('click', function() {
+        input.value = pin.name;
+        sugBox.classList.remove('open');
+        selectPin(pin);
+      });
+
+      sugBox.appendChild(item);
+    });
+
+    sugBox.classList.add('open');
   }
-});
+
+  function selectPin(pin) {
+    // Find the DOM element for this pin and trigger tooltip
+    var el = null;
+    document.querySelectorAll('.building').forEach(function(b) {
+      if (b.dataset.name === pin.name) el = b;
+    });
+    if (el && typeof _showPinTooltip === 'function') {
+      _showPinTooltip(pin, el);
+    }
+    // Clear highlight from all, mark selected
+    document.querySelectorAll('.building').forEach(function(b) { b.classList.remove('active'); });
+    if (el) el.classList.add('active');
+  }
+
+  input.addEventListener('input', function() { openSuggestions(input.value); });
+  input.addEventListener('focus', function() { if (input.value.trim()) openSuggestions(input.value); });
+
+  document.addEventListener('click', function(e) {
+    if (!sugBox.contains(e.target) && e.target !== input) {
+      sugBox.classList.remove('open');
+    }
+  });
+})();
 
 
 updateYouHere(80, 395);
@@ -1277,6 +1419,9 @@ updateYouHere(80, 395);
   fetch('/api/campus-pins')
     .then(function(r){ return r.json(); })
     .then(function(pins) {
+      if (typeof window._registerPinsForSearch === 'function') {
+        window._registerPinsForSearch(pins);
+      }
       var container = document.querySelector('.map-container');
       if (!container) return;
       pins.forEach(function(pin) {
@@ -1315,6 +1460,29 @@ updateYouHere(80, 395);
         });
         container.appendChild(el);
       });
+
+      // Populate legend bar marquee
+      var legendBar = document.getElementById('pinLegendBar');
+      var legendTrack = document.getElementById('pinLegendTrack');
+      if (legendBar && legendTrack && pins.length) {
+        function makeItem(pin) {
+          var item = document.createElement('div');
+          item.style.cssText = 'display:flex;align-items:center;gap:6px;padding:0 14px;border-right:1px solid rgba(255,255,255,0.1);flex-shrink:0;height:36px;';
+          var badge = document.createElement('span');
+          badge.style.cssText = 'background:#7b2d2d;color:#fff;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;flex-shrink:0;';
+          badge.textContent = pin.number || '•';
+          var name = document.createElement('span');
+          name.style.cssText = 'font-size:10px;font-weight:700;letter-spacing:0.5px;color:rgba(255,255,255,0.85);white-space:nowrap;text-transform:uppercase;';
+          name.textContent = pin.name;
+          item.appendChild(badge);
+          item.appendChild(name);
+          return item;
+        }
+        // Build once, then duplicate for seamless loop
+        pins.forEach(function(pin) { legendTrack.appendChild(makeItem(pin)); });
+        pins.forEach(function(pin) { legendTrack.appendChild(makeItem(pin)); });
+        legendBar.style.display = 'flex';
+      }
     })
     .catch(function(err){ console.error('campus-pins load failed:', err); });
 })();
@@ -1323,13 +1491,71 @@ updateYouHere(80, 395);
 <script src="{{ url_for('static', filename='js/kiosk.js') }}"></script>
 
 <!-- Pin tooltip — inside map-container so position:absolute is relative to it -->
-<div id="pinTooltip" style="position:absolute;display:none;z-index:1500;pointer-events:auto;filter:drop-shadow(0 6px 18px rgba(0,0,0,0.5));">
-  <div style="background:#fff;border-radius:14px;padding:14px 18px 12px;min-width:180px;max-width:260px;">
-    <div id="ptNum" style="font-size:10px;font-weight:900;letter-spacing:2px;color:#7b2d2d;margin-bottom:4px;"></div>
-    <div id="ptName" style="font-size:16px;font-weight:900;color:#111;letter-spacing:0.5px;line-height:1.25;margin-bottom:12px;"></div>
-    <button id="ptBtn" style="display:block;width:100%;background:#7b2d2d;color:#fff;border:none;border-radius:8px;padding:10px 0;font-size:12px;font-weight:900;letter-spacing:1.5px;cursor:pointer;font-family:inherit;">GET DIRECTIONS →</button>
+<style>
+@keyframes ptFadeUp {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+#pinTooltip.pt-visible { animation: ptFadeUp 180ms cubic-bezier(0.16,1,0.3,1) both; }
+
+/* Override global button { width:300px; margin:15px; min-height:60px } from style.css */
+#ptClose {
+  position:static !important;
+  width:36px !important;
+  height:36px !important;
+  min-width:36px !important;
+  min-height:36px !important;
+  max-width:36px !important;
+  max-height:36px !important;
+  margin:0 !important;
+  padding:0 !important;
+  background:none !important;
+  border:none !important;
+  color:rgba(255,255,255,0.8) !important;
+  font-size:22px !important;
+  line-height:36px !important;
+  text-align:center !important;
+  cursor:pointer;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  flex-shrink:0 !important;
+}
+#ptBtn {
+  display:block !important;
+  width:100% !important;
+  min-width:0 !important;
+  min-height:44px !important;
+  max-width:none !important;
+  margin:0 !important;
+  padding:13px !important;
+  box-sizing:border-box !important;
+  background:#fff !important;
+  color:#7b2d2d !important;
+  border:none !important;
+  border-radius:10px !important;
+  font-size:12px !important;
+  font-weight:900 !important;
+  letter-spacing:2px !important;
+  text-transform:uppercase !important;
+  text-align:center !important;
+  font-family:inherit !important;
+  cursor:pointer;
+}
+</style>
+<div id="pinTooltip" style="position:absolute;display:none;z-index:1500;pointer-events:auto;">
+  <div style="background:#7b2d2d;border-radius:16px;width:280px;padding:12px 12px 14px;box-sizing:border-box;box-shadow:0 12px 40px rgba(0,0,0,0.4);">
+    <div id="ptNum" style="display:none;"></div>
+    <!-- header: spacer | name | × -->
+    <div style="display:flex;align-items:center;margin-bottom:12px;">
+      <div style="width:36px;flex-shrink:0;"></div>
+      <div id="ptName" style="flex:1;font-size:18px;font-weight:900;color:#fff;line-height:1.3;font-family:inherit;text-align:center;"></div>
+      <button id="ptClose" aria-label="Close">×</button>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,0.3);margin-bottom:12px;"></div>
+    <button id="ptBtn">GET DIRECTIONS →</button>
   </div>
-  <div style="width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:10px solid #fff;margin:0 auto;"></div>
+  <div style="width:0;height:0;border-left:12px solid transparent;border-right:12px solid transparent;border-top:12px solid #7b2d2d;margin:0 auto;"></div>
 </div>
 
 </div>
@@ -1342,12 +1568,21 @@ var _mapScale = 0.7;
   var ptNum   = document.getElementById('ptNum');
   var ptName  = document.getElementById('ptName');
   var ptBtn   = document.getElementById('ptBtn');
+  var ptClose = document.getElementById('ptClose');
+
+  function hideTooltip() {
+    tooltip.style.display = 'none';
+    tooltip.classList.remove('pt-visible');
+  }
+
+  if (ptClose) ptClose.addEventListener('click', hideTooltip);
 
   window._showPinTooltip = function(pin, anchorEl) {
-    ptNum.textContent  = pin.number ? 'BUILDING ' + pin.number : '';
+    ptNum.textContent  = '';
     ptName.textContent = pin.name;
+
     ptBtn.onclick = function() {
-      tooltip.style.display = 'none';
+      hideTooltip();
       showDirections(pin.name);
     };
 
@@ -1361,8 +1596,12 @@ var _mapScale = 0.7;
     var topY    = (aRect.top  - cRect.top) / scale;
 
     tooltip.style.display = 'block';
-    var tW = tooltip.offsetWidth  || 220;
-    var tH = tooltip.offsetHeight || 115;
+    tooltip.classList.remove('pt-visible');
+    void tooltip.offsetWidth; // reflow to restart animation
+    tooltip.classList.add('pt-visible');
+
+    var tW = tooltip.offsetWidth  || 280;
+    var tH = tooltip.offsetHeight || 160;
 
     var containerW = container.offsetWidth || 1920;
     var left = Math.max(8, Math.min(centerX - tW / 2, containerW - tW - 8));
@@ -1376,7 +1615,7 @@ var _mapScale = 0.7;
     if (!tooltip || tooltip.style.display === 'none') return;
     if (tooltip.contains(e.target)) return;
     if (e.target.classList.contains('building')) return;
-    tooltip.style.display = 'none';
+    hideTooltip();
   });
 })();
 </script>
@@ -1433,9 +1672,16 @@ var _mapScale = 0.7;
   height:36px;
 ">
   <span style="font-size:9px;font-weight:900;letter-spacing:2px;color:rgba(255,255,255,0.45);padding:0 10px;flex-shrink:0;text-transform:uppercase;">BUILDINGS</span>
-  <div id="pinLegendScroll" style="display:flex;gap:0;overflow-x:auto;flex:1;scrollbar-width:none;align-items:center;">
+  <div id="pinLegendScroll" style="display:flex;gap:0;flex:1;overflow:hidden;align-items:center;">
+    <div id="pinLegendTrack" style="display:flex;gap:0;align-items:center;animation:legendScroll 40s linear infinite;will-change:transform;"></div>
   </div>
 </div>
+<style>
+@keyframes legendScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+</style>
 
 <div class="legend-bar">
   <span class="leg-title">LEGENDS</span>

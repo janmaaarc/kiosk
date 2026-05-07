@@ -1060,7 +1060,7 @@ def api_screensaver_images():
 def campus_pins_list():
     with db_connection() as conn:
         pins = conn.execute(
-            "SELECT * FROM campus_pins ORDER BY number, id"
+            "SELECT * FROM campus_pins ORDER BY CAST(number AS INTEGER), number, id"
         ).fetchall()
     return render_template("admin/campus_pins.html", pins=[dict(p) for p in pins])
 
@@ -1069,7 +1069,7 @@ def campus_pins_list():
 @login_required
 def campus_pins_placer():
     if request.method == "POST":
-        number = request.form.get("number", type=int)
+        number = request.form.get("number", "").strip()[:10] or None
         name = request.form.get("name", "").strip()[:200]
         left_pct = request.form.get("left_pct", type=float)
         top_pct = request.form.get("top_pct", type=float)
@@ -1085,17 +1085,43 @@ def campus_pins_placer():
         return redirect(url_for("content.campus_pins_placer"))
     with db_connection() as conn:
         pins = conn.execute(
-            "SELECT * FROM campus_pins ORDER BY number, id"
+            "SELECT * FROM campus_pins ORDER BY CAST(number AS INTEGER), number, id"
         ).fetchall()
     return render_template("admin/campus_placer.html", pins=[dict(p) for p in pins])
+
+
+@content_bp.route("/admin/campus-pins/<int:pin_id>/edit", methods=["GET", "POST"])
+@login_required
+def campus_pin_edit(pin_id: int):
+    with db_connection() as conn:
+        pin = conn.execute("SELECT * FROM campus_pins WHERE id=?", (pin_id,)).fetchone()
+    if pin is None:
+        abort(404)
+    if request.method == "POST":
+        number = request.form.get("number", "").strip()[:10] or None
+        name = request.form.get("name", "").strip()[:200]
+        left_pct = request.form.get("left_pct", type=float)
+        top_pct = request.form.get("top_pct", type=float)
+        if name and left_pct is not None and top_pct is not None:
+            with db_connection() as conn:
+                conn.execute(
+                    "UPDATE campus_pins SET number=?, name=?, left_pct=?, top_pct=? WHERE id=?",
+                    (number, name, left_pct, top_pct, pin_id),
+                )
+                conn.commit()
+        return redirect(url_for("content.campus_pins_list"))
+    return render_template("admin/campus_pin_form.html", pin=dict(pin))
 
 
 @content_bp.route("/admin/campus-pins/<int:pin_id>/delete", methods=["POST"])
 @login_required
 def campus_pin_delete(pin_id: int):
+    next_url = request.form.get("next", "list")
     with db_connection() as conn:
         conn.execute("DELETE FROM campus_pins WHERE id=?", (pin_id,))
         conn.commit()
+    if next_url == "placer":
+        return redirect(url_for("content.campus_pins_placer"))
     return redirect(url_for("content.campus_pins_list"))
 
 
@@ -1104,6 +1130,6 @@ def campus_pin_delete(pin_id: int):
 def api_campus_pins():
     with db_connection() as conn:
         pins = conn.execute(
-            "SELECT id, number, name, left_pct, top_pct FROM campus_pins ORDER BY number, id"
+            "SELECT id, number, name, left_pct, top_pct FROM campus_pins ORDER BY CAST(number AS INTEGER), number, id"
         ).fetchall()
     return jsonify([dict(p) for p in pins])

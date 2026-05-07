@@ -1,0 +1,47 @@
+{% extends "admin/base.html" %}
+{% block title %}Edit Pin{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+    <a href="{{ url_for('content.campus_pins_list') }}" style="color:#7b2d2d;text-decoration:none;font-size:14px;">← Back</a>
+    <h1 style="margin:0;">Edit Pin</h1>
+</div>
+
+<div class="form-card">
+    <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+            <label>Building Number</label>
+            <input type="text" name="number" maxlength="10"
+                   value="{{ pin.number or '' }}"
+                   placeholder="e.g. 18A">
+        </div>
+
+        <div class="form-group">
+            <label>Building Name</label>
+            <input type="text" name="name" required maxlength="200"
+                   value="{{ pin.name }}">
+        </div>
+
+        <div style="display:flex;gap:16px;">
+            <div class="form-group" style="flex:1;">
+                <label>Left %</label>
+                <input type="number" name="left_pct" step="0.01" min="0" max="100" required
+                       value="{{ '%.2f'|format(pin.left_pct) }}">
+                <span class="hint">Horizontal position on map (0–100)</span>
+            </div>
+            <div class="form-group" style="flex:1;">
+                <label>Top %</label>
+                <input type="number" name="top_pct" step="0.01" min="0" max="100" required
+                       value="{{ '%.2f'|format(pin.top_pct) }}">
+                <span class="hint">Vertical position on map (0–100)</span>
+            </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:8px;">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="{{ url_for('content.campus_pins_list') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
