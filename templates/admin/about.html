@@ -17,7 +17,7 @@
                onchange="previewUpload('officials_file','officials_image')">
       </div>
       {% if officials_image %}
-      <img src="/static/{{ officials_image }}" style="margin-top:10px;max-width:400px;border-radius:6px;">
+      <img src="{{ url_for('static', filename=officials_image) }}" style="margin-top:10px;max-width:400px;border-radius:6px;">
       {% endif %}
     </div>
     <button type="submit" class="btn btn-primary">Save Image</button>
@@ -46,7 +46,7 @@
         <td>{{ r.id }}</td>
         <td>
           {% if r.photo %}
-          <img src="/static/{{ r.photo }}" class="img-thumb" style="border-radius:50%;width:44px;height:44px;object-fit:cover;">
+          <img src="{{ url_for('static', filename=r.photo) }}" class="img-thumb" style="border-radius:50%;width:44px;height:44px;object-fit:cover;">
           {% else %}
           <div style="width:44px;height:44px;border-radius:50%;background:#e0c0c0;display:flex;align-items:center;justify-content:center;font-weight:700;color:#7b2d2d;font-size:16px;">
             {{ r.name[0]|upper }}
@@ -71,6 +71,8 @@
           </form>
         </td>
       </tr>
+      {% else %}
+      <tr><td colspan="5" style="text-align:center;color:#888;padding:20px">No researchers yet. Add one below.</td></tr>
       {% endfor %}
     </tbody>
   </table>
@@ -140,7 +142,8 @@ function openEditBtn(btn) {
   openEdit(btn.dataset.id, btn.dataset.name, btn.dataset.photo, btn.dataset.order);
 }
 function openEdit(id, name, photo, order) {
-  document.getElementById('editForm').action = '/admin/about/researcher/' + id + '/edit';
+  var base = '{{ url_for("content.about_researcher_edit", rid=0) }}'.replace('/0/', '/' + id + '/');
+  document.getElementById('editForm').action = base;
   document.getElementById('edit_name').value = name;
   document.getElementById('edit_photo').value = photo;
   document.getElementById('edit_order').value = order;

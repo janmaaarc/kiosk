@@ -1,7 +1,7 @@
 {% extends "admin/base.html" %}
 {% block title %}Campus Path Editor{% endblock %}
 {% block content %}
-<h1 style="margin-bottom:4px;">Campus Path Editor</h1>
+<h1 class="page-title">Campus Path Editor</h1>
 <p style="color:#888;margin-bottom:16px;font-size:14px;">Click map to place nodes. Select two nodes to connect them. Use DELETE mode to remove.</p>
 
 <div style="display:flex;gap:24px;align-items:flex-start;">
@@ -90,7 +90,7 @@
           <span style="flex:1;color:#888;font-size:11px;">{{ "%.1f"|format(node.x_pct) }}%, {{ "%.1f"|format(node.y_pct) }}%</span>
           <form method="post" action="{{ url_for('content.campus_path_node_delete', node_id=node.id) }}" style="margin:0;">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:14px;padding:0;"
+            <button type="submit" class="btn btn-danger btn-sm" style="padding:0 8px;"
               onclick="return confirm('Delete node {{ node.label | e }}?')">×</button>
           </form>
         </div>
@@ -111,7 +111,7 @@
           <span style="flex:1;font-size:12px;">{{ nodes_by_id[edge.node_a].label }} ↔ {{ nodes_by_id[edge.node_b].label }}</span>
           <form method="post" action="{{ url_for('content.campus_path_edge_delete', edge_id=edge.id) }}" style="margin:0;">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button type="submit" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:14px;padding:0;"
+            <button type="submit" class="btn btn-danger btn-sm" style="padding:0 8px;"
               onclick="return confirm('Delete this edge?')">×</button>
           </form>
         </div>

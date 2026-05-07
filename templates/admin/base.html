@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -47,7 +47,7 @@ tr:hover td { background: #fdf5f5; }
 .btn-primary { background: #7b2d2d; color: #fff; }
 .btn-secondary { background: #555; color: #fff; }
 .btn-danger { background: #c0392b; color: #fff; }
-.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-sm { padding: 9px 12px; font-size: 12px; min-height: 44px; display: inline-flex; align-items: center; }
 
 .form-card { background: #fff; border-radius: 8px; padding: 28px 32px;
     box-shadow: 0 1px 3px rgba(0,0,0,.1); max-width: 700px; }
@@ -70,17 +70,29 @@ textarea { resize: vertical; min-height: 100px; }
 .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .img-thumb { width: 48px; height: 36px; object-fit: cover; border-radius: 3px; }
 
+.dashboard-card { background:#fff; border-radius:8px; padding:24px;
+    box-shadow:0 1px 3px rgba(0,0,0,.1); cursor:pointer; text-decoration:none;
+    display:block; transition:box-shadow .15s; }
+.dashboard-card:hover { box-shadow:0 4px 12px rgba(0,0,0,.15); }
+.dashboard-card-title { font-size:28px; font-weight:700; }
+.dashboard-card-desc { color:#666; margin-top:6px; font-size:14px; }
+.dashboard-card-primary { border-left:4px solid #7b2d2d; }
+.dashboard-card-primary .dashboard-card-title { color:#7b2d2d; }
+.dashboard-card-secondary { border-left:4px solid #555; }
+.dashboard-card-secondary .dashboard-card-title { color:#555; }
+
 .expired-badge { background: #ffc107; color: #333; font-size: 11px;
     padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
 
 .pagination { display:flex; gap:8px; align-items:center; margin-top:16px; }
-.pagination a { padding:6px 14px; border-radius:5px; background:#fff;
-    border:1px solid #ddd; color:#333; text-decoration:none; font-size:13px; }
+.pagination a { padding:11px 14px; border-radius:5px; background:#fff;
+    border:1px solid #ddd; color:#333; text-decoration:none; font-size:13px;
+    min-height:44px; display:inline-flex; align-items:center; }
 .pagination a:hover { background:#f0e8e8; border-color:#7b2d2d; }
-.pagination .current { padding:6px 14px; border-radius:5px; background:#7b2d2d;
-    color:#fff; font-size:13px; font-weight:700; }
-.pagination .disabled { padding:6px 14px; border-radius:5px; background:#f4f4f4;
-    color:#bbb; font-size:13px; cursor:default; }
+.pagination .current { padding:11px 14px; border-radius:5px; background:#7b2d2d;
+    color:#fff; font-size:13px; font-weight:700; min-height:44px; display:inline-flex; align-items:center; }
+.pagination .disabled { padding:11px 14px; border-radius:5px; background:#f4f4f4;
+    color:#bbb; font-size:13px; cursor:default; min-height:44px; display:inline-flex; align-items:center; }
 </style>
 </head>
 <body>
@@ -108,7 +120,6 @@ textarea { resize: vertical; min-height: 100px; }
             About Us
         </a>
         <div class="section">Data</div>
-        <a href="{{ url_for('admin.rooms') }}" class="{% if request.endpoint == 'admin.rooms' %}active{% endif %}">Rooms</a>
         <a href="{{ url_for('content.building_floors_list') }}" class="{% if 'building_floor' in request.endpoint %}active{% endif %}">Building Floors</a>
         <a href="{{ url_for('content.rooms_list') }}" class="{% if request.endpoint == 'content.rooms_list' or request.endpoint == 'content.room_add' or request.endpoint == 'content.room_edit' %}active{% endif %}">Room Labels</a>
         <a href="{{ url_for('content.room_placer') }}" class="{% if request.endpoint == 'content.room_placer' %}active{% endif %}">Room Placer</a>

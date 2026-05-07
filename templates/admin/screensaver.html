@@ -2,24 +2,20 @@
 {% block title %}Screensaver Images{% endblock %}
 
 {% block content %}
-<div class="toolbar">
-    <h1 class="page-title">Screensaver Images</h1>
-</div>
-
-<div class="form-card" style="margin-bottom:24px;">
-    <h3 style="margin-bottom:14px;font-size:15px;font-weight:700;">Upload New Image</h3>
+<div class="toolbar" style="align-items:flex-end;flex-wrap:wrap;gap:16px;">
+    <h1 class="page-title" style="flex-shrink:0;">Screensaver Images</h1>
     <form method="POST" action="{{ url_for('content.screensaver_upload') }}" enctype="multipart/form-data"
-          style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+          style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div>
-            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px;">Image File</label>
+            <label style="font-size:12px;font-weight:600;display:block;margin-bottom:3px;">Image File</label>
             <input type="file" name="file" accept="image/*" required>
         </div>
         <div>
-            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:4px;">Display Order</label>
-            <input type="number" name="display_order" value="0" min="0" style="width:80px;padding:8px;border-radius:6px;border:1px solid #ddd;">
+            <label style="font-size:12px;font-weight:600;display:block;margin-bottom:3px;">Order</label>
+            <input type="number" name="display_order" value="0" min="0" style="width:70px;padding:8px;border-radius:6px;border:1px solid #ddd;font-size:13px;">
         </div>
-        <button type="submit" class="btn btn-primary">Upload</button>
+        <button type="submit" class="btn btn-primary">+ Upload</button>
     </form>
 </div>
 

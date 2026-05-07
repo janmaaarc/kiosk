@@ -1,7 +1,7 @@
 {% extends "admin/base.html" %}
 {% block title %}Campus Pin Placer{% endblock %}
 {% block content %}
-<h1 style="margin-bottom:4px;">Campus Pin Placer</h1>
+<h1 class="page-title">Campus Pin Placer</h1>
 <p style="color:#888;margin-bottom:16px;font-size:14px;">Click on the map to place a building pin. The coordinates are saved as percentages so they scale with any screen size.</p>
 
 <div style="display:flex;gap:24px;align-items:flex-start;">
@@ -93,8 +93,8 @@
                     <form method="post" action="{{ url_for('content.campus_pin_delete', pin_id=pin.id) }}" style="margin:0;">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" name="next" value="placer">
-                        <button type="submit" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:14px;padding:0;" title="Delete"
-                            onclick="return confirm('Delete?')">×</button>
+                        <button type="submit" class="btn btn-danger btn-sm" title="Delete"
+                            onclick="return confirm('Delete?')" style="padding:0 8px;">×</button>
                     </form>
                 </div>
             {% endfor %}

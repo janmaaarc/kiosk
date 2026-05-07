@@ -208,6 +208,7 @@ def event_add():
                 ),
             )
             conn.commit()
+        flash("Event saved.", "success")
         return redirect(url_for("content.events_list"))
     return render_template("admin/event_form.html", event=None)
 
@@ -242,6 +243,7 @@ def event_edit(event_id: int):
                 ),
             )
             conn.commit()
+            flash("Event updated.", "success")
             return redirect(url_for("content.events_list"))
 
     return render_template("admin/event_form.html", event=event)
@@ -293,6 +295,7 @@ def announcement_add():
                 ),
             )
             conn.commit()
+        flash("Announcement saved.", "success")
         return redirect(url_for("content.announcements_list"))
     return render_template("admin/announcement_form.html", announcement=None)
 
@@ -323,6 +326,7 @@ def announcement_edit(ann_id: int):
                 ),
             )
             conn.commit()
+            flash("Announcement updated.", "success")
             return redirect(url_for("content.announcements_list"))
 
     return render_template("admin/announcement_form.html", announcement=ann)
@@ -344,9 +348,16 @@ def announcement_delete(ann_id: int):
 @content_bp.route("/admin/offices")
 @login_required
 def offices_list():
+    per = 30
     with db_connection() as conn:
-        rows = conn.execute("SELECT * FROM offices ORDER BY id").fetchall()
-    return render_template("admin/offices.html", offices=rows)
+        total = conn.execute("SELECT COUNT(*) FROM offices").fetchone()[0]
+        total_pages = max(1, -(-total // per))
+        page = max(1, min(request.args.get("page", 1, type=int), total_pages))
+        rows = conn.execute(
+            "SELECT * FROM offices ORDER BY id LIMIT ? OFFSET ?",
+            (per, (page - 1) * per),
+        ).fetchall()
+    return render_template("admin/offices.html", offices=rows, page=page, total_pages=total_pages)
 
 
 @content_bp.route("/admin/offices/add", methods=["GET", "POST"])
@@ -379,6 +390,7 @@ def office_add():
                 ),
             )
             conn.commit()
+        flash("Office saved.", "success")
         return redirect(url_for("content.offices_list"))
     return render_template("admin/office_form.html", office=None, staff=[])
 
@@ -440,6 +452,7 @@ def office_edit(office_id: int):
                         (val.strip(), fid),
                     )
             conn.commit()
+            flash("Office updated.", "success")
             return redirect(url_for("content.offices_list"))
 
         staff = [dict(r) for r in conn.execute(
@@ -467,11 +480,16 @@ def office_delete(office_id: int):
 @content_bp.route("/admin/building-floors")
 @login_required
 def building_floors_list():
+    per = 30
     with db_connection() as conn:
+        total = conn.execute("SELECT COUNT(*) FROM building_floors").fetchone()[0]
+        total_pages = max(1, -(-total // per))
+        page = max(1, min(request.args.get("page", 1, type=int), total_pages))
         rows = conn.execute(
-            "SELECT * FROM building_floors ORDER BY building, floor_number"
+            "SELECT * FROM building_floors ORDER BY building, floor_number LIMIT ? OFFSET ?",
+            (per, (page - 1) * per),
         ).fetchall()
-    return render_template("admin/building_floors.html", floors=rows)
+    return render_template("admin/building_floors.html", floors=rows, page=page, total_pages=total_pages)
 
 
 @content_bp.route("/admin/building-floors/add", methods=["GET", "POST"])
@@ -491,6 +509,7 @@ def building_floor_add():
                 ),
             )
             conn.commit()
+        flash("Floor saved.", "success")
         return redirect(url_for("content.building_floors_list"))
     return render_template("admin/building_floor_form.html", floor=None)
 
@@ -519,6 +538,7 @@ def building_floor_edit(floor_id: int):
                 ),
             )
             conn.commit()
+            flash("Floor updated.", "success")
             return redirect(url_for("content.building_floors_list"))
 
     return render_template("admin/building_floor_form.html", floor=floor)
@@ -751,6 +771,7 @@ def faculty_add():
                 ),
             )
             conn.commit()
+        flash("Faculty member saved.", "success")
         return redirect(url_for("content.faculty_list"))
     return render_template("admin/faculty_form.html", member=None)
 
@@ -789,6 +810,7 @@ def faculty_edit(member_id: int):
                 ),
             )
             conn.commit()
+            flash("Faculty member updated.", "success")
             return redirect(url_for("content.faculty_list"))
 
     return render_template("admin/faculty_form.html", member=member)
@@ -822,8 +844,11 @@ def rfid_logs_clear():
 
 @content_bp.route("/api/faculty/<int:member_id>/schedule")
 def faculty_schedule_api(member_id: int):
+    # Kiosk-facing endpoint: visitors are blocked, students/faculty allowed via session role.
+    # Admin session also passes (admin has no user_role key, defaults to "visitor" → blocked
+    # when accessing kiosk profiles directly, which is fine).
     from flask import session as _session
-    if _session.get("user_role", "visitor") == "visitor":
+    if _session.get("user_role", "visitor") == "visitor" and "admin" not in _session:
         return jsonify({"error": "forbidden"}), 403
     with db_connection() as conn:
         row = conn.execute("SELECT schedule FROM faculty WHERE id = ?", (member_id,)).fetchone()
@@ -841,6 +866,7 @@ def faculty_delete(member_id: int):
     with db_connection() as conn:
         conn.execute("DELETE FROM faculty WHERE id = ?", (member_id,))
         conn.commit()
+    flash("Faculty member deleted.", "success")
     return redirect(url_for("content.faculty_list"))
 
 

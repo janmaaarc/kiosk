@@ -9,27 +9,27 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
     <div class="form-group">
-        <label>Building *</label>
-        <input type="text" name="building"
+        <label for="bf-building">Building *</label>
+        <input type="text" id="bf-building" name="building"
                value="{{ floor['building'] if floor else '' }}"
                placeholder="e.g. Rodriguez Building" required>
     </div>
 
     <div class="form-group">
-        <label>Floor Number *</label>
-        <input type="number" name="floor_number" min="1"
+        <label for="bf-floor-number">Floor Number *</label>
+        <input type="number" id="bf-floor-number" name="floor_number" min="1"
                value="{{ floor['floor_number'] if floor else 1 }}" required>
     </div>
 
     <div class="form-group">
-        <label>Floor Label *</label>
-        <input type="text" name="floor_label"
+        <label for="bf-floor-label">Floor Label *</label>
+        <input type="text" id="bf-floor-label" name="floor_label"
                value="{{ floor['floor_label'] if floor else '' }}"
                placeholder="e.g. Ground Floor" required>
     </div>
 
     <div class="form-group">
-        <label>Floor Plan Image <span style="font-weight:400;color:#888">(path under static/)</span></label>
+        <label for="floor-image-path">Floor Plan Image <span style="font-weight:400;color:#888">(path under static/)</span></label>
         <div class="upload-row">
             <input type="text" id="floor-image-path" name="floor_image"
                    value="{{ floor['floor_image'] if floor else '' }}"
