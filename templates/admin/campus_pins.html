@@ -1,0 +1,48 @@
+{% extends "admin/base.html" %}
+{% block title %}Campus Pins{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+    <h1 style="margin:0;">Campus Pins</h1>
+    <a href="{{ url_for('content.campus_pins_placer') }}"
+       style="background:#7b2d2d;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700;">
+        + Place New Pin
+    </a>
+</div>
+
+{% if pins %}
+<table style="width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);">
+    <thead>
+        <tr style="background:#7b2d2d;color:#fff;">
+            <th style="padding:12px 16px;text-align:left;">#</th>
+            <th style="padding:12px 16px;text-align:left;">Name</th>
+            <th style="padding:12px 16px;text-align:center;">Left %</th>
+            <th style="padding:12px 16px;text-align:center;">Top %</th>
+            <th style="padding:12px 16px;text-align:center;">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for pin in pins %}
+        <tr style="border-bottom:1px solid #f0e8e8;">
+            <td style="padding:12px 16px;font-weight:700;color:#7b2d2d;">{{ pin.number or '—' }}</td>
+            <td style="padding:12px 16px;">{{ pin.name }}</td>
+            <td style="padding:12px 16px;text-align:center;">{{ "%.2f"|format(pin.left_pct) }}%</td>
+            <td style="padding:12px 16px;text-align:center;">{{ "%.2f"|format(pin.top_pct) }}%</td>
+            <td style="padding:12px 16px;text-align:center;">
+                <form method="post" action="{{ url_for('content.campus_pin_delete', pin_id=pin.id) }}"
+                      style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" data-pin-name="{{ pin.name | e }}"
+                        onclick="return confirm('Delete pin ' + this.dataset.pinName + '?')"
+                        style="background:#c0392b;color:#fff;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;">
+                        Delete
+                    </button>
+                </form>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p style="color:#888;text-align:center;padding:40px;">No pins yet. Use the placer to add building markers.</p>
+{% endif %}
+{% endblock %}

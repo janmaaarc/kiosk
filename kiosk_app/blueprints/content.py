@@ -1051,3 +1051,59 @@ def api_screensaver_images():
             "SELECT filename FROM screensaver_images WHERE active = 1 ORDER BY display_order, id"
         ).fetchall()
     return jsonify([r["filename"] for r in rows])
+
+
+# ── Campus Pins ──────────────────────────────────────────────────────────────
+
+@content_bp.route("/admin/campus-pins")
+@login_required
+def campus_pins_list():
+    with db_connection() as conn:
+        pins = conn.execute(
+            "SELECT * FROM campus_pins ORDER BY number, id"
+        ).fetchall()
+    return render_template("admin/campus_pins.html", pins=[dict(p) for p in pins])
+
+
+@content_bp.route("/admin/campus-pins/placer", methods=["GET", "POST"])
+@login_required
+def campus_pins_placer():
+    if request.method == "POST":
+        number = request.form.get("number", type=int)
+        name = request.form.get("name", "").strip()[:200]
+        left_pct = request.form.get("left_pct", type=float)
+        top_pct = request.form.get("top_pct", type=float)
+        if (name
+                and left_pct is not None and 0.0 <= left_pct <= 100.0
+                and top_pct is not None and 0.0 <= top_pct <= 100.0):
+            with db_connection() as conn:
+                conn.execute(
+                    "INSERT INTO campus_pins (number, name, left_pct, top_pct) VALUES (?, ?, ?, ?)",
+                    (number, name, left_pct, top_pct),
+                )
+                conn.commit()
+        return redirect(url_for("content.campus_pins_placer"))
+    with db_connection() as conn:
+        pins = conn.execute(
+            "SELECT * FROM campus_pins ORDER BY number, id"
+        ).fetchall()
+    return render_template("admin/campus_placer.html", pins=[dict(p) for p in pins])
+
+
+@content_bp.route("/admin/campus-pins/<int:pin_id>/delete", methods=["POST"])
+@login_required
+def campus_pin_delete(pin_id: int):
+    with db_connection() as conn:
+        conn.execute("DELETE FROM campus_pins WHERE id=?", (pin_id,))
+        conn.commit()
+    return redirect(url_for("content.campus_pins_list"))
+
+
+@content_bp.route("/api/campus-pins")
+@limiter.limit("60/minute")
+def api_campus_pins():
+    with db_connection() as conn:
+        pins = conn.execute(
+            "SELECT id, number, name, left_pct, top_pct FROM campus_pins ORDER BY number, id"
+        ).fetchall()
+    return jsonify([dict(p) for p in pins])

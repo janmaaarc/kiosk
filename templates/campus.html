@@ -153,9 +153,10 @@
         border: 1px dashed rgba(255,255,255,0.3);
       }
 
-          @keyframes pulse { 
-            from { transform: scale(1.05); } to { transform: scale(1.1); } 
-          } 
+          @keyframes pulse {
+            from { transform: scale(1.05); } to { transform: scale(1.1); }
+          }
+
 
           .road.active {
             background: #8e44ad;
@@ -427,96 +428,14 @@
             
             <div class="map-wrapper"> 
               <div class="map-container"> 
-                <img src="/static/images/roofs.png"
+                <img src="/static/images/labeled_map.jpg"
                      style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:fill;z-index:0;display:block;">
                 <svg id="routeSVG" width="1920" height="813" style="position:absolute; top:0; left:0; pointer-events:none; z-index: 999;"> 
                   <path id="routeLine" fill="none" stroke="#8e44ad" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/> 
                   <circle id="routeDot" r="8" fill="#8e44ad"/> 
                 </svg> 
 
-                  <!-- BUILDING OVERLAYS — pixel-accurate from roofs.png flood-fill + labeled map analysis -->
-
-                  <!-- TOP AREA -->
-                  <div class="building" data-name="RODRIGUEZ BUILDING" data-page="/rodriguez_building"
-                    style="top:21px; left:513px; width:668px; height:78px;">
-                    <span class="bld-label">RODRIGUEZ BLDG</span></div>
-
-                  <div class="building" data-name="MIST-NCESTD BUILDING" data-page="/mist_ncestd_building"
-                    style="top:63px; left:130px; width:305px; height:175px;">
-                    <span class="bld-label">MIST-NCESTD BLDG</span></div>
-
-                  <div class="building" data-name="Ylagan Hall" data-page="/ylagan_hall"
-                    style="top:100px; left:430px; width:80px; height:95px;">
-                    <span class="bld-label">YLAGAN HALL</span></div>
-
-                  <div class="building" data-name="MIST-NCESTD DORM" data-page="/mist_ncestd_dorm"
-                    style="top:60px; left:1190px; width:265px; height:220px;">
-                    <span class="bld-label">MIST-NCESTD DORM</span></div>
-
-                  <div class="building" data-name="MULTI-PURPOSE BUILDING" data-page="/multi_purpose_building"
-                    style="top:60px; left:1460px; width:220px; height:190px;">
-                    <span class="bld-label">MULTI-PURPOSE</span></div>
-
-                  <!-- CENTER -->
-                  <div class="building" data-name="ACADEMIC BUILDING" data-page="/academic_building"
-                    style="top:220px; left:743px; width:315px; height:118px;">
-                    <span class="bld-label">ACADEMIC BLDG</span></div>
-
-                  <div class="building" data-name="WAF & RAC BUILDING" data-page="/waf_&_rac_building"
-                    style="top:287px; left:1211px; width:132px; height:115px;">
-                    <span class="bld-label">WAF &amp; RAC BLDG</span></div>
-
-                  <div class="building" data-name="AUTOMOTIVE BUILDING" data-page="/automotive_building"
-                    style="top:198px; left:1673px; width:112px; height:100px;">
-                    <span class="bld-label">AUTOMOTIVE BLDG</span></div>
-
-                  <!-- RIGHT COLUMN — IT / SCIENCE / TE (cyan strip) -->
-                  <div class="building" data-name="IT BUILDING" data-page="/it_building"
-                    style="top:19px; left:1826px; width:56px; height:190px;">
-                    <span class="bld-label">IT BLDG</span></div>
-
-                  <div class="building" data-name="SCIENCE BUILDING" data-page="/science_building"
-                    style="top:210px; left:1826px; width:56px; height:170px;">
-                    <span class="bld-label">SCIENCE BLDG</span></div>
-
-                  <div class="building" data-name="TE BUILDING" data-page="/te_building"
-                    style="top:380px; left:1826px; width:56px; height:335px;">
-                    <span class="bld-label">TE BLDG</span></div>
-
-                  <!-- BOTTOM LEFT -->
-                  <div class="building" data-name="OLD ADMIN BUILDING" data-page="/old_admin_building"
-                    style="top:444px; left:76px; width:42px; height:285px;">
-                    <span class="bld-label">OLD ADMIN</span></div>
-
-                  <div class="building" data-name="NEW ADMIN BUILDING" data-page="/new_admin_building"
-                    style="top:444px; left:121px; width:44px; height:285px;">
-                    <span class="bld-label">NEW ADMIN BLDG</span></div>
-
-                  <!-- BOTTOM CENTER -->
-                  <div class="building" data-name="FSM BUILDING" data-page="/fsm_building"
-                    style="top:595px; left:731px; width:264px; height:114px;">
-                    <span class="bld-label">FSM BLDG</span></div>
-
-                  <div class="building" data-name="CIVIL TECH BUILDING" data-page="/civil_tech_building"
-                    style="top:465px; left:1020px; width:57px; height:245px;">
-                    <span class="bld-label">CIVIL TECH</span></div>
-
-                  <div class="building" data-name="GRADUATE SCHOOL BUILDING" data-page="/graduate_school_building"
-                    style="top:465px; left:1156px; width:80px; height:245px;">
-                    <span class="bld-label">GRAD SCHOOL</span></div>
-
-                  <div class="building" data-name="MECHANICAL BUILDING" data-page="/mechanical_building"
-                    style="top:465px; left:1236px; width:130px; height:248px;">
-                    <span class="bld-label">MECHANICAL BLDG</span></div>
-
-                  <div class="building" data-name="TECH BUILDING" data-page="/tech_building"
-                    style="top:617px; left:1403px; width:342px; height:160px;">
-                    <span class="bld-label">TECH BLDG</span></div>
-
-                  <!-- BOTTOM BAR — cyan canteen strip -->
-                  <div class="building" data-name="WAF & FSM BUILDING" data-page="/waf_&_fsm_building"
-                    style="top:753px; left:946px; width:484px; height:49px;">
-                    <span class="bld-label">WAF &amp; FSM BLDG</span></div>
+                  <!-- Building pins loaded dynamically from /api/campus-pins -->
 
 
                            
@@ -1047,7 +966,18 @@ function showDirections(destination){
   const path = findPath(start, target);
 
   if(!path){
-    console.warn("No path found for " + destination);
+    // No routing data — still show panel with building name
+    document.getElementById("destName").textContent = destination;
+    const box = document.getElementById("directionsBox");
+    while (box.firstChild) box.removeChild(box.firstChild);
+    const li = document.createElement("li");
+    li.textContent = "See the labeled map for the location of this building.";
+    box.appendChild(li);
+    const dp = document.getElementById("directionsPanel");
+    dp.style.display = "block";
+    dp.classList.remove("collapsed");
+    document.getElementById("panelToggle").style.display = "none";
+    _directionsActive = true;
     return;
   }
 
@@ -1342,12 +1272,113 @@ input.addEventListener('keypress', (e) => {
 
 updateYouHere(80, 395);
 
+// Load campus pins from DB and render as clickable overlays
+(function loadCampusPins() {
+  fetch('/api/campus-pins')
+    .then(function(r){ return r.json(); })
+    .then(function(pins) {
+      var container = document.querySelector('.map-container');
+      if (!container) return;
+      pins.forEach(function(pin) {
+        var el = document.createElement('div');
+        el.className = 'building';
+        el.dataset.name = pin.name;
+        el.style.cssText = [
+          'position:absolute',
+          'left:' + pin.left_pct + '%',
+          'top:' + pin.top_pct + '%',
+          'width:60px',
+          'height:60px',
+          'transform:translate(-50%,-50%)',
+          'border-radius:50%',
+          'cursor:pointer',
+          'z-index:10',
+          'display:flex',
+          'align-items:center',
+          'justify-content:center',
+          'background:transparent',
+          'border:2px solid transparent',
+        ].join(';');
+        // Hidden label for search matching
+        var label = document.createElement('span');
+        label.className = 'bld-label';
+        label.style.cssText = 'opacity:0;position:absolute;pointer-events:none;';
+        label.textContent = pin.name;
+        el.appendChild(label);
+        el.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (typeof _showPinTooltip === 'function') {
+            _showPinTooltip(pin, el);
+          } else {
+            showDirections(pin.name);
+          }
+        });
+        container.appendChild(el);
+      });
+    })
+    .catch(function(err){ console.error('campus-pins load failed:', err); });
+})();
+
 </script>
 <script src="{{ url_for('static', filename='js/kiosk.js') }}"></script>
+
+<!-- Pin tooltip — inside map-container so position:absolute is relative to it -->
+<div id="pinTooltip" style="position:absolute;display:none;z-index:1500;pointer-events:auto;filter:drop-shadow(0 6px 18px rgba(0,0,0,0.5));">
+  <div style="background:#fff;border-radius:14px;padding:14px 18px 12px;min-width:180px;max-width:260px;">
+    <div id="ptNum" style="font-size:10px;font-weight:900;letter-spacing:2px;color:#7b2d2d;margin-bottom:4px;"></div>
+    <div id="ptName" style="font-size:16px;font-weight:900;color:#111;letter-spacing:0.5px;line-height:1.25;margin-bottom:12px;"></div>
+    <button id="ptBtn" style="display:block;width:100%;background:#7b2d2d;color:#fff;border:none;border-radius:8px;padding:10px 0;font-size:12px;font-weight:900;letter-spacing:1.5px;cursor:pointer;font-family:inherit;">GET DIRECTIONS →</button>
+  </div>
+  <div style="width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:10px solid #fff;margin:0 auto;"></div>
+</div>
+
 </div>
 
 <script>
 var _mapScale = 0.7;
+
+(function(){
+  var tooltip = document.getElementById('pinTooltip');
+  var ptNum   = document.getElementById('ptNum');
+  var ptName  = document.getElementById('ptName');
+  var ptBtn   = document.getElementById('ptBtn');
+
+  window._showPinTooltip = function(pin, anchorEl) {
+    ptNum.textContent  = pin.number ? 'BUILDING ' + pin.number : '';
+    ptName.textContent = pin.name;
+    ptBtn.onclick = function() {
+      tooltip.style.display = 'none';
+      showDirections(pin.name);
+    };
+
+    // Position above the pin — coordinates relative to map-container (unscaled)
+    var container = document.querySelector('.map-container');
+    var cRect = container.getBoundingClientRect();
+    var aRect = anchorEl.getBoundingClientRect();
+    var scale = _mapScale || 0.7;
+
+    var centerX = (aRect.left + aRect.width  / 2 - cRect.left) / scale;
+    var topY    = (aRect.top  - cRect.top) / scale;
+
+    tooltip.style.display = 'block';
+    var tW = tooltip.offsetWidth  || 220;
+    var tH = tooltip.offsetHeight || 115;
+
+    var containerW = container.offsetWidth || 1920;
+    var left = Math.max(8, Math.min(centerX - tW / 2, containerW - tW - 8));
+    var top  = Math.max(8, topY - tH - 8);
+
+    tooltip.style.left = left + 'px';
+    tooltip.style.top  = top  + 'px';
+  };
+
+  document.addEventListener('click', function(e) {
+    if (!tooltip || tooltip.style.display === 'none') return;
+    if (tooltip.contains(e.target)) return;
+    if (e.target.classList.contains('building')) return;
+    tooltip.style.display = 'none';
+  });
+})();
 </script>
 
 <div id="buildingPanel" style="
@@ -1390,6 +1421,22 @@ var _mapScale = 0.7;
 <script src="/static/js/drag-scroll.js?v=2"></script>
 <script src="{{ url_for('static', filename='js/keyboard.js') }}?v=2"></script>
 
+<div id="pinLegendBar" style="
+  position:absolute;bottom:48px;left:0;right:0;
+  background:rgba(8,3,3,0.88);
+  border-top:1px solid rgba(255,255,255,0.08);
+  display:none;
+  align-items:center;
+  gap:0;
+  z-index:501;
+  overflow:hidden;
+  height:36px;
+">
+  <span style="font-size:9px;font-weight:900;letter-spacing:2px;color:rgba(255,255,255,0.45);padding:0 10px;flex-shrink:0;text-transform:uppercase;">BUILDINGS</span>
+  <div id="pinLegendScroll" style="display:flex;gap:0;overflow-x:auto;flex:1;scrollbar-width:none;align-items:center;">
+  </div>
+</div>
+
 <div class="legend-bar">
   <span class="leg-title">LEGENDS</span>
   <div class="leg-item">
@@ -1424,5 +1471,6 @@ var _mapScale = 0.7;
     <div class="leg-swatch dashed"></div>MPC PROPERTY LINE
   </div>
 </div>
+
 </body>
 </html>

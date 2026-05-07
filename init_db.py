@@ -362,6 +362,15 @@ def _ensure_rfid_logs(conn: sqlite3.Connection) -> None:
             uploaded_at   TEXT DEFAULT (datetime('now'))
         )
     """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS campus_pins (
+            id       INTEGER PRIMARY KEY AUTOINCREMENT,
+            number   INTEGER,
+            name     TEXT NOT NULL,
+            left_pct REAL NOT NULL,
+            top_pct  REAL NOT NULL
+        )
+    """)
 
 
 def _seed_rfid_users(cur: sqlite3.Cursor) -> None:

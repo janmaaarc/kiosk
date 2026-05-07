@@ -110,6 +110,7 @@ textarea { resize: vertical; min-height: 100px; }
         <a href="{{ url_for('content.rooms_list') }}" class="{% if request.endpoint == 'content.rooms_list' or request.endpoint == 'content.room_add' or request.endpoint == 'content.room_edit' %}active{% endif %}">Room Labels</a>
         <a href="{{ url_for('content.room_placer') }}" class="{% if request.endpoint == 'content.room_placer' %}active{% endif %}">Room Placer</a>
         <a href="{{ url_for('content.faculty_list') }}" class="{% if 'faculty' in request.endpoint %}active{% endif %}">Faculty</a>
+        <a href="{{ url_for('content.campus_pins_list') }}" class="{% if 'campus_pin' in request.endpoint %}active{% endif %}">Campus Pins</a>
         <div class="section">RFID</div>
         <a href="{{ url_for('content.rfid_logs') }}" class="{% if request.endpoint == 'content.rfid_logs' %}active{% endif %}">Scan Logs</a>
         <div class="section">Account</div>
