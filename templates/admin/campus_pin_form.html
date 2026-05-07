@@ -23,6 +23,14 @@
                    value="{{ pin.name }}">
         </div>
 
+        <div class="form-group">
+            <label>Floor Plan URL <span style="font-weight:400;color:#888;">(optional)</span></label>
+            <input type="text" name="page_url" maxlength="200"
+                   value="{{ pin.page_url or '' }}"
+                   placeholder="e.g. /academic_building">
+            <span class="hint">Leave blank if no floor plan. Used for ENTER BUILDING button on kiosk.</span>
+        </div>
+
         <div style="display:flex;gap:16px;">
             <div class="form-group" style="flex:1;">
                 <label>Left %</label>
