@@ -872,8 +872,23 @@ const graph = {
   "TE_ENT":        ["INT_F", "BOT_F", "TE BUILDING"],
   "TE BUILDING":   ["TE_ENT"],
 };
-                            
-                            function drawPath(path){ 
+
+// Fetch DB campus paths, replace hardcoded graph if data exists, then run URL-based routing
+var _campusPathsReady = fetch('/api/campus-paths').then(function(r){ return r.json(); }).then(function(data) {
+  if (!data.nodes || !data.nodes.length) return;
+  var labelById = {};
+  data.nodes.forEach(function(n) {
+    labelById[n.id] = n.label;
+    nodes[n.label] = { x: n.x_pct / 100 * 1920, y: n.y_pct / 100 * 813 };
+  });
+  Object.keys(nodes).forEach(function(k) { edges[k] = []; });
+  data.edges.forEach(function(e) {
+    var a = labelById[e.node_a], b = labelById[e.node_b];
+    if (a && b) { edges[a].push(b); edges[b].push(a); }
+  });
+}).catch(function(){});
+
+                            function drawPath(path){
 
                               const line = document.getElementById("routeLine");
 
@@ -1301,7 +1316,7 @@ function highlightFromURL(){
   }
 }
 
-highlightFromURL();
+_campusPathsReady.then(function(){ highlightFromURL(); });
 
 // Mobile view: stretch directions panel to cover everything fullscreen
 if(new URLSearchParams(window.location.search).get("mobile") === "1"){

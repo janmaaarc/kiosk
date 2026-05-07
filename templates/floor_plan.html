@@ -634,24 +634,100 @@ if (loc) {
   });
 }
 
+// DB floor graph (populated on load)
+var _floorGraph = null;
+
+function _loadFloorGraph() {
+  if (_floorGraph !== null) return Promise.resolve(_floorGraph);
+  var url = '/api/floor-paths?building=' + encodeURIComponent(BUILDING_NAME) + '&floor=' + encodeURIComponent(FLOOR_NUMBER);
+  return fetch(url).then(function(r) { return r.json(); }).then(function(data) {
+    if (!data.nodes || !data.nodes.length) { _floorGraph = false; return false; }
+    var nodeMap = {};
+    data.nodes.forEach(function(n) { nodeMap[n.id] = n; });
+    var adj = {};
+    data.nodes.forEach(function(n) { adj[n.id] = []; });
+    data.edges.forEach(function(e) {
+      adj[e.from_id].push(e.to_id);
+      adj[e.to_id].push(e.from_id);
+    });
+    _floorGraph = { nodeMap: nodeMap, adj: adj };
+    return _floorGraph;
+  }).catch(function() { _floorGraph = false; return false; });
+}
+
+function _bfs(adj, startId, goalId) {
+  var visited = {}, prev = {}, queue = [startId];
+  visited[startId] = true;
+  while (queue.length) {
+    var cur = queue.shift();
+    if (cur === goalId) break;
+    (adj[cur] || []).forEach(function(nb) {
+      if (!visited[nb]) { visited[nb] = true; prev[nb] = cur; queue.push(nb); }
+    });
+  }
+  if (!visited[goalId]) return null;
+  var path = [], c = goalId;
+  while (c !== undefined) { path.unshift(c); c = prev[c]; }
+  return path;
+}
+
 function drawIndoorRoute(targetBtn) {
-  const left = parseFloat(targetBtn.dataset.left);
-  const top  = parseFloat(targetBtn.dataset.top);
-  const w    = parseFloat(targetBtn.dataset.width);
-  const h    = parseFloat(targetBtn.dataset.height);
-  if ([left, top, w, h].some(Number.isNaN)) return;
+  var left = parseFloat(targetBtn.dataset.left);
+  var top  = parseFloat(targetBtn.dataset.top);
+  var w    = parseFloat(targetBtn.dataset.width);
+  var h    = parseFloat(targetBtn.dataset.height);
+  if ([left, top, w, h].some(isNaN)) return;
 
-  // All coordinates converted from image-% to wrapper-% for SVG
-  const ex = imgToW(ENTRANCE_X), ey = imgToH(ENTRANCE_Y);
-  const hy = imgToH(HALLWAY_Y);
-  const rx = imgToW(left + w / 2), ry = imgToH(top + h / 2);
+  var rx = left + w / 2, ry = top + h / 2;
 
-  const d = `M ${ex} ${ey} L ${ex} ${hy} L ${rx} ${hy} L ${rx} ${ry}`;
-  const line = document.getElementById('indoorRouteLine');
+  _loadFloorGraph().then(function(graph) {
+    if (!graph) {
+      _drawHeuristic(rx, ry);
+      return;
+    }
+    // Find entrance node (label contains ENTRANCE/GATE/ENTRY) else first node
+    var nodes = Object.values(graph.nodeMap);
+    var entranceNode = nodes.find(function(n) {
+      var lbl = (n.label || '').toUpperCase();
+      return lbl.indexOf('ENTRANCE') >= 0 || lbl.indexOf('GATE') >= 0 || lbl.indexOf('ENTRY') >= 0;
+    }) || nodes[0];
+
+    // Find closest node to room center
+    var goalNode = nodes.reduce(function(best, n) {
+      var d = Math.pow(n.x_pct - rx, 2) + Math.pow(n.y_pct - ry, 2);
+      return d < best.d ? { node: n, d: d } : best;
+    }, { node: null, d: Infinity }).node;
+    if (!goalNode) { _drawHeuristic(rx, ry); return; }
+
+    var path = _bfs(graph.adj, entranceNode.id, goalNode.id);
+    if (!path) { _drawHeuristic(rx, ry); return; }
+
+    var coords = path.map(function(id) { return graph.nodeMap[id]; });
+    coords.push({ x_pct: rx, y_pct: ry });
+
+    var d = coords.map(function(c, i) {
+      return (i === 0 ? 'M' : 'L') + ' ' + imgToW(c.x_pct) + ' ' + imgToH(c.y_pct);
+    }).join(' ');
+
+    var line = document.getElementById('indoorRouteLine');
+    line.setAttribute('d', d);
+    line.style.display = 'block';
+
+    var pin = document.getElementById('indoorYouHere');
+    pin.style.left = imgToW(entranceNode.x_pct) + '%';
+    pin.style.top  = imgToH(entranceNode.y_pct) + '%';
+    pin.style.display = 'block';
+  });
+}
+
+function _drawHeuristic(rx, ry) {
+  var ex = imgToW(ENTRANCE_X), ey = imgToH(ENTRANCE_Y);
+  var hy = imgToH(HALLWAY_Y);
+  var d = 'M ' + ex + ' ' + ey + ' L ' + ex + ' ' + hy + ' L ' + imgToW(rx) + ' ' + hy + ' L ' + imgToW(rx) + ' ' + imgToH(ry);
+  var line = document.getElementById('indoorRouteLine');
   line.setAttribute('d', d);
   line.style.display = 'block';
-
-  const pin = document.getElementById('indoorYouHere');
+  var pin = document.getElementById('indoorYouHere');
   pin.style.left = ex + '%';
   pin.style.top  = ey + '%';
   pin.style.display = 'block';

@@ -1135,3 +1135,240 @@ def api_campus_pins():
             "SELECT id, number, name, left_pct, top_pct, page_url FROM campus_pins ORDER BY CAST(number AS INTEGER), number, id"
         ).fetchall()
     return jsonify([dict(p) for p in pins])
+
+
+# ---------------------------------------------------------------------------
+# Campus path editor
+# ---------------------------------------------------------------------------
+
+@content_bp.route("/admin/campus-paths")
+@login_required
+def campus_path_editor():
+    with db_connection() as conn:
+        nodes = conn.execute("SELECT * FROM campus_nodes ORDER BY id").fetchall()
+        edges = conn.execute(
+            "SELECT ce.id, ce.node_a, ce.node_b, na.label AS label_a, nb.label AS label_b "
+            "FROM campus_edges ce "
+            "JOIN campus_nodes na ON na.id = ce.node_a "
+            "JOIN campus_nodes nb ON nb.id = ce.node_b "
+            "ORDER BY ce.id"
+        ).fetchall()
+    nodes_list = [dict(n) for n in nodes]
+    nodes_by_id = {n["id"]: n for n in nodes_list}
+    return render_template("admin/campus_path_editor.html",
+                           nodes=nodes_list,
+                           edges=[dict(e) for e in edges],
+                           nodes_by_id=nodes_by_id)
+
+
+@content_bp.route("/admin/campus-paths/nodes", methods=["POST"])
+@login_required
+def campus_path_node_add():
+    label = request.form.get("label", "").strip()[:100]
+    x_pct = request.form.get("x_pct", type=float)
+    y_pct = request.form.get("y_pct", type=float)
+    if label and x_pct is not None and y_pct is not None:
+        with db_connection() as conn:
+            conn.execute(
+                "INSERT INTO campus_nodes (label, x_pct, y_pct) VALUES (?, ?, ?)",
+                (label, x_pct, y_pct),
+            )
+            conn.commit()
+    return redirect(url_for("content.campus_path_editor"))
+
+
+@content_bp.route("/admin/campus-paths/nodes/<int:node_id>/delete", methods=["POST"])
+@login_required
+def campus_path_node_delete(node_id: int):
+    with db_connection() as conn:
+        conn.execute("DELETE FROM campus_edges WHERE node_a=? OR node_b=?", (node_id, node_id))
+        conn.execute("DELETE FROM campus_nodes WHERE id=?", (node_id,))
+        conn.commit()
+    return redirect(url_for("content.campus_path_editor"))
+
+
+@content_bp.route("/admin/campus-paths/edges", methods=["POST"])
+@login_required
+def campus_path_edge_add():
+    node_a = request.form.get("node_a", type=int)
+    node_b = request.form.get("node_b", type=int)
+    if node_a and node_b and node_a != node_b:
+        with db_connection() as conn:
+            exists = conn.execute(
+                "SELECT id FROM campus_edges WHERE (node_a=? AND node_b=?) OR (node_a=? AND node_b=?)",
+                (node_a, node_b, node_b, node_a),
+            ).fetchone()
+            if not exists:
+                conn.execute(
+                    "INSERT INTO campus_edges (node_a, node_b) VALUES (?, ?)", (node_a, node_b)
+                )
+                conn.commit()
+    return redirect(url_for("content.campus_path_editor"))
+
+
+@content_bp.route("/admin/campus-paths/edges/<int:edge_id>/delete", methods=["POST"])
+@login_required
+def campus_path_edge_delete(edge_id: int):
+    with db_connection() as conn:
+        conn.execute("DELETE FROM campus_edges WHERE id=?", (edge_id,))
+        conn.commit()
+    return redirect(url_for("content.campus_path_editor"))
+
+
+@content_bp.route("/api/campus-paths")
+@limiter.limit("60/minute")
+def api_campus_paths():
+    with db_connection() as conn:
+        nodes = conn.execute("SELECT id, label, x_pct, y_pct FROM campus_nodes ORDER BY id").fetchall()
+        edges = conn.execute("SELECT id, node_a, node_b FROM campus_edges ORDER BY id").fetchall()
+    return jsonify({"nodes": [dict(n) for n in nodes], "edges": [dict(e) for e in edges]})
+
+
+# ---------------------------------------------------------------------------
+# Floor path editor
+# ---------------------------------------------------------------------------
+
+@content_bp.route("/admin/floor-paths")
+@login_required
+def floor_path_editor():
+    building = request.args.get("building", "")
+    floor = request.args.get("floor", "")
+    with db_connection() as conn:
+        buildings = conn.execute(
+            "SELECT DISTINCT building FROM building_floors ORDER BY building"
+        ).fetchall()
+        floors = []
+        floor_image = None
+        nodes = []
+        edges = []
+        if building:
+            floors = conn.execute(
+                "SELECT floor_number, floor_label FROM building_floors WHERE building=? ORDER BY floor_number",
+                (building,),
+            ).fetchall()
+        if building and floor:
+            row = conn.execute(
+                "SELECT floor_image FROM building_floors WHERE building=? AND floor_number=?",
+                (building, floor),
+            ).fetchone()
+            floor_image = row["floor_image"] if row else None
+            nodes = conn.execute(
+                "SELECT * FROM floor_nodes WHERE building=? AND floor=? ORDER BY id",
+                (building, floor),
+            ).fetchall()
+            edges = conn.execute(
+                "SELECT fe.id, fe.from_id, fe.to_id, na.label AS label_a, nb.label AS label_b "
+                "FROM floor_edges fe "
+                "JOIN floor_nodes na ON na.id = fe.from_id "
+                "JOIN floor_nodes nb ON nb.id = fe.to_id "
+                "WHERE na.building=? AND na.floor=? "
+                "ORDER BY fe.id",
+                (building, floor),
+            ).fetchall()
+    nodes_list = [dict(n) for n in nodes]
+    nodes_by_id = {n["id"]: n for n in nodes_list}
+    return render_template("admin/floor_path_editor.html",
+                           buildings=[dict(b) for b in buildings],
+                           floors=[dict(f) for f in floors],
+                           floor_image=floor_image,
+                           nodes=nodes_list,
+                           edges=[dict(e) for e in edges],
+                           nodes_by_id=nodes_by_id,
+                           selected_building=building,
+                           selected_floor=floor)
+
+
+@content_bp.route("/admin/floor-paths/nodes", methods=["POST"])
+@login_required
+def floor_path_node_add():
+    building = request.form.get("building", "").strip()[:200]
+    floor = request.form.get("floor", "").strip()[:20]
+    label = request.form.get("label", "").strip()[:100]
+    x_pct = request.form.get("x_pct", type=float)
+    y_pct = request.form.get("y_pct", type=float)
+    if building and floor and x_pct is not None and y_pct is not None:
+        with db_connection() as conn:
+            conn.execute(
+                "INSERT INTO floor_nodes (building, floor, label, x_pct, y_pct) VALUES (?, ?, ?, ?, ?)",
+                (building, floor, label or None, x_pct, y_pct),
+            )
+            conn.commit()
+    return redirect(url_for("content.floor_path_editor", building=building, floor=floor))
+
+
+@content_bp.route("/admin/floor-paths/nodes/<int:node_id>/delete", methods=["POST"])
+@login_required
+def floor_path_node_delete(node_id: int):
+    with db_connection() as conn:
+        node = conn.execute("SELECT building, floor FROM floor_nodes WHERE id=?", (node_id,)).fetchone()
+        building = node["building"] if node else ""
+        floor = node["floor"] if node else ""
+        conn.execute("DELETE FROM floor_edges WHERE from_id=? OR to_id=?", (node_id, node_id))
+        conn.execute("DELETE FROM floor_nodes WHERE id=?", (node_id,))
+        conn.commit()
+    return redirect(url_for("content.floor_path_editor", building=building, floor=floor))
+
+
+@content_bp.route("/admin/floor-paths/edges", methods=["POST"])
+@login_required
+def floor_path_edge_add():
+    from_id = request.form.get("from_id", type=int)
+    to_id = request.form.get("to_id", type=int)
+    building = request.form.get("building", "")
+    floor = request.form.get("floor", "")
+    if from_id and to_id and from_id != to_id:
+        with db_connection() as conn:
+            from_node = conn.execute(
+                "SELECT id FROM floor_nodes WHERE id=? AND building=? AND floor=?",
+                (from_id, building, floor),
+            ).fetchone()
+            to_node = conn.execute(
+                "SELECT id FROM floor_nodes WHERE id=? AND building=? AND floor=?",
+                (to_id, building, floor),
+            ).fetchone()
+            if from_node and to_node:
+                exists = conn.execute(
+                    "SELECT id FROM floor_edges WHERE (from_id=? AND to_id=?) OR (from_id=? AND to_id=?)",
+                    (from_id, to_id, to_id, from_id),
+                ).fetchone()
+                if not exists:
+                    conn.execute(
+                        "INSERT INTO floor_edges (from_id, to_id) VALUES (?, ?)", (from_id, to_id)
+                    )
+                    conn.commit()
+    return redirect(url_for("content.floor_path_editor", building=building, floor=floor))
+
+
+@content_bp.route("/admin/floor-paths/edges/<int:edge_id>/delete", methods=["POST"])
+@login_required
+def floor_path_edge_delete(edge_id: int):
+    building = request.form.get("building", "")
+    floor = request.form.get("floor", "")
+    with db_connection() as conn:
+        conn.execute("DELETE FROM floor_edges WHERE id=?", (edge_id,))
+        conn.commit()
+    return redirect(url_for("content.floor_path_editor", building=building, floor=floor))
+
+
+@content_bp.route("/api/floor-paths")
+@limiter.limit("60/minute")
+def api_floor_paths():
+    building = request.args.get("building", "")
+    floor = request.args.get("floor", "")
+    if not building or not floor:
+        return jsonify({"nodes": [], "edges": []})
+    with db_connection() as conn:
+        nodes = conn.execute(
+            "SELECT id, label, x_pct, y_pct FROM floor_nodes WHERE building=? AND floor=? ORDER BY id",
+            (building, floor),
+        ).fetchall()
+        edges = conn.execute(
+            "SELECT fe.id, fe.from_id, fe.to_id FROM floor_edges fe "
+            "JOIN floor_nodes fn_from ON fn_from.id = fe.from_id "
+            "JOIN floor_nodes fn_to   ON fn_to.id   = fe.to_id "
+            "WHERE fn_from.building=? AND fn_from.floor=? "
+            "  AND fn_to.building=?   AND fn_to.floor=? "
+            "ORDER BY fe.id",
+            (building, floor, building, floor),
+        ).fetchall() if nodes else []
+    return jsonify({"nodes": [dict(n) for n in nodes], "edges": [dict(e) for e in edges]})

@@ -1,0 +1,244 @@
+{% extends "admin/base.html" %}
+{% block title %}Campus Path Editor{% endblock %}
+{% block content %}
+<h1 style="margin-bottom:4px;">Campus Path Editor</h1>
+<p style="color:#888;margin-bottom:16px;font-size:14px;">Click map to place nodes. Select two nodes to connect them. Use DELETE mode to remove.</p>
+
+<div style="display:flex;gap:24px;align-items:flex-start;">
+
+  <!-- Map panel -->
+  <div style="flex:1;min-width:0;">
+    <div id="mapWrap" style="position:relative;display:inline-block;width:100%;cursor:crosshair;border:2px solid #ddd;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1);">
+      <img src="/static/images/labeled_map.jpg" id="mapImg" style="width:100%;height:auto;display:block;" alt="Campus Map">
+      <svg id="editorSVG" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;">
+        {% for edge in edges %}
+        {% set na = nodes_by_id[edge.node_a] %}
+        {% set nb = nodes_by_id[edge.node_b] %}
+        <line data-edge-id="{{ edge.id }}"
+              x1="{{ na.x_pct }}%" y1="{{ na.y_pct }}%"
+              x2="{{ nb.x_pct }}%" y2="{{ nb.y_pct }}%"
+              stroke="#7b2d2d" stroke-width="3" stroke-opacity="0.7"
+              style="pointer-events:stroke;cursor:pointer;"/>
+        {% endfor %}
+        {% for node in nodes %}
+        <circle data-node-id="{{ node.id }}" data-label="{{ node.label | e }}"
+                cx="{{ node.x_pct }}%" cy="{{ node.y_pct }}%"
+                r="10" fill="#7b2d2d" fill-opacity="0.85"
+                stroke="#fff" stroke-width="2"
+                style="pointer-events:all;cursor:pointer;"/>
+        <text x="{{ node.x_pct }}%" y="{{ node.y_pct }}%"
+              text-anchor="middle" dominant-baseline="central"
+              font-size="9" font-weight="900" fill="#fff"
+              style="pointer-events:none;user-select:none;">{{ node.label[:4] }}</text>
+        {% endfor %}
+      </svg>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div style="width:300px;flex-shrink:0;">
+
+    <!-- Mode toggle -->
+    <div style="background:#fff;border-radius:10px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px;">
+      <h4 style="margin:0 0 12px;color:#7b2d2d;font-size:14px;">Mode</h4>
+      <div style="display:flex;gap:8px;">
+        <button onclick="setMode('node')" id="modeNode"
+          style="flex:1;padding:8px;border-radius:6px;border:2px solid #7b2d2d;background:#7b2d2d;color:#fff;font-size:12px;font-weight:700;cursor:pointer;">
+          + Node
+        </button>
+        <button onclick="setMode('edge')" id="modeEdge"
+          style="flex:1;padding:8px;border-radius:6px;border:2px solid #ddd;background:#fff;color:#666;font-size:12px;font-weight:700;cursor:pointer;">
+          + Edge
+        </button>
+        <button onclick="setMode('delete')" id="modeDelete"
+          style="flex:1;padding:8px;border-radius:6px;border:2px solid #ddd;background:#fff;color:#666;font-size:12px;font-weight:700;cursor:pointer;">
+          Delete
+        </button>
+      </div>
+      <div id="modeHint" style="font-size:12px;color:#888;margin-top:8px;">Click map to place a node.</div>
+    </div>
+
+    <!-- Add node form -->
+    <div id="nodeFormWrap" style="background:#fff;border-radius:10px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px;">
+      <h4 style="margin:0 0 12px;color:#7b2d2d;font-size:14px;">New Node</h4>
+      <form id="nodeForm" method="post" action="{{ url_for('content.campus_path_node_add') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="x_pct" id="nodePctX">
+        <input type="hidden" name="y_pct" id="nodePctY">
+        <label style="display:block;font-size:13px;font-weight:700;margin-bottom:4px;">Label</label>
+        <input type="text" name="label" id="nodeLabel" required maxlength="50"
+          style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:14px;margin-bottom:10px;box-sizing:border-box;"
+          placeholder="e.g. GATE1 or B18A">
+        <div id="nodeCoord" style="font-size:12px;color:#888;margin-bottom:10px;">Click map to set position.</div>
+        <button type="submit" id="nodeSaveBtn" disabled
+          style="width:100%;background:#7b2d2d;color:#fff;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;opacity:.5;">
+          Save Node
+        </button>
+      </form>
+    </div>
+
+    <!-- Nodes list -->
+    <div style="background:#fff;border-radius:10px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h4 style="margin:0;color:#7b2d2d;font-size:14px;">Nodes ({{ nodes|length }})</h4>
+      </div>
+      <div style="max-height:200px;overflow-y:auto;">
+      {% if nodes %}
+        {% for node in nodes %}
+        <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f5f0f0;font-size:13px;">
+          <span style="background:#7b2d2d;color:#fff;border-radius:4px;padding:2px 6px;font-size:11px;font-weight:900;flex-shrink:0;">{{ node.label }}</span>
+          <span style="flex:1;color:#888;font-size:11px;">{{ "%.1f"|format(node.x_pct) }}%, {{ "%.1f"|format(node.y_pct) }}%</span>
+          <form method="post" action="{{ url_for('content.campus_path_node_delete', node_id=node.id) }}" style="margin:0;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:14px;padding:0;"
+              onclick="return confirm('Delete node {{ node.label | e }}?')">×</button>
+          </form>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color:#aaa;font-size:13px;margin:0;">No nodes yet.</p>
+      {% endif %}
+      </div>
+    </div>
+
+    <!-- Edges list -->
+    <div style="background:#fff;border-radius:10px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.08);">
+      <h4 style="margin:0 0 10px;color:#7b2d2d;font-size:14px;">Edges ({{ edges|length }})</h4>
+      <div style="max-height:200px;overflow-y:auto;">
+      {% if edges %}
+        {% for edge in edges %}
+        <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f5f0f0;font-size:13px;">
+          <span style="flex:1;font-size:12px;">{{ nodes_by_id[edge.node_a].label }} ↔ {{ nodes_by_id[edge.node_b].label }}</span>
+          <form method="post" action="{{ url_for('content.campus_path_edge_delete', edge_id=edge.id) }}" style="margin:0;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" style="background:none;border:none;color:#c0392b;cursor:pointer;font-size:14px;padding:0;"
+              onclick="return confirm('Delete this edge?')">×</button>
+          </form>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color:#aaa;font-size:13px;margin:0;">No edges yet.</p>
+      {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  var mode = 'node';
+  var edgeSrc = null;
+  var wrap = document.getElementById('mapWrap');
+  var img  = document.getElementById('mapImg');
+  var svg  = document.getElementById('editorSVG');
+
+  function setMode(m) {
+    mode = m;
+    edgeSrc = null;
+    clearHighlights();
+    var hints = {
+      node:   'Click map to place a node.',
+      edge:   'Click first node, then second node to connect.',
+      delete: 'Click a node or edge line to delete it.'
+    };
+    document.getElementById('modeHint').textContent = hints[m];
+    document.getElementById('nodeFormWrap').style.display = (m === 'node') ? '' : 'none';
+    ['modeNode','modeEdge','modeDelete'].forEach(function(id) {
+      var btn = document.getElementById(id);
+      var active = (id === 'mode' + m.charAt(0).toUpperCase() + m.slice(1));
+      btn.style.background = active ? '#7b2d2d' : '#fff';
+      btn.style.color      = active ? '#fff'    : '#666';
+      btn.style.borderColor = active ? '#7b2d2d' : '#ddd';
+    });
+  }
+  window.setMode = setMode;
+
+  function clearHighlights() {
+    svg.querySelectorAll('circle').forEach(function(c) {
+      c.setAttribute('fill', '#7b2d2d');
+      c.setAttribute('r', '10');
+    });
+  }
+
+  wrap.addEventListener('click', function(e) {
+    if (mode !== 'node') return;
+    var rect = img.getBoundingClientRect();
+    var x = ((e.clientX - rect.left) / rect.width  * 100).toFixed(2);
+    var y = ((e.clientY - rect.top)  / rect.height * 100).toFixed(2);
+    document.getElementById('nodePctX').value = x;
+    document.getElementById('nodePctY').value = y;
+    document.getElementById('nodeCoord').textContent = 'Position: ' + x + '% left, ' + y + '% top';
+    var btn = document.getElementById('nodeSaveBtn');
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  });
+
+  svg.addEventListener('click', function(e) {
+    var target = e.target;
+
+    if (mode === 'delete') {
+      var nodeId = target.getAttribute('data-node-id');
+      var edgeId = target.getAttribute('data-edge-id');
+      if (nodeId && confirm('Delete this node?')) {
+        submitDelete('{{ url_for("content.campus_path_node_delete", node_id=0) }}'.replace('/0', '/' + nodeId));
+      } else if (edgeId && confirm('Delete this edge?')) {
+        submitDelete('{{ url_for("content.campus_path_edge_delete", edge_id=0) }}'.replace('/0', '/' + edgeId));
+      }
+      return;
+    }
+
+    if (mode === 'edge') {
+      var nodeId = target.getAttribute('data-node-id');
+      if (!nodeId) return;
+      if (!edgeSrc) {
+        edgeSrc = nodeId;
+        clearHighlights();
+        target.setAttribute('fill', '#f39c12');
+        target.setAttribute('r', '13');
+        document.getElementById('modeHint').textContent = 'Now click the second node.';
+      } else {
+        if (edgeSrc === nodeId) { edgeSrc = null; clearHighlights(); return; }
+        submitEdge(edgeSrc, nodeId);
+        edgeSrc = null;
+        clearHighlights();
+      }
+      e.stopPropagation();
+    }
+  });
+
+  function submitDelete(url) {
+    var f = document.createElement('form');
+    f.method = 'post';
+    f.action = url;
+    f.style.display = 'none';
+    var csrf = document.createElement('input');
+    csrf.type  = 'hidden';
+    csrf.name  = 'csrf_token';
+    csrf.value = document.querySelector('meta[name=csrf-token]').getAttribute('content');
+    f.appendChild(csrf);
+    document.body.appendChild(f);
+    f.submit();
+  }
+
+  function submitEdge(aId, bId) {
+    var f = document.createElement('form');
+    f.method = 'post';
+    f.action = '{{ url_for("content.campus_path_edge_add") }}';
+    f.style.display = 'none';
+    var fields = { csrf_token: document.querySelector('meta[name=csrf-token]').getAttribute('content'), node_a: aId, node_b: bId };
+    Object.keys(fields).forEach(function(k) {
+      var inp = document.createElement('input');
+      inp.type  = 'hidden';
+      inp.name  = k;
+      inp.value = fields[k];
+      f.appendChild(inp);
+    });
+    document.body.appendChild(f);
+    f.submit();
+  }
+
+  setMode('node');
+})();
+</script>
+{% endblock %}

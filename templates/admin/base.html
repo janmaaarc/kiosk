@@ -111,6 +111,8 @@ textarea { resize: vertical; min-height: 100px; }
         <a href="{{ url_for('content.room_placer') }}" class="{% if request.endpoint == 'content.room_placer' %}active{% endif %}">Room Placer</a>
         <a href="{{ url_for('content.faculty_list') }}" class="{% if 'faculty' in request.endpoint %}active{% endif %}">Faculty</a>
         <a href="{{ url_for('content.campus_pins_list') }}" class="{% if 'campus_pin' in request.endpoint %}active{% endif %}">Campus Pins</a>
+        <a href="{{ url_for('content.campus_path_editor') }}" class="{% if 'campus_path' in request.endpoint %}active{% endif %}">Campus Paths</a>
+        <a href="{{ url_for('content.floor_path_editor') }}" class="{% if 'floor_path' in request.endpoint %}active{% endif %}">Floor Paths</a>
         <div class="section">RFID</div>
         <a href="{{ url_for('content.rfid_logs') }}" class="{% if request.endpoint == 'content.rfid_logs' %}active{% endif %}">Scan Logs</a>
         <div class="section">Account</div>
