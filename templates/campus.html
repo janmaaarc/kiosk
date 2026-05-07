@@ -1184,30 +1184,27 @@ const BUILDING_PHOTOS = {
   "TE BUILDING":          "/static/images/building/te_building.jpg",
 };
 let _pendingUrl = null;
+function openBuildingPanel(name, pageUrl) {
+  const hasFloorPlan = !!pageUrl;
+  document.getElementById('panelEnterBtn').style.display = hasFloorPlan ? '' : 'none';
+  document.getElementById('panelComingSoon').style.display = hasFloorPlan ? 'none' : 'block';
+  _pendingUrl = hasFloorPlan ? pageUrl + "?from=gate&location=" + encodeURIComponent(name) : null;
+  document.getElementById('panelBuildingName').textContent = name;
+  const img = document.getElementById('panelBuildingImage');
+  const photo = BUILDING_PHOTOS[name.toUpperCase()];
+  if (photo) { img.src = photo; img.style.display = 'block'; }
+  else { img.style.display = 'none'; }
+  const p = document.getElementById('buildingPanel');
+  p.style.right = '0px';
+  p.style.pointerEvents = 'auto';
+  document.getElementById('viewToggle').style.display = 'none';
+  document.getElementById('qrBtnFloat').style.display = 'none';
+  document.getElementById('buildingSearch').style.display = 'none';
+}
 document.querySelectorAll('.building[data-page]').forEach(b => {
   b.onclick = function(e) {
     e.stopPropagation();
-    const page = b.getAttribute('data-page');
-    const name = b.getAttribute('data-name') || b.textContent.trim();
-    const hasFloorPlan = !!page;
-    document.getElementById('panelEnterBtn').style.display = hasFloorPlan ? '' : 'none';
-    document.getElementById('panelComingSoon').style.display = hasFloorPlan ? 'none' : 'block';
-    _pendingUrl = hasFloorPlan ? page + "?from=gate&location=" + encodeURIComponent(name) : null;
-    document.getElementById('panelBuildingName').textContent = name;
-    const img = document.getElementById('panelBuildingImage');
-    const photo = BUILDING_PHOTOS[name.toUpperCase()];
-    if (photo) {
-      img.src = photo;
-      img.style.display = 'block';
-    } else {
-      img.style.display = 'none';
-    }
-    const p = document.getElementById('buildingPanel');
-    p.style.right = '0px';
-    p.style.pointerEvents = 'auto';
-    document.getElementById('viewToggle').style.display = 'none';
-    document.getElementById('qrBtnFloat').style.display = 'none';
-    document.getElementById('buildingSearch').style.display = 'none';
+    openBuildingPanel(b.getAttribute('data-name') || b.textContent.trim(), b.getAttribute('data-page'));
   };
 });
 function toggleDirectionsPanel() {
@@ -1408,9 +1405,7 @@ if(new URLSearchParams(window.location.search).get("mobile") === "1"){
     document.querySelectorAll('.building').forEach(function(b) {
       if (b.dataset.name === pin.name) el = b;
     });
-    if (el && typeof _showPinTooltip === 'function') {
-      _showPinTooltip(pin, el);
-    }
+    openBuildingPanel(pin.name, pin.page_url || '');
     // Clear highlight from all, mark selected
     document.querySelectorAll('.building').forEach(function(b) { b.classList.remove('active'); });
     if (el) el.classList.add('active');
@@ -1467,11 +1462,7 @@ updateYouHere(80, 395);
         el.appendChild(label);
         el.addEventListener('click', function(e) {
           e.stopPropagation();
-          if (typeof _showPinTooltip === 'function') {
-            _showPinTooltip(pin, el);
-          } else {
-            showDirections(pin.name);
-          }
+          openBuildingPanel(pin.name, pin.page_url || '');
         });
         container.appendChild(el);
       });
