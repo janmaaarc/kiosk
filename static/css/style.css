@@ -124,6 +124,16 @@ a:not(.icon), button:not(.icon), [role="button"]:not(.icon), .menu-card {
     min-width: 60px;
 }
 
+/* Admin nav icon — lock to 44px, defeat any min-size override */
+.icon {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    max-width: 44px !important;
+    max-height: 44px !important;
+}
+
 /* Active mirrors hover for touch devices */
 a:active, button:active {
     opacity: 0.75;
