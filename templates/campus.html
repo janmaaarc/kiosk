@@ -419,11 +419,11 @@
                 onclick="goBack()">
               </div>
               <div class="top-right search-wrap" style="display:flex;align-items:center;gap:10px;">
-                <input type="text" placeholder="Search buildings…">
+                <input id="buildingSearch" type="text" placeholder="Search buildings…">
+                <a href="/admin" class="icon" title="Admin">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#333"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
+                </a>
               </div>
-              <a href="/admin" class="icon" style="position:absolute;top:20px;right:30px;z-index:3000;" title="Admin">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="#333"><path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>
-              </a>
             
             <div class="map-wrapper"> 
               <div class="map-container"> 
@@ -1183,7 +1183,7 @@ document.querySelectorAll('.building[data-page]').forEach(b => {
     p.style.pointerEvents = 'auto';
     document.getElementById('viewToggle').style.display = 'none';
     document.getElementById('qrBtnFloat').style.display = 'none';
-    document.querySelector('.top-right').style.display = 'none';
+    document.getElementById('buildingSearch').style.display = 'none';
   };
 });
 function toggleDirectionsPanel() {
@@ -1197,7 +1197,7 @@ function closeBuildingPanel() {
   const p = document.getElementById('buildingPanel');
   p.style.right = '-500px';
   p.style.pointerEvents = 'none';
-  document.querySelector('.top-right').style.display = '';
+  document.getElementById('buildingSearch').style.display = '';
   if (_directionsActive) {
     document.getElementById('viewToggle').style.display = 'flex';
     document.getElementById('qrBtnFloat').style.display = 'flex';

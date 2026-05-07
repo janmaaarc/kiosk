@@ -119,7 +119,7 @@ input {
 }
 
 /* Touch targets */
-a, button, [role="button"], .menu-card {
+a:not(.icon), button:not(.icon), [role="button"]:not(.icon), .menu-card {
     min-height: 60px;
     min-width: 60px;
 }
