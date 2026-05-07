@@ -1254,7 +1254,7 @@ def floor_path_editor():
             ).fetchone()
             floor_image = row["floor_image"] if row else None
             rooms = conn.execute(
-                "SELECT room, pos_left, pos_top, width, height FROM rooms "
+                "SELECT room, pos_left, pos_top, pos_width, pos_height FROM rooms "
                 "WHERE building=? AND floor=? ORDER BY pos_top, pos_left",
                 (building, floor),
             ).fetchall()
