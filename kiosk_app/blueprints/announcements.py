@@ -1,4 +1,6 @@
-from flask import Blueprint, abort, render_template, request
+import os
+
+from flask import Blueprint, abort, current_app, render_template, request
 
 from kiosk_app.db import db_connection
 
@@ -26,5 +28,11 @@ def announcement_view():
             (file,),
         ).fetchone()
     if not row:
-        abort(400)
-    return render_template("announcement_view.html", file=row["file"])
+        abort(404)
+    static_root = os.path.realpath(current_app.static_folder)
+    resolved = os.path.realpath(os.path.join(current_app.static_folder, row["file"]))
+    if not resolved.startswith(static_root + os.sep):
+        abort(404)
+    if not os.path.isfile(resolved):
+        return render_template("announcement_view.html", file=None, missing=True)
+    return render_template("announcement_view.html", file=row["file"], missing=False)

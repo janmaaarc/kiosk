@@ -416,7 +416,7 @@ body {
     <div class="pdf-list">
       {% if selected.files %}
         {% for file in selected.files %}
-        <div class="pdf-item" onclick="openPDF({{ file.file | tojson }}, {{ file.title | tojson }})">
+        <div class="pdf-item" data-file="{{ file.file | e }}" data-title="{{ file.title | e }}">
           <span class="pdf-icon">📄</span>
           {{ file.title }}
         </div>
@@ -489,6 +489,10 @@ function filterOffices(q) {
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.staff-card[data-href]').forEach(el => {
     el.addEventListener('click', () => { window.location.href = el.dataset.href; });
+  });
+
+  document.querySelectorAll('.pdf-item[data-file]').forEach(el => {
+    el.addEventListener('click', () => { openPDF(el.dataset.file, el.dataset.title); });
   });
 
   const sidebar = document.querySelector('.sidebar');

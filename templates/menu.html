@@ -259,9 +259,7 @@
     tag.className = 'role-tag role-' + safeRole;
     tag.textContent = safeRole.toUpperCase();
     el.appendChild(tag);
-    if (safeRole !== 'visitor') {
-      document.getElementById('logoutBtn').classList.add('visible');
-    }
+    document.getElementById('logoutBtn').classList.add('visible');
   }
 
   try {

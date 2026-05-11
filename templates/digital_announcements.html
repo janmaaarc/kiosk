@@ -22,43 +22,63 @@
 
         .title {
             text-align: center;
-            font-size: 60px;
+            font-size: 52px;
             font-weight: 900;
             color: #8b2e2e;
             text-shadow: 2px 2px 0 rgba(0,0,0,0.15);
             letter-spacing: 5px;
-            margin-top: 80px;
+            margin-top: 60px;
+            margin-bottom: 4px;
             flex-shrink: 0;
         }
 
         .grid {
             flex: 1;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 24px;
-            padding: 24px 40px 40px;
-            align-content: start;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 16px 60px 40px;
             overflow-y: auto;
         }
 
         .card {
             cursor: pointer;
-            text-align: center;
-        }
-
-        .card p {
-            font-weight: 900;
-            font-size: 18px;
-            margin-top: 10px;
-        }
-
-        .card img {
-            width: 100%;
-            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(255,255,255,0.92);
+            border-radius: 12px;
+            padding: 14px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+            transition: background 0.15s, transform 0.15s;
+            min-height: 80px;
         }
 
         .card:hover {
-            transform: scale(1.05);
+            background: #fff;
+            transform: translateX(4px);
+        }
+
+        .card img {
+            width: 72px;
+            height: 72px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .card p {
+            font-weight: 800;
+            font-size: 20px;
+            margin: 0;
+            color: #1a1a1a;
+            flex: 1;
+        }
+
+        .card-arrow {
+            font-size: 22px;
+            color: #8b2e2e;
+            flex-shrink: 0;
         }
 
         .top-icons {
@@ -163,8 +183,9 @@
 <div class="grid">
     {% for a in announcements %}
     <div class="card" onclick="{% if a.file %}window.location.href='/announcement-view?file={{ a.file | urlencode }}'{% else %}openImage('{{ url_for('static', filename=a.thumbnail) }}'){% endif %}">
-        <img src="{{ url_for('static', filename=a.thumbnail) }}">
+        <img src="{{ url_for('static', filename=a.thumbnail) }}" alt="">
         <p>{{ a.title }}</p>
+        <span class="card-arrow">›</span>
     </div>
     {% endfor %}
 </div>

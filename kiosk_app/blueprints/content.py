@@ -101,7 +101,7 @@ def _safe_filename(original: str) -> str:
 
 
 import re as _re
-_SAFE_FILE_RE = _re.compile(r'^(?!.*\.\.)(?!.*\x00)[a-zA-Z0-9_./ -]{1,300}\.pdf$')
+_SAFE_FILE_RE = _re.compile(r'^(?:uploads|files/uploads)/[0-9a-f]{32}\.pdf$')
 
 
 def _safe_files_json(raw: str) -> str:
@@ -270,7 +270,7 @@ def announcements_list():
         total = conn.execute("SELECT COUNT(*) FROM announcements").fetchone()[0]
         total_pages = max(1, -(-total // per))
         page = max(1, min(request.args.get("page", 1, type=int), total_pages))
-        rows = conn.execute("SELECT * FROM announcements ORDER BY id DESC LIMIT ? OFFSET ?",
+        rows = conn.execute("SELECT * FROM announcements ORDER BY id ASC LIMIT ? OFFSET ?",
                             (per, (page - 1) * per)).fetchall()
     return render_template("admin/announcements.html", announcements=rows,
                            page=page, total_pages=total_pages)

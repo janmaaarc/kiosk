@@ -14,15 +14,6 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f4f4; color: #
     background: #7b2d2d; color: #fff; padding: 24px 16px 72px; overflow-y: auto;
     scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.3) transparent;
 }
-.sidebar-logout {
-    position: fixed; bottom: 0; left: 0; width: 220px;
-    background: #7b2d2d; padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.1);
-}
-.sidebar-logout a {
-    display: block; padding: 10px 12px; border-radius: 6px;
-    color: rgba(255,255,255,0.65); text-decoration: none; font-size: 13px;
-}
-.sidebar-logout a:hover { background: rgba(255,255,255,0.1); color: #fff; }
 .sidebar::-webkit-scrollbar { width: 4px; }
 .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 2px; }
 .sidebar h2 { font-size: 15px; letter-spacing: 2px; margin-bottom: 28px; opacity: .7; }
@@ -138,11 +129,9 @@ textarea { resize: vertical; min-height: 100px; }
         <a href="{{ url_for('content.floor_path_editor') }}" class="{% if 'floor_path' in request.endpoint %}active{% endif %}">Floor Paths</a>
         <div class="section">RFID</div>
         <a href="{{ url_for('content.rfid_logs') }}" class="{% if request.endpoint == 'content.rfid_logs' %}active{% endif %}">Scan Logs</a>
+        <div class="section">Account</div>
+        <a href="{{ url_for('admin.logout') }}">Logout</a>
     </nav>
-</div>
-
-<div class="sidebar-logout">
-    <a href="{{ url_for('admin.logout') }}">⏻ Logout</a>
 </div>
 
 <div class="main">
