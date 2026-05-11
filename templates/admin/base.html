@@ -124,6 +124,7 @@ textarea { resize: vertical; min-height: 100px; }
         <a href="{{ url_for('content.rooms_list') }}" class="{% if request.endpoint == 'content.rooms_list' or request.endpoint == 'content.room_add' or request.endpoint == 'content.room_edit' %}active{% endif %}">Room Labels</a>
         <a href="{{ url_for('content.room_placer') }}" class="{% if request.endpoint == 'content.room_placer' %}active{% endif %}">Room Placer</a>
         <a href="{{ url_for('content.faculty_list') }}" class="{% if 'faculty' in request.endpoint %}active{% endif %}">Faculty</a>
+        <a href="{{ url_for('content.campus_map_admin') }}" class="{% if request.endpoint == 'content.campus_map_admin' %}active{% endif %}">Campus Map</a>
         <a href="{{ url_for('content.campus_pins_list') }}" class="{% if 'campus_pin' in request.endpoint %}active{% endif %}">Campus Pins</a>
         <a href="{{ url_for('content.campus_path_editor') }}" class="{% if 'campus_path' in request.endpoint %}active{% endif %}">Campus Paths</a>
         <a href="{{ url_for('content.floor_path_editor') }}" class="{% if 'floor_path' in request.endpoint %}active{% endif %}">Floor Paths</a>
@@ -160,6 +161,30 @@ function previewUpload(inputId, pathId) {
         else alert(d.error || 'Upload failed');
     })
     .catch(() => alert('Upload failed'));
+}
+function uploadAndPreview(inputId, pathId, previewId) {
+    var input = document.getElementById(inputId);
+    var pathField = document.getElementById(pathId);
+    var preview = document.getElementById(previewId);
+    var file = input.files[0];
+    if (!file) return;
+    var fd = new FormData();
+    fd.append('file', file);
+    fetch('/admin/upload', {
+        method: 'POST', body: fd,
+        headers: { 'X-CSRFToken': document.querySelector('meta[name=csrf-token]')?.content || '' }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (d.path) {
+            pathField.value = d.path;
+            preview.src = '/static/' + d.path;
+            preview.style.display = 'block';
+        } else {
+            alert(d.error || 'Upload failed');
+        }
+    })
+    .catch(function() { alert('Upload failed'); });
 }
 </script>
 <script src="/static/js/toast.js?v=2"></script>

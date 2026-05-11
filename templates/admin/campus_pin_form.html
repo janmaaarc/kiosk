@@ -24,6 +24,31 @@
         </div>
 
         <div class="form-group">
+            <label>Building Photo <span style="font-weight:400;color:#888">(optional)</span></label>
+            {% if pin.photo %}
+            <div style="margin-bottom:10px;">
+                <img id="pin-photo-preview"
+                     src="{{ url_for('static', filename=pin.photo) }}"
+                     style="max-width:260px;max-height:160px;object-fit:cover;border-radius:6px;border:1px solid #ddd;display:block;">
+            </div>
+            {% else %}
+            <div style="margin-bottom:10px;">
+                <img id="pin-photo-preview"
+                     src=""
+                     style="max-width:260px;max-height:160px;object-fit:cover;border-radius:6px;border:1px solid #ddd;display:none;">
+            </div>
+            {% endif %}
+            <div class="upload-row">
+                <input type="text" id="pin-photo-path" name="photo"
+                       value="{{ pin.photo or '' }}"
+                       placeholder="e.g. uploads/images/acad_building.jpg">
+                <input type="file" id="pin-photo-file" accept="image/*"
+                       onchange="uploadAndPreview('pin-photo-file','pin-photo-path','pin-photo-preview')">
+            </div>
+            <span class="hint">Upload a photo of this building for use in kiosk directions / mobile QR view.</span>
+        </div>
+
+        <div class="form-group">
             <label>Floor Plan URL <span style="font-weight:400;color:#888;">(optional)</span></label>
             <input type="text" name="page_url" maxlength="200"
                    value="{{ pin.page_url or '' }}"

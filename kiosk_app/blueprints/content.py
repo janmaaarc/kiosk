@@ -102,6 +102,7 @@ def _safe_filename(original: str) -> str:
 
 import re as _re
 _SAFE_FILE_RE = _re.compile(r'^(?:uploads|files/uploads)/[0-9a-f]{32}\.pdf$')
+_SAFE_IMAGE_PATH_RE = _re.compile(r'^uploads/images/[0-9a-f]{32}\.(jpg|jpeg|png|webp|gif)$')
 
 
 def _safe_files_json(raw: str) -> str:
@@ -1077,6 +1078,38 @@ def api_screensaver_images():
     return jsonify([r["filename"] for r in rows])
 
 
+# ── Campus Map Image ─────────────────────────────────────────────────────────
+
+@content_bp.route("/admin/campus-map", methods=["GET", "POST"])
+@login_required
+def campus_map_admin():
+    _MAP_PATH = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+        "static", "images", "labeled_map.jpg",
+    )
+    error = None
+    if request.method == "POST":
+        f = request.files.get("campus_map")
+        if not f or not f.filename:
+            error = "No file selected."
+        else:
+            mime = _sniff_mime(f.stream)
+            if mime not in _ALLOWED_IMAGE_MIME:
+                error = "Only image files are allowed (JPEG, PNG, WebP, GIF)."
+            else:
+                data = f.read()
+                if len(data) > _MAX_IMAGE_BYTES:
+                    error = "Image exceeds 5 MB limit."
+                else:
+                    os.makedirs(os.path.dirname(_MAP_PATH), exist_ok=True)
+                    with open(_MAP_PATH, "wb") as fh:
+                        fh.write(data)
+                    flash("Campus map updated.", "success")
+                    return redirect(url_for("content.campus_map_admin"))
+    exists = os.path.isfile(_MAP_PATH)
+    return render_template("admin/campus_map.html", exists=exists, error=error)
+
+
 # ── Campus Pins ──────────────────────────────────────────────────────────────
 
 @content_bp.route("/admin/campus-pins")
@@ -1127,13 +1160,15 @@ def campus_pin_edit(pin_id: int):
         name = request.form.get("name", "").strip()[:200]
         page_url = request.form.get("page_url", "").strip()[:200] or None
         directions_text = request.form.get("directions_text", "").strip()[:1000] or None
+        photo_raw = request.form.get("photo", "").strip()
+        photo = photo_raw if photo_raw and _SAFE_IMAGE_PATH_RE.fullmatch(photo_raw) else None
         left_pct = request.form.get("left_pct", type=float)
         top_pct = request.form.get("top_pct", type=float)
         if name and left_pct is not None and top_pct is not None:
             with db_connection() as conn:
                 conn.execute(
-                    "UPDATE campus_pins SET number=?, name=?, left_pct=?, top_pct=?, page_url=?, directions_text=? WHERE id=?",
-                    (number, name, left_pct, top_pct, page_url, directions_text, pin_id),
+                    "UPDATE campus_pins SET number=?, name=?, left_pct=?, top_pct=?, page_url=?, directions_text=?, photo=? WHERE id=?",
+                    (number, name, left_pct, top_pct, page_url, directions_text, photo, pin_id),
                 )
                 conn.commit()
         return redirect(url_for("content.campus_pins_list"))

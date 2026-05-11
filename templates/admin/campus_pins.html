@@ -10,6 +10,7 @@
     <thead>
         <tr>
             <th>#</th>
+            <th>Photo</th>
             <th>Name</th>
             <th>Left %</th>
             <th>Top %</th>
@@ -20,6 +21,13 @@
     {% for pin in pins %}
         <tr>
             <td style="font-weight:700;color:#7b2d2d;">{{ pin.number or '—' }}</td>
+            <td>
+                {% if pin.photo %}
+                <img src="{{ url_for('static', filename=pin.photo) }}" class="img-thumb" alt="photo">
+                {% else %}
+                <span style="color:#bbb;font-size:12px">—</span>
+                {% endif %}
+            </td>
             <td>{{ pin.name }}</td>
             <td style="text-align:center;">{{ "%.2f"|format(pin.left_pct) }}%</td>
             <td style="text-align:center;">{{ "%.2f"|format(pin.top_pct) }}%</td>
@@ -38,7 +46,7 @@
             </td>
         </tr>
     {% else %}
-        <tr><td colspan="5" style="text-align:center;color:#888;padding:20px">No pins yet. Use the placer to add building markers.</td></tr>
+        <tr><td colspan="6" style="text-align:center;color:#888;padding:20px">No pins yet. Use the placer to add building markers.</td></tr>
     {% endfor %}
     </tbody>
 </table>

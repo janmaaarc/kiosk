@@ -1,0 +1,58 @@
+{% extends "admin/base.html" %}
+{% block title %}Campus Map{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Campus Map</h1>
+
+{% if error %}
+<div class="flash flash-error">{{ error }}</div>
+{% endif %}
+
+<div class="form-card" style="max-width:800px;">
+    <p style="font-size:14px;color:#555;margin-bottom:20px;">
+        Upload a new campus map image. This replaces the map shown on the kiosk, mobile QR directions, and admin tools.
+        Accepted formats: JPEG, PNG, WebP, GIF. Max 5 MB.
+    </p>
+
+    {% if exists %}
+    <div style="margin-bottom:20px;">
+        <p style="font-size:13px;font-weight:600;color:#444;margin-bottom:8px;">Current Map</p>
+        <img src="{{ url_for('static', filename='images/labeled_map.jpg') }}?v={{ range(1,99999)|random }}"
+             alt="Current campus map"
+             style="max-width:100%;border-radius:6px;border:1px solid #ddd;">
+    </div>
+    {% else %}
+    <div style="margin-bottom:20px;padding:20px;background:#fdf5f5;border-radius:6px;color:#7b2d2d;font-size:14px;">
+        No campus map uploaded yet.
+    </div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="form-group">
+            <label for="campus-map-file">{{ 'Replace Map' if exists else 'Upload Map' }}</label>
+            <input type="file" id="campus-map-file" name="campus_map" accept="image/*" required
+                   style="width:100%;padding:9px 12px;border:1px solid #ccc;border-radius:5px;font-size:14px;">
+        </div>
+        <div id="new-preview-wrap" style="display:none;margin-bottom:16px;">
+            <p style="font-size:13px;font-weight:600;color:#444;margin-bottom:8px;">Preview</p>
+            <img id="new-preview"
+                 style="max-width:100%;border-radius:6px;border:1px solid #ddd;">
+        </div>
+        <button type="submit" class="btn btn-primary">Upload &amp; Replace Map</button>
+    </form>
+</div>
+
+<script>
+document.getElementById('campus-map-file').addEventListener('change', function() {
+    var file = this.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('new-preview').src = e.target.result;
+        document.getElementById('new-preview-wrap').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+});
+</script>
+{% endblock %}
