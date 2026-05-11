@@ -40,9 +40,36 @@ html, body { width:100%; height:100%; background:#1a0a0a; overflow:hidden; font-
   flex-shrink:0;
   border-radius:6px; overflow:hidden;
   border:1px solid rgba(255,255,255,.2);
-  background:#2a1010;
+  background:#2a1010; cursor:pointer; position:relative;
 }
 .campus-thumb img { width:100%; display:block; object-fit:cover; max-height:100px; }
+.campus-thumb-hint {
+  position:absolute; bottom:4px; right:5px;
+  font-size:8px; font-weight:900; letter-spacing:1px;
+  color:rgba(255,255,255,.7); background:rgba(0,0,0,.45);
+  padding:2px 5px; border-radius:3px; pointer-events:none;
+}
+
+/* Campus map zoom overlay */
+#map-zoom {
+  display:none; position:fixed; inset:0; z-index:1000;
+  background:rgba(0,0,0,.92);
+  flex-direction:column; align-items:center; justify-content:center;
+}
+#map-zoom.show { display:flex; }
+#map-zoom-inner {
+  position:relative; width:92vw; max-width:600px;
+  border-radius:8px; overflow:hidden;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+}
+#map-zoom-inner img { width:100%; display:block; }
+#map-zoom-close {
+  position:absolute; top:8px; right:8px;
+  width:30px; height:30px; border-radius:50%;
+  background:rgba(123,45,45,.9); color:#fff;
+  font-size:18px; font-weight:900; line-height:30px; text-align:center;
+  cursor:pointer; border:none; font-family:var(--f);
+}
 
 /* ── RIGHT PANEL (floor plan) ── */
 .floor-panel {
@@ -171,8 +198,9 @@ html, body { width:100%; height:100%; background:#1a0a0a; overflow:hidden; font-
     <div class="p-divider"></div>
     <div class="p-dir-hd">DIRECTIONS</div>
     <ul id="steps"></ul>
-    <div class="campus-thumb">
+    <div class="campus-thumb" onclick="openMapZoom()">
       <img src="/static/images/labeled_map.jpg" alt="Campus Map" onerror="this.parentElement.style.display='none'">
+      <div class="campus-thumb-hint">TAP TO ZOOM</div>
     </div>
   </div>
 
@@ -200,6 +228,14 @@ html, body { width:100%; height:100%; background:#1a0a0a; overflow:hidden; font-
 
 </div>
 
+<!-- Campus map zoom overlay -->
+<div id="map-zoom">
+  <div id="map-zoom-inner">
+    <img src="/static/images/labeled_map.jpg" alt="Campus Map">
+    <button id="map-zoom-close" onclick="closeMapZoom()" aria-label="Close">&times;</button>
+  </div>
+</div>
+
 <script>
 var p    = new URLSearchParams(window.location.search);
 var DEST = (p.get("location") || "").trim().toUpperCase();
@@ -219,6 +255,17 @@ function dismissLandscapePrompt() {
 }
 window.addEventListener('resize', checkOrientation);
 checkOrientation();
+
+function openMapZoom() {
+  document.getElementById('map-zoom').classList.add('show');
+}
+function closeMapZoom() {
+  document.getElementById('map-zoom').classList.remove('show');
+}
+document.addEventListener('click', function(e) {
+  var z = document.getElementById('map-zoom');
+  if (z.classList.contains('show') && e.target === z) closeMapZoom();
+});
 
 function tc(s) {
   return s.split(" ").filter(function(w){return w.length>0;}).map(function(w){
