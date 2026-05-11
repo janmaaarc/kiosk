@@ -115,9 +115,40 @@ def api_floor_rooms():
     except (ValueError, TypeError):
         floor_num = 1
 
-    floors_map = {
-        "Academic Building": _ACADEMIC_FLOORS,
-    }
+    # Try DB rooms first
+    with db_connection() as conn:
+        db_rows = conn.execute(
+            "SELECT room, pos_left, pos_top, pos_width, pos_height, description"
+            " FROM rooms WHERE building=? AND floor=? ORDER BY pos_top, pos_left",
+            (building, str(floor_num)),
+        ).fetchall()
+
+    if db_rows:
+        rooms = [
+            {
+                "name": r["room"],
+                "left": r["pos_left"],
+                "top": r["pos_top"],
+                "width": r["pos_width"],
+                "height": r["pos_height"],
+                "desc": r["description"] or "",
+            }
+            for r in db_rows
+        ]
+        bldg_entrances = _BUILDING_ENTRANCES.get(building, {})
+        raw_e = bldg_entrances.get(floor_num, _ENTRANCE_BY_FLOOR.get(floor_num, _ENTRANCE_BY_FLOOR[1]))
+        # Normalize both key spellings so mobile JS (uses hY) and kiosk JS (uses hallway_y) both work
+        entrance = {
+            "x": raw_e.get("x", 50),
+            "y": raw_e.get("y", 96),
+            "hY": raw_e.get("hY", raw_e.get("hallway_y", 50)),
+            "hallway_y": raw_e.get("hallway_y", raw_e.get("hY", 50)),
+        }
+        return Response(json.dumps({"rooms": rooms, "entrance": entrance}),
+                        content_type="application/json")
+
+    # Fall back to hardcoded data
+    floors_map = {"Academic Building": _ACADEMIC_FLOORS}
     floors = floors_map.get(building)
     if not floors or floor_num not in floors:
         return Response(json.dumps({"rooms": [], "entrance": _ENTRANCE_BY_FLOOR.get(1)}),
@@ -136,8 +167,8 @@ def api_floor_rooms():
         for r in floor_data.get("rooms", [])
     ]
     entrance = _ENTRANCE_BY_FLOOR.get(floor_num, _ENTRANCE_BY_FLOOR[1])
-    data = {"rooms": rooms, "entrance": entrance}
-    return Response(json.dumps(data), content_type="application/json")
+    return Response(json.dumps({"rooms": rooms, "entrance": entrance}),
+                    content_type="application/json")
 
 
 # Per-building, per-floor entrance points (image % coordinates).
