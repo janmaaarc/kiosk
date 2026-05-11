@@ -107,9 +107,41 @@ html, body { width:100%; height:100%; margin:0; background:#1a0a0a; overflow:hid
 /* Photo */
 .photo-sect { height:40%; flex-shrink:0; overflow:hidden; background:#c8b8a0; }
 .photo-sect img { width:100%; height:100%; object-fit:cover; display:block; }
+
+/* Landscape prompt */
+#landscape-prompt {
+  display:none; position:fixed; inset:0; z-index:999;
+  background:rgba(10,0,0,.92);
+  flex-direction:column; align-items:center; justify-content:center;
+  gap:18px; padding:32px; text-align:center; color:#fff;
+}
+#landscape-prompt.show { display:flex; }
+.lp-phone {
+  color:var(--red);
+  animation:lp-rock 1.4s ease-in-out infinite alternate;
+}
+@keyframes lp-rock {
+  from { transform:rotate(-20deg); }
+  to   { transform:rotate(20deg); }
+}
+.lp-title { font-size:clamp(16px,5vw,24px); font-weight:900; letter-spacing:3px; color:var(--red); }
+.lp-desc  { font-size:clamp(12px,3.5vw,15px); opacity:.75; max-width:280px; line-height:1.6; letter-spacing:.5px; }
+.lp-skip  { font-size:clamp(10px,3vw,13px); opacity:.4; cursor:pointer; text-decoration:underline; padding:8px 16px; letter-spacing:1px; }
 </style>
 </head>
 <body>
+<div id="landscape-prompt">
+  <div class="lp-phone">
+    <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="7" y="2" width="10" height="20" rx="2"/>
+      <circle cx="12" cy="17" r=".8" fill="currentColor" stroke="none"/>
+    </svg>
+  </div>
+  <div class="lp-title">ROTATE YOUR PHONE</div>
+  <div class="lp-desc">Turn to landscape for the best floor plan viewing experience.</div>
+  <div class="lp-skip" onclick="dismissLandscapePrompt()">Continue in portrait</div>
+</div>
+
 <div class="wrap">
 
   <!-- LEFT PANEL -->
@@ -241,6 +273,21 @@ var p    = new URLSearchParams(window.location.search);
 var DEST = (p.get("location") || "").trim().toUpperCase();
 var IMG  = p.get("img") || "";
 
+// Orientation prompt
+var _landscapeDismissed = false;
+function checkOrientation() {
+  var isPortrait = window.innerWidth < window.innerHeight;
+  var el = document.getElementById('landscape-prompt');
+  if (!_landscapeDismissed && isPortrait) { el.classList.add('show'); }
+  else { el.classList.remove('show'); }
+}
+function dismissLandscapePrompt() {
+  _landscapeDismissed = true;
+  document.getElementById('landscape-prompt').classList.remove('show');
+}
+window.addEventListener('resize', checkOrientation);
+checkOrientation();
+
 function tc(s) {
   return s.split(" ").filter(function(w){return w.length>0;}).map(function(w){
     return w[0].toUpperCase()+w.slice(1).toLowerCase();
@@ -296,26 +343,65 @@ var ul = document.getElementById("steps");
 for (var i=0;i<steps.length;i++){var li=document.createElement("li");li.textContent=steps[i];ul.appendChild(li);}
 // "Inside the Building:" only shows when INSIDE view is active
 
-// ── OUTSIDE / INSIDE toggle ────────────────────────────
-var FLOOR_PLANS = {
-  "ACADEMIC BUILDING": [
-    "/static/images/floor_plans/academic_ground.svg",
-    "/static/images/floor_plans/academic_2nd.svg",
-    "/static/images/floor_plans/academic_3rd.svg",
-    "/static/images/floor_plans/academic_4th.svg",
-    "/static/images/floor_plans/academic_5th.svg"
-  ],
-  "NEW ADMIN BUILDING": [
-    "/static/images/floor_plans/new_admin_f1.png"
-  ],
-  "IT BUILDING": [
-    "/static/images/floor_plans/IT_1ST.JPG",
-    "/static/images/floor_plans/IT_2ND.JPG",
-    "/static/images/floor_plans/IT_3RD.JPG"
-  ]
-};
+// ── Campus path from DB ─────────────────────────────────
+function bfsCampus(adj, start, goal) {
+  var q = [[start]], seen = {};
+  seen[start] = true;
+  while (q.length) {
+    var path = q.shift(), node = path[path.length-1];
+    if (node === goal) return path;
+    (adj[node]||[]).forEach(function(nb){ if (!seen[nb]) { seen[nb]=true; q.push(path.concat(nb)); } });
+  }
+  return null;
+}
 
+fetch('/api/campus-paths').then(function(r){ return r.json(); }).then(function(data) {
+  if (!data.nodes.length || !data.edges.length) return;
+  var nodeById = {}, adj = {};
+  data.nodes.forEach(function(n){ nodeById[n.id]=n; adj[n.id]=[]; });
+  data.edges.forEach(function(e){ adj[e.node_a].push(e.node_b); adj[e.node_b].push(e.node_a); });
+  var startNode = data.nodes.find(function(n){ return /ENTRANCE|GATE/i.test(n.label); }) || data.nodes[0];
+  var destNode  = data.nodes.find(function(n){
+    var lbl = n.label.toUpperCase();
+    return lbl === DEST || lbl.indexOf(DEST) >= 0 || DEST.indexOf(lbl) >= 0;
+  });
+  if (!destNode) return;
+  var path = bfsCampus(adj, startNode.id, destNode.id);
+  if (!path || path.length < 2) return;
+  var pts = path.map(function(id){
+    var n = nodeById[id];
+    return (n.x_pct/100*1920).toFixed(1) + ',' + (n.y_pct/100*1080).toFixed(1);
+  }).join(' ');
+  var line = document.getElementById('route-line');
+  if (line) line.setAttribute('points', pts);
+}).catch(function(){});
+
+// ── OUTSIDE / INSIDE toggle ────────────────────────────
+function toTitleCase(s) {
+  return s.split(' ').map(function(w){ return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(); }).join(' ');
+}
+var DEST_TITLE = toTitleCase(DEST);
+
+var _dbFloors = null;
 var _floorsBuilt = false;
+
+fetch('/api/building-floors?building=' + encodeURIComponent(DEST_TITLE))
+  .then(function(r){ return r.json(); })
+  .then(function(data) {
+    _dbFloors = data;
+    var insideBtn = document.getElementById('btn-inside');
+    if (!data.length) {
+      insideBtn.style.opacity = '.4';
+      insideBtn.style.pointerEvents = 'none';
+    }
+    // If user already tapped Inside before fetch resolved, build tabs now
+    var insideEl = document.getElementById('inside-view');
+    if (insideEl && insideEl.style.display !== 'none' && !_floorsBuilt) {
+      buildFloorTabs();
+      _floorsBuilt = true;
+    }
+  })
+  .catch(function(){});
 
 function setView(view) {
   var outsideEl = document.getElementById("outside-view");
@@ -337,22 +423,20 @@ function setView(view) {
 }
 
 function buildFloorTabs() {
-  var floors = FLOOR_PLANS[DEST];
+  var floors = _dbFloors;
   var tabsEl = document.getElementById("floor-tabs");
   var noEl   = document.getElementById("no-floor");
-  var imgEl  = document.getElementById("floor-img");
 
   if (!floors || !floors.length) {
     noEl.style.display = "flex";
     return;
   }
 
-  var labels = ["1F","2F","3F","4F","5F"];
   for (var i = 0; i < floors.length; i++) {
     (function(idx) {
       var btn = document.createElement("button");
       btn.className = "floor-btn" + (idx === 0 ? " active" : "");
-      btn.textContent = labels[idx];
+      btn.textContent = floors[idx].floor_label || ("Floor " + floors[idx].floor_number);
       btn.onclick = function() { showFloor(idx); };
       tabsEl.appendChild(btn);
     })(i);
@@ -361,14 +445,26 @@ function buildFloorTabs() {
 }
 
 var _currentEntrance = {x:50, y:96, hY:50};
+var _floorGraph = null;
+
+function bfsFloor(adj, start, goal) {
+  var q = [[start]], seen = {};
+  seen[start] = true;
+  while (q.length) {
+    var path = q.shift(), node = path[path.length-1];
+    if (node === goal) return path;
+    (adj[node]||[]).forEach(function(nb){ if (!seen[nb]) { seen[nb]=true; q.push(path.concat(nb)); } });
+  }
+  return null;
+}
 
 function showFloor(idx) {
-  var floors = FLOOR_PLANS[DEST];
-  if (!floors || !floors[idx]) return;
+  var floors = _dbFloors;
+  if (!floors || !floors[idx] || !floors[idx].floor_image_url) return;
 
   var imgEl  = document.getElementById("floor-img");
   var planWrap = document.getElementById("plan-wrap");
-  imgEl.src = floors[idx];
+  imgEl.src = floors[idx].floor_image_url;
   planWrap.style.display = "block";
 
   // Clear previous overlays and route
@@ -383,10 +479,22 @@ function showFloor(idx) {
     btns[j].className = "floor-btn" + (j === idx ? " active" : "");
   }
 
+  // Fetch floor path graph for BFS routing
+  _floorGraph = null;
+  var floorNum = floors[idx].floor_number;
+  fetch('/api/floor-paths?building=' + encodeURIComponent(DEST_TITLE) + '&floor=' + floorNum)
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      if (!data.nodes || !data.nodes.length) return;
+      var adj = {};
+      data.nodes.forEach(function(n){ adj[n.id]=[]; });
+      data.edges.forEach(function(e){ adj[e.from_id].push(e.to_id); adj[e.to_id].push(e.from_id); });
+      _floorGraph = { nodes: data.nodes, adj: adj };
+    })
+    .catch(function(){});
+
   // Fetch room data for this floor
-  var floorNum = idx + 1;
-  var bldgName = DEST.charAt(0) + DEST.slice(1).toLowerCase();
-  fetch("/api/floor_rooms?building=" + encodeURIComponent(bldgName) + "&floor=" + floorNum)
+  fetch("/api/floor_rooms?building=" + encodeURIComponent(DEST_TITLE) + "&floor=" + floorNum)
     .then(function(r){ return r.json(); })
     .then(function(data) {
       _currentEntrance = data.entrance || {x:50, y:96, hY:50};
@@ -413,20 +521,43 @@ function renderRooms(rooms) {
 }
 
 function selectRoom(el, room) {
-  // Clear previous active
   var all = document.querySelectorAll(".room-lbl");
   for (var i = 0; i < all.length; i++) all[i].classList.remove("active");
   el.classList.add("active");
 
-  // Draw static route: entrance → hallway → room center
-  var e = _currentEntrance;
   var rCx = room.left + room.width  / 2;
   var rCy = room.top  + room.height / 2;
-  var hY  = e.hY;
-  var d = "M " + e.x + " " + e.y +
-          " L " + e.x + " " + hY +
-          " L " + rCx + " " + hY +
-          " L " + rCx + " " + rCy;
+  var d;
+
+  if (_floorGraph && _floorGraph.nodes.length > 1) {
+    var nodes = _floorGraph.nodes, adj = _floorGraph.adj;
+    var entry = nodes.find(function(n){ return /ENTRANCE|GATE|ENTRY/i.test(n.label||''); }) || nodes[0];
+    var best = null, bestDist = Infinity;
+    nodes.forEach(function(n){ var dx=n.x_pct-rCx, dy=n.y_pct-rCy, d2=dx*dx+dy*dy; if(d2<bestDist){bestDist=d2;best=n;} });
+    if (entry && best) {
+      var path = bfsFloor(adj, entry.id, best.id);
+      if (path && path.length > 1) {
+        var byId = {};
+        nodes.forEach(function(n){ byId[n.id]=n; });
+        var parts = [];
+        path.forEach(function(id, i){
+          var n = byId[id];
+          if (!n) return;
+          parts.push((i===0?'M ':'L ') + n.x_pct + ' ' + n.y_pct);
+        });
+        parts.push('L ' + rCx + ' ' + rCy);
+        d = parts.join(' ');
+      }
+    }
+  }
+
+  if (!d) {
+    var e = _currentEntrance;
+    d = "M " + e.x + " " + e.y +
+        " L " + e.x + " " + e.hY +
+        " L " + rCx + " " + e.hY +
+        " L " + rCx + " " + rCy;
+  }
 
   document.getElementById("route-path").setAttribute("d", d);
   document.getElementById("route-svg").style.display = "block";

@@ -1404,3 +1404,34 @@ def api_floor_paths():
             (building, floor, building, floor),
         ).fetchall() if nodes else []
     return jsonify({"nodes": [dict(n) for n in nodes], "edges": [dict(e) for e in edges]})
+
+
+@content_bp.route("/api/building-floors")
+@limiter.limit("60/minute")
+def api_building_floors():
+    building = request.args.get("building", "").strip()
+    if not building:
+        return jsonify([])
+    with db_connection() as conn:
+        rows = conn.execute(
+            "SELECT floor_number, floor_label, floor_image FROM building_floors"
+            " WHERE building=? ORDER BY floor_number",
+            (building,),
+        ).fetchall()
+    import posixpath as _pp
+    def _safe_img(img):
+        if not img:
+            return None
+        clean = _pp.normpath(img.replace("\\", "/")).lstrip("/.")
+        if not clean or clean.startswith(".."):
+            return None
+        return "/static/" + clean
+
+    return jsonify([
+        {
+            "floor_number": r["floor_number"],
+            "floor_label": r["floor_label"],
+            "floor_image_url": _safe_img(r["floor_image"]),
+        }
+        for r in rows
+    ])
