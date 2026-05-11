@@ -271,35 +271,6 @@ body {
   color: white !important;
 }
 
-.indoor-pin {
-  position:absolute;
-  width:44px;
-  height:56px;
-  transform:translate(-50%,-100%);
-  pointer-events:none;
-  z-index:8;
-}
-.indoor-pin .pin {
-  width:44px;height:44px;
-  background:#8b1a1a;
-  border-radius:50% 50% 50% 0;
-  transform:rotate(-45deg);
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 3px 10px rgba(0,0,0,0.35);
-}
-.indoor-pin .pin-text {
-  transform:rotate(45deg);
-  color:#fff;
-  font-weight:900;
-  font-size:8px;
-  text-align:center;
-  line-height:1;
-  letter-spacing:0.5px;
-}
-@keyframes dash-march {
-  to { stroke-dashoffset: -10; }
-}
-#indoorRouteLine { animation: dash-march 0.8s linear infinite; }
 
 @media (max-width: 768px) {
   body { height: auto; overflow: auto; }
@@ -433,16 +404,6 @@ body {
     <div class="plan-placeholder">FLOOR PLAN IMAGE COMING SOON</div>
     {% endif %}
 
-    <svg id="indoorRouteSVG" viewBox="0 0 100 100" preserveAspectRatio="none"
-         style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5;">
-      <path id="indoorRouteLine" fill="none" stroke="#8e44ad" stroke-width="1.4"
-            stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 2"
-            style="display:none"/>
-    </svg>
-
-    <div id="indoorYouHere" class="indoor-pin" style="display:none">
-      <div class="pin"><div class="pin-text">YOU<br>ARE<br>HERE.</div></div>
-    </div>
 
     {% for room in rooms %}
     <button class="room-label {% if highlight and highlight|lower == room.name|lower %}highlighted{% endif %} {% if room.color %}room-type-{{ room.color }}{% endif %}"
@@ -501,14 +462,9 @@ function switchFloor(url) {
 const BUILDING_URL  = '{{ request.path }}';
 const FLOOR_NUMBER  = {{ floor_number }};
 const BUILDING_NAME = {{ building_name | tojson }};
-const ENTRANCE_X    = {{ entrance_x | default(50) }};
-const ENTRANCE_Y    = {{ entrance_y | default(96) }};
-const HALLWAY_Y     = {{ hallway_y | default(50) }};
-
 function handleRoomClick(btn) {
   document.querySelectorAll('.room-label').forEach(b => b.classList.remove('highlighted'));
   btn.classList.add('highlighted');
-  drawIndoorRoute(btn);
   showInfo(btn);
   toast(btn.dataset.name, 'success', 2000);
 }
@@ -583,7 +539,6 @@ const ALL_ROOMS = {{ all_rooms_index | default([]) | tojson }};
           if (target) {
             document.querySelectorAll('.room-label').forEach(b => b.classList.remove('highlighted'));
             target.classList.add('highlighted');
-            drawIndoorRoute(target);
             showInfo(target);
           }
           clearSuggestions();
@@ -629,109 +584,12 @@ if (loc) {
   document.querySelectorAll('.room-label').forEach(b => {
     if (b.dataset.name.toLowerCase() === loc.toLowerCase()) {
       b.classList.add('highlighted');
-      drawIndoorRoute(b);
+      showInfo(b);
+      toast(b.dataset.name, 'success', 2000);
     }
   });
 }
 
-// DB floor graph (populated on load)
-var _floorGraph = null;
-
-function _loadFloorGraph() {
-  if (_floorGraph !== null) return Promise.resolve(_floorGraph);
-  var url = '/api/floor-paths?building=' + encodeURIComponent(BUILDING_NAME) + '&floor=' + encodeURIComponent(FLOOR_NUMBER);
-  return fetch(url).then(function(r) { return r.json(); }).then(function(data) {
-    if (!data.nodes || !data.nodes.length) { _floorGraph = false; return false; }
-    var nodeMap = {};
-    data.nodes.forEach(function(n) { nodeMap[n.id] = n; });
-    var adj = {};
-    data.nodes.forEach(function(n) { adj[n.id] = []; });
-    data.edges.forEach(function(e) {
-      adj[e.from_id].push(e.to_id);
-      adj[e.to_id].push(e.from_id);
-    });
-    _floorGraph = { nodeMap: nodeMap, adj: adj };
-    return _floorGraph;
-  }).catch(function() { _floorGraph = false; return false; });
-}
-
-function _bfs(adj, startId, goalId) {
-  var visited = {}, prev = {}, queue = [startId];
-  visited[startId] = true;
-  while (queue.length) {
-    var cur = queue.shift();
-    if (cur === goalId) break;
-    (adj[cur] || []).forEach(function(nb) {
-      if (!visited[nb]) { visited[nb] = true; prev[nb] = cur; queue.push(nb); }
-    });
-  }
-  if (!visited[goalId]) return null;
-  var path = [], c = goalId;
-  while (c !== undefined) { path.unshift(c); c = prev[c]; }
-  return path;
-}
-
-function drawIndoorRoute(targetBtn) {
-  var left = parseFloat(targetBtn.dataset.left);
-  var top  = parseFloat(targetBtn.dataset.top);
-  var w    = parseFloat(targetBtn.dataset.width);
-  var h    = parseFloat(targetBtn.dataset.height);
-  if ([left, top, w, h].some(isNaN)) return;
-
-  var rx = left + w / 2, ry = top + h / 2;
-
-  _loadFloorGraph().then(function(graph) {
-    if (!graph) {
-      _drawHeuristic(rx, ry);
-      return;
-    }
-    // Find entrance node (label contains ENTRANCE/GATE/ENTRY) else first node
-    var nodes = Object.values(graph.nodeMap);
-    var entranceNode = nodes.find(function(n) {
-      var lbl = (n.label || '').toUpperCase();
-      return lbl.indexOf('ENTRANCE') >= 0 || lbl.indexOf('GATE') >= 0 || lbl.indexOf('ENTRY') >= 0;
-    }) || nodes[0];
-
-    // Find closest node to room center
-    var goalNode = nodes.reduce(function(best, n) {
-      var d = Math.pow(n.x_pct - rx, 2) + Math.pow(n.y_pct - ry, 2);
-      return d < best.d ? { node: n, d: d } : best;
-    }, { node: null, d: Infinity }).node;
-    if (!goalNode) { _drawHeuristic(rx, ry); return; }
-
-    var path = _bfs(graph.adj, entranceNode.id, goalNode.id);
-    if (!path) { _drawHeuristic(rx, ry); return; }
-
-    var coords = path.map(function(id) { return graph.nodeMap[id]; });
-    coords.push({ x_pct: rx, y_pct: ry });
-
-    var d = coords.map(function(c, i) {
-      return (i === 0 ? 'M' : 'L') + ' ' + imgToW(c.x_pct) + ' ' + imgToH(c.y_pct);
-    }).join(' ');
-
-    var line = document.getElementById('indoorRouteLine');
-    line.setAttribute('d', d);
-    line.style.display = 'block';
-
-    var pin = document.getElementById('indoorYouHere');
-    pin.style.left = imgToW(entranceNode.x_pct) + '%';
-    pin.style.top  = imgToH(entranceNode.y_pct) + '%';
-    pin.style.display = 'block';
-  });
-}
-
-function _drawHeuristic(rx, ry) {
-  var ex = imgToW(ENTRANCE_X), ey = imgToH(ENTRANCE_Y);
-  var hy = imgToH(HALLWAY_Y);
-  var d = 'M ' + ex + ' ' + ey + ' L ' + ex + ' ' + hy + ' L ' + imgToW(rx) + ' ' + hy + ' L ' + imgToW(rx) + ' ' + imgToH(ry);
-  var line = document.getElementById('indoorRouteLine');
-  line.setAttribute('d', d);
-  line.style.display = 'block';
-  var pin = document.getElementById('indoorYouHere');
-  pin.style.left = ex + '%';
-  pin.style.top  = ey + '%';
-  pin.style.display = 'block';
-}
 
 let _lb = null; // letterbox transform cache
 

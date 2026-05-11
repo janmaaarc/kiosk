@@ -101,7 +101,7 @@ def _safe_filename(original: str) -> str:
 
 
 import re as _re
-_SAFE_FILE_RE = _re.compile(r'^uploads/[0-9a-f]{32}\.pdf$')
+_SAFE_FILE_RE = _re.compile(r'^(?!.*\.\.)(?!.*\x00)[a-zA-Z0-9_./ -]{1,300}\.pdf$')
 
 
 def _safe_files_json(raw: str) -> str:
@@ -1126,13 +1126,14 @@ def campus_pin_edit(pin_id: int):
         number = request.form.get("number", "").strip()[:10] or None
         name = request.form.get("name", "").strip()[:200]
         page_url = request.form.get("page_url", "").strip()[:200] or None
+        directions_text = request.form.get("directions_text", "").strip()[:1000] or None
         left_pct = request.form.get("left_pct", type=float)
         top_pct = request.form.get("top_pct", type=float)
         if name and left_pct is not None and top_pct is not None:
             with db_connection() as conn:
                 conn.execute(
-                    "UPDATE campus_pins SET number=?, name=?, left_pct=?, top_pct=?, page_url=? WHERE id=?",
-                    (number, name, left_pct, top_pct, page_url, pin_id),
+                    "UPDATE campus_pins SET number=?, name=?, left_pct=?, top_pct=?, page_url=?, directions_text=? WHERE id=?",
+                    (number, name, left_pct, top_pct, page_url, directions_text, pin_id),
                 )
                 conn.commit()
         return redirect(url_for("content.campus_pins_list"))
@@ -1156,7 +1157,7 @@ def campus_pin_delete(pin_id: int):
 def api_campus_pins():
     with db_connection() as conn:
         pins = conn.execute(
-            "SELECT id, number, name, left_pct, top_pct, page_url FROM campus_pins ORDER BY CAST(number AS INTEGER), number, id"
+            "SELECT id, number, name, left_pct, top_pct, page_url, directions_text FROM campus_pins ORDER BY CAST(number AS INTEGER), number, id"
         ).fetchall()
     return jsonify([dict(p) for p in pins])
 

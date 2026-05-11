@@ -286,12 +286,12 @@
               box-sizing: border-box;
               color: #fff;
               z-index: 1400;
-              overflow-y: auto;
+              overflow: hidden;
+              display: flex;
+              flex-direction: column;
               box-shadow: 6px 0 32px rgba(0,0,0,0.35);
               transition: transform 0.32s cubic-bezier(0.16,1,0.3,1);
-              scrollbar-width: none;
             }
-            .directions-panel::-webkit-scrollbar { display: none; }
             .directions-panel.collapsed {
               transform: translateX(-360px);
             }
@@ -321,7 +321,7 @@
             }
             .dp-close:hover { background: rgba(255,255,255,0.22); }
 
-            .dp-body { padding: 24px 28px 32px; }
+            .dp-body { padding: 24px 28px 32px; flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.2) transparent; }
 
             .panel-toggle {
               position: fixed;
@@ -397,30 +397,6 @@
               letter-spacing:0.5px;
             }
 
-            .view-toggle {
-              position:fixed;
-              top:70px;
-              right:28px;
-              display:flex;
-              gap:24px;
-              align-items:center;
-              z-index:2500;
-              font-weight:900;
-              letter-spacing:2px;
-              font-size:15px;
-              color:#333;
-              background:rgba(255,255,255,0.96);
-              padding:8px 18px;
-              border-radius:24px;
-              box-shadow:0 4px 14px rgba(0,0,0,0.12);
-            }
-            .view-toggle .toggle-btn {
-              cursor:pointer;
-              padding:4px 4px;
-              opacity:0.55;
-              transition:opacity 0.2s;
-            }
-            .view-toggle .toggle-btn.active { opacity:1; border-bottom:3px solid #8b1a1a; }
             .qr-btn-float {
               position:fixed;
               top:125px;
@@ -482,7 +458,6 @@
               }
               .directions-panel ul li { font-size: 15px; }
               .directions-panel .dest-name { font-size: 20px; }
-              .view-toggle { font-size: 13px; top: 16px; right: 16px; padding: 6px 14px; }
               .qr-btn-float { top: 72px; right: 16px; font-size: 12px; padding: 8px 14px; }
               .qr-card { right: 8px; width: 280px; }
               #buildingPanel { width: 100% !important; right: -110% !important; }
@@ -521,10 +496,6 @@
                             <div class="pin"><div class="pin-text">YOU<br>ARE<br>HERE.</div></div>
                           </div>
 
-                          <div class="view-toggle" id="viewToggle" style="display:none">
-                            <span class="toggle-btn active" id="toggleOutside" onclick="setView('outside')" title="Outdoor directions to the building">OUTSIDE</span>
-                            <span class="toggle-btn" id="toggleInside" onclick="setView('inside')" title="View floor plan and indoor directions">INSIDE</span>
-                          </div>
                           <div class="qr-btn-float" id="qrBtnFloat" onclick="generateQR()" style="display:none">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zm8-2v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4zm13-2h-2v2h2v-2zm-2 2h-2v2h2v-2zm4 0h-2v2h2v-2zm0 4h-2v2h2v-2zm-4 0h-2v2h2v-2z"/></svg>
                             GENERATE QR CODE
@@ -553,11 +524,6 @@
                             <div class="dp-body">
                               <div class="dir-heading">Directions</div>
                               <ul id="directionsBox"></ul>
-                              <div id="insideBlock" style="display:none">
-                                <div class="divider"></div>
-                                <div class="dir-heading" id="insideHeading">Inside the Building:</div>
-                                <ul id="insideBox"></ul>
-                              </div>
                             </div>
                           </div>
                           <button class="panel-toggle" id="panelToggle" onclick="toggleDirectionsPanel()">DIR</button>
@@ -1062,19 +1028,29 @@ function showDirections(destination){
   const target = nodes[destination] ? destination : destination.toUpperCase();
   const path = findPath(start, target);
 
+  const pinEl = document.querySelector(`.building[data-name="${CSS.escape(destination)}"]`);
+  const writtenText = pinEl && pinEl.dataset.directions ? pinEl.dataset.directions : null;
+
   if(!path){
     // No routing data — still show panel with building name
     document.getElementById("destName").textContent = destination;
     const box = document.getElementById("directionsBox");
     while (box.firstChild) box.removeChild(box.firstChild);
-    const li = document.createElement("li");
-    li.textContent = "See the labeled map for the location of this building.";
-    box.appendChild(li);
+    if (writtenText) {
+      writtenText.split('\n').filter(s => s.trim()).forEach(line => {
+        const li = document.createElement("li");
+        li.textContent = line.trim();
+        box.appendChild(li);
+      });
+    } else {
+      const li = document.createElement("li");
+      li.textContent = "See the labeled map for the location of this building.";
+      box.appendChild(li);
+    }
     const dp = document.getElementById("directionsPanel");
     dp.style.display = "block";
     dp.classList.remove("collapsed");
     document.getElementById("panelToggle").style.display = "none";
-    document.getElementById("viewToggle").style.display = "flex";
     document.getElementById("qrBtnFloat").style.display = "flex";
     _directionsActive = true;
     return;
@@ -1101,23 +1077,30 @@ function showDirections(destination){
   const steps = friendlyDirections(path, destination);
   const box = document.getElementById("directionsBox");
   while (box.firstChild) box.removeChild(box.firstChild);
-  steps.forEach(s => {
-    const li = document.createElement("li");
-    li.textContent = s;
-    box.appendChild(li);
-  });
+  if (writtenText) {
+    writtenText.split('\n').filter(s => s.trim()).forEach(line => {
+      const li = document.createElement("li");
+      li.textContent = line.trim();
+      box.appendChild(li);
+    });
+  } else {
+    steps.forEach(s => {
+      const li = document.createElement("li");
+      li.textContent = s;
+      box.appendChild(li);
+    });
+  }
 
   document.getElementById("destName").textContent = destination;
   const dp = document.getElementById("directionsPanel");
   dp.style.display = "block";
   dp.classList.remove("collapsed");
   document.getElementById("panelToggle").style.display = "none";
-  document.getElementById("viewToggle").style.display = "flex";
   document.getElementById("qrBtnFloat").style.display = "flex";
   _directionsActive = true;
 
   if (_pendingRoom) {
-    const buildingEl = document.querySelector(`.building[data-name="${destination}"]`);
+    const buildingEl = document.querySelector(`.building[data-name="${CSS.escape(destination)}"]`);
     const page = buildingEl && buildingEl.dataset.page;
     if (page) {
       setTimeout(() => {
@@ -1128,32 +1111,8 @@ function showDirections(destination){
   }
 }
 
-let _currentView = "outside";
 let _pendingRoom = null;
 let _pendingFloor = null;
-function setView(view){
-  _currentView = view;
-  document.getElementById("toggleOutside").classList.toggle("active", view === "outside");
-  document.getElementById("toggleInside").classList.toggle("active", view === "inside");
-  const dest = document.getElementById("destName").textContent;
-  if (view === "inside") {
-    const el = document.querySelector(`.building[data-name="${dest}"]`);
-    if (el && el.dataset.page) {
-      const target = _pendingRoom || dest;
-      window.location.href = el.dataset.page + "?location=" + encodeURIComponent(target);
-    } else {
-      const box = document.getElementById("directionsBox");
-      while (box.firstChild) box.removeChild(box.firstChild);
-      const li = document.createElement("li");
-      li.style.cssText = "opacity:.7;font-style:italic;";
-      li.textContent = "Floor plan not yet available. Use outdoor directions to reach the entrance.";
-      box.appendChild(li);
-      document.getElementById("toggleInside").classList.remove("active");
-      document.getElementById("toggleOutside").classList.add("active");
-      _currentView = "outside";
-    }
-  }
-}
 
 const LAN_BASE_URL = {{ lan_base_url | tojson }};
 
@@ -1180,13 +1139,13 @@ document.addEventListener("click", (e) => {
 let _directionsActive = false;
 
 const BUILDING_PHOTOS = {
-  "ACADEMIC BUILDING":    "/static/images/building/academic_building.JPG",
-  "IT BUILDING":          "/static/images/building/it_building.JPG",
-  "TECH BUILDING":        "/static/images/building/tech_building.JPG",
-  "NEW ADMIN BUILDING":   "/static/images/building/admin_building.JPG",
-  "OLD ADMIN BUILDING":   "/static/images/building/admin_building.JPG",
-  "CIVIL TECH BUILDING":  "/static/images/building/civil_tech_building.JPG",
-  "TE BUILDING":          "/static/images/building/te_building.jpg",
+  "ACADEMIC BUILDING":         "/static/images/building/academic_building.JPG",
+  "IT BUILDING":               "/static/images/building/it_building.JPG",
+  "TECH BUILDING":             "/static/images/building/tech_building.JPG",
+  "NEW ADMIN BUILDING":        "/static/images/building/admin_building.JPG",
+  "OLD ADMIN BUILDING":        "/static/images/building/admin_building.JPG",
+  "CIVIL TECHNOLOGY BUILDING": "/static/images/building/civil_tech_building.JPG",
+  "TEACHER EDUCATION BUILDING":"/static/images/building/te_building.jpg",
 };
 let _pendingUrl = null;
 function openBuildingPanel(name, pageUrl) {
@@ -1202,7 +1161,6 @@ function openBuildingPanel(name, pageUrl) {
   const p = document.getElementById('buildingPanel');
   p.style.right = '0px';
   p.style.pointerEvents = 'auto';
-  document.getElementById('viewToggle').style.display = 'none';
   document.getElementById('qrBtnFloat').style.display = 'none';
   document.getElementById('searchWrap').style.setProperty('display', 'none', 'important');
 }
@@ -1225,7 +1183,6 @@ function closeBuildingPanel() {
   p.style.pointerEvents = 'none';
   document.getElementById('searchWrap').style.removeProperty('display');
   if (_directionsActive) {
-    document.getElementById('viewToggle').style.display = 'flex';
     document.getElementById('qrBtnFloat').style.display = 'flex';
   }
 }
@@ -1258,33 +1215,6 @@ const INDOOR_DIRECTIONS = {{ indoor_directions | default({}) | tojson }};
 const ROOM_PLACEMENTS = {{ room_placements | default({}) | tojson }};
 
 
-function showRoomInfo(room){
-  const block = document.getElementById("insideBlock");
-  const box = document.getElementById("insideBox");
-  const heading = document.getElementById("insideHeading");
-  const dest = document.getElementById("destName").textContent;
-  const nice = dest.split(" ").map(w => w.length > 2 ? w[0] + w.slice(1).toLowerCase() : w).join(" ");
-  const niceRoom = room.split(" ").map(w => w.length > 2 ? w[0] + w.slice(1).toLowerCase() : w).join(" ");
-  heading.textContent = "Inside " + nice + " → " + niceRoom + ":";
-
-  const buildingDirs = INDOOR_DIRECTIONS[dest.toUpperCase()] || {};
-  const roomKey = room.replace(/^ROOM\s+/i, "").toUpperCase();
-  const realSteps = buildingDirs[roomKey] || buildingDirs[room.toUpperCase()];
-
-  const steps = Array.isArray(realSteps) && realSteps.length ? realSteps : [
-    "After entering the building, proceed straight ahead.",
-    "Follow the corridor toward " + niceRoom + ".",
-    "The " + niceRoom + " will be clearly labelled.",
-  ];
-
-  while (box.firstChild) box.removeChild(box.firstChild);
-  steps.forEach(s => {
-    const li = document.createElement("li");
-    li.textContent = s;
-    box.appendChild(li);
-  });
-  block.style.display = "block";
-}
 
 function highlightFromURL(){
   const params = new URLSearchParams(window.location.search);
@@ -1313,9 +1243,6 @@ function highlightFromURL(){
 
   showDirections(building);
 
-  if(room){
-    showRoomInfo(room);
-  }
 }
 
 _campusPathsReady.then(function(){ highlightFromURL(); });
@@ -1420,7 +1347,8 @@ if(new URLSearchParams(window.location.search).get("mobile") === "1"){
   input.addEventListener('focus', function() { if (input.value.trim()) openSuggestions(input.value); });
 
   document.addEventListener('click', function(e) {
-    if (!sugBox.contains(e.target) && e.target !== input) {
+    var vkbd = document.getElementById('vkbd');
+    if (!sugBox.contains(e.target) && e.target !== input && !(vkbd && vkbd.contains(e.target))) {
       sugBox.classList.remove('open');
     }
   });
@@ -1444,6 +1372,7 @@ updateYouHere(80, 395);
         el.className = 'building';
         el.dataset.name = pin.name;
         if (pin.page_url) el.dataset.page = pin.page_url;
+        if (pin.directions_text) el.dataset.directions = pin.directions_text;
         el.style.cssText = [
           'position:absolute',
           'left:' + pin.left_pct + '%',
@@ -1646,11 +1575,11 @@ var _mapScale = 0.7;
   position:fixed;top:0;right:-500px;width:340px;height:100vh;pointer-events:none;
   background:rgba(255,255,255,0.97);
   box-shadow:-4px 0 24px rgba(0,0,0,0.25);
-  display:flex;flex-direction:column;justify-content:flex-start;
-  padding:24px 24px 24px;z-index:2000;overflow-y:auto;
+  display:flex;flex-direction:column;justify-content:flex-start;align-items:center;
+  padding:24px 24px 24px;z-index:2000;overflow-y:auto;text-align:center;
   transition:right 0.35s cubic-bezier(0.16,1,0.3,1);">
   <h2 id="panelBuildingName" style="font-size:20px;font-weight:900;color:#7b2d2d;
-    letter-spacing:2px;margin-bottom:12px;line-height:1.3"></h2>
+    letter-spacing:2px;margin-bottom:12px;line-height:1.3;text-align:center;width:100%"></h2>
   <img id="panelBuildingImage" src="" alt=""
        style="display:none;width:100%;height:160px;object-fit:cover;
               border-radius:10px;margin-bottom:14px;box-shadow:0 4px 12px rgba(0,0,0,0.15)">
@@ -1699,10 +1628,12 @@ var _mapScale = 0.7;
   z-index:501;
   overflow:hidden;
   height:36px;
+  cursor:grab;
+  user-select:none;
 ">
   <span style="font-size:9px;font-weight:900;letter-spacing:2px;color:rgba(255,255,255,0.45);padding:0 10px;flex-shrink:0;text-transform:uppercase;">BUILDINGS</span>
   <div id="pinLegendScroll" style="display:flex;gap:0;flex:1;overflow:hidden;align-items:center;">
-    <div id="pinLegendTrack" style="display:flex;gap:0;align-items:center;animation:legendScroll 80s linear infinite;will-change:transform;"></div>
+    <div id="pinLegendTrack" style="display:flex;gap:0;align-items:center;will-change:transform;"></div>
   </div>
 </div>
 <style>
@@ -1710,7 +1641,91 @@ var _mapScale = 0.7;
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+#pinLegendTrack { animation: legendScroll 80s linear infinite; }
+#pinLegendTrack.paused { animation-play-state: paused; }
 </style>
+<script>
+(function() {
+  var bar = document.getElementById('pinLegendBar');
+  var track = document.getElementById('pinLegendTrack');
+  if (!bar || !track) return;
+
+  var dragging = false, startX = 0, scrollOffset = 0, currentOffset = 0, raf = null;
+  var velocity = 0, lastX = 0, lastT = 0;
+
+  function getMatrix() {
+    var t = window.getComputedStyle(track).transform;
+    if (!t || t === 'none') return 0;
+    return parseFloat(t.split(',')[4]) || 0;
+  }
+
+  function setOffset(x) {
+    var halfW = track.scrollWidth / 2;
+    x = ((x % halfW) + halfW) % halfW * -1;
+    track.style.transform = 'translateX(' + x + 'px)';
+  }
+
+  bar.addEventListener('mousedown', startDrag);
+  bar.addEventListener('touchstart', function(e) { startDrag(e.touches[0]); }, { passive: true });
+
+  function startDrag(e) {
+    dragging = true;
+    bar.style.cursor = 'grabbing';
+    track.classList.add('paused');
+    currentOffset = getMatrix();
+    startX = e.clientX;
+    lastX = e.clientX;
+    lastT = Date.now();
+    velocity = 0;
+    cancelAnimationFrame(raf);
+    track.style.animation = 'none';
+    track.style.transform = 'translateX(' + currentOffset + 'px)';
+  }
+
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('touchmove', function(e) { if (dragging) onMove(e.touches[0]); }, { passive: true });
+
+  function onMove(e) {
+    if (!dragging) return;
+    var dx = e.clientX - lastX;
+    var now = Date.now();
+    velocity = dx / Math.max(1, now - lastT);
+    lastX = e.clientX;
+    lastT = now;
+    currentOffset += dx;
+    setOffset(currentOffset);
+    startX = e.clientX;
+  }
+
+  window.addEventListener('mouseup', endDrag);
+  window.addEventListener('touchend', endDrag);
+
+  function endDrag() {
+    if (!dragging) return;
+    dragging = false;
+    bar.style.cursor = 'grab';
+    // momentum
+    (function momentum() {
+      if (Math.abs(velocity) < 0.05) {
+        // resume auto-scroll from current position
+        var halfW = track.scrollWidth / 2;
+        var pct = (Math.abs(currentOffset) % halfW) / halfW * 100;
+        track.style.animation = '';
+        track.style.transform = '';
+        track.classList.remove('paused');
+        // re-attach animation offset via delay trick
+        var remaining = (1 - pct / 100) * 80;
+        track.style.animationDelay = '-' + (80 - remaining) + 's';
+        return;
+      }
+      currentOffset += velocity * 16;
+      velocity *= 0.92;
+      setOffset(currentOffset);
+      raf = requestAnimationFrame(momentum);
+    })();
+  }
+})();
+</script>
 
 <div class="legend-bar">
   <span class="leg-title">LEGENDS</span>
@@ -1722,16 +1737,16 @@ var _mapScale = 0.7;
     </svg>ENTRANCE/EXIT
   </div>
   <div class="leg-item">
-    <div class="leg-swatch" style="background:#3b6fd4;"></div>ACADEMIC CORE
+    <div class="leg-swatch" style="background:#1a5fa8;"></div>ACADEMIC CORE
   </div>
   <div class="leg-item">
     <div class="leg-swatch" style="background:#f5d800;"></div>ACADEMIC SUPPORT
   </div>
   <div class="leg-item">
-    <div class="leg-swatch" style="background:#f4821f;"></div>MIXED USED
+    <div class="leg-swatch" style="background:#f07a1a;"></div>MIXED USE
   </div>
   <div class="leg-item">
-    <div class="leg-swatch" style="background:#c0392b;"></div>CONSTRAINED AREA
+    <div class="leg-swatch" style="background:#d42020;"></div>CONSTRAINED AREA
   </div>
   <div class="leg-item">
     <div class="leg-swatch" style="background:#7d5a2f;"></div>INCOME GENERATING
