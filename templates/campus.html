@@ -1193,9 +1193,6 @@ function showDirectionFromPanel() {
   const name = document.getElementById('panelBuildingName').textContent.trim();
   if (!name) return;
   closeBuildingPanel();
-  const params = new URLSearchParams(window.location.search);
-  params.set("location", name);
-  window.history.replaceState(null, "", "?" + params.toString());
   showDirections(name);
 }
 
@@ -1240,6 +1237,13 @@ function highlightFromURL(){
     const partial = buildingKeys.find(k => k.includes(raw) || raw.includes(k));
     building = exact || starts || partial || raw;
   }
+
+  // Clear location param so reload/back doesn't re-trigger directions
+  const cleanParams = new URLSearchParams(window.location.search);
+  cleanParams.delete("location");
+  cleanParams.delete("room_floor");
+  const cleanSearch = cleanParams.toString();
+  window.history.replaceState(null, "", cleanSearch ? "?" + cleanSearch : window.location.pathname);
 
   showDirections(building);
 

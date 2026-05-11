@@ -404,6 +404,12 @@ body {
     <div class="plan-placeholder">FLOOR PLAN IMAGE COMING SOON</div>
     {% endif %}
 
+    <svg id="floorRouteSVG" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:5;" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <polyline id="floorRouteLine" points="" fill="none" stroke="#e63946" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 1.5" opacity="0"/>
+      <circle id="floorRouteStart" cx="-10" cy="-10" r="1.2" fill="#2dc653" opacity="0"/>
+      <circle id="floorRouteEnd" cx="-10" cy="-10" r="1.2" fill="#e63946" opacity="0"/>
+    </svg>
+
 
     {% for room in rooms %}
     <button class="room-label {% if highlight and highlight|lower == room.name|lower %}highlighted{% endif %} {% if room.color %}room-type-{{ room.color }}{% endif %}"
@@ -466,6 +472,7 @@ function handleRoomClick(btn) {
   document.querySelectorAll('.room-label').forEach(b => b.classList.remove('highlighted'));
   btn.classList.add('highlighted');
   showInfo(btn);
+  drawFloorRoute(btn);
   toast(btn.dataset.name, 'success', 2000);
 }
 
@@ -507,6 +514,8 @@ function showInfo(btn) {
 }
 function closeInfo() {
   document.getElementById('infoPanel').classList.remove('visible');
+  clearFloorRoute();
+  document.querySelectorAll('.room-label').forEach(b => b.classList.remove('highlighted'));
 }
 
 const ALL_ROOMS = {{ all_rooms_index | default([]) | tojson }};
@@ -540,6 +549,7 @@ const ALL_ROOMS = {{ all_rooms_index | default([]) | tojson }};
             document.querySelectorAll('.room-label').forEach(b => b.classList.remove('highlighted'));
             target.classList.add('highlighted');
             showInfo(target);
+            drawFloorRoute(target);
           }
           clearSuggestions();
           input.value = m.name;
@@ -628,6 +638,97 @@ function imgToW(xPct) {
 function imgToH(yPct) {
   if (!_lb) return yPct;
   return (_lb.oy + yPct / 100 * _lb.rh) / _lb.ch * 100;
+}
+
+// Floor path BFS routing
+var _floorGraph = null; // { nodes: [{id,label,x_pct,y_pct}], adj: {id:[id,...]} }
+
+(function loadFloorPaths() {
+  var building = encodeURIComponent(BUILDING_NAME);
+  var floor    = encodeURIComponent(String(FLOOR_NUMBER));
+  fetch('/api/floor-paths?building=' + building + '&floor=' + floor)
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      if (!data.nodes || !data.nodes.length) return;
+      var adj = {};
+      data.nodes.forEach(function(n){ adj[n.id] = []; });
+      data.edges.forEach(function(e){
+        adj[e.from_id].push(e.to_id);
+        adj[e.to_id].push(e.from_id);
+      });
+      _floorGraph = { nodes: data.nodes, adj: adj };
+    })
+    .catch(function(){});
+})();
+
+function _bfsFloor(adj, startId, goalId) {
+  if (startId === goalId) return [startId];
+  var visited = {}, prev = {}, queue = [startId];
+  visited[startId] = true;
+  while (queue.length) {
+    var cur = queue.shift();
+    if (cur === goalId) {
+      var path = [];
+      while (cur !== undefined) { path.unshift(cur); cur = prev[cur]; }
+      return path;
+    }
+    (adj[cur] || []).forEach(function(nb){
+      if (!visited[nb]) { visited[nb] = true; prev[nb] = cur; queue.push(nb); }
+    });
+  }
+  return null;
+}
+
+function _nearestNode(nodes, xPct, yPct) {
+  var best = null, bestD = Infinity;
+  nodes.forEach(function(n){
+    var dx = n.x_pct - xPct, dy = n.y_pct - yPct;
+    var d = dx*dx + dy*dy;
+    if (d < bestD) { bestD = d; best = n; }
+  });
+  return best;
+}
+
+function drawFloorRoute(roomBtn) {
+  if (!_floorGraph) return;
+  var nodes = _floorGraph.nodes, adj = _floorGraph.adj;
+
+  // Room center in image-% coords
+  var roomL = parseFloat(roomBtn.style.left) + parseFloat(roomBtn.style.width)  / 2;
+  var roomT = parseFloat(roomBtn.style.top)  + parseFloat(roomBtn.style.height) / 2;
+
+  // Entry node = node labeled ENTRANCE/GATE/ENTRY (first match), else first node
+  var entry = nodes.find(function(n){ return /ENTRANCE|GATE|ENTRY/i.test(n.label || ''); }) || nodes[0];
+  var target = _nearestNode(nodes, roomL, roomT);
+
+  var path = _bfsFloor(adj, entry.id, target.id);
+  var line  = document.getElementById('floorRouteLine');
+  var dotS  = document.getElementById('floorRouteStart');
+  var dotE  = document.getElementById('floorRouteEnd');
+  if (!path || !line) return;
+
+  var pts = path.map(function(id){
+    var n = nodes.find(function(x){ return x.id === id; });
+    if (!n) return null;
+    return imgToW(n.x_pct).toFixed(2) + ',' + imgToH(n.y_pct).toFixed(2);
+  }).filter(Boolean).join(' ');
+
+  line.setAttribute('points', pts);
+  line.setAttribute('opacity', '1');
+
+  var s = nodes.find(function(x){ return x.id === path[0]; });
+  var e = nodes.find(function(x){ return x.id === path[path.length-1]; });
+  if (s) { dotS.setAttribute('cx', imgToW(s.x_pct).toFixed(2)); dotS.setAttribute('cy', imgToH(s.y_pct).toFixed(2)); dotS.setAttribute('opacity', '1'); }
+  if (e) { dotE.setAttribute('cx', imgToW(e.x_pct).toFixed(2)); dotE.setAttribute('cy', imgToH(e.y_pct).toFixed(2)); dotE.setAttribute('opacity', '1'); }
+}
+
+function clearFloorRoute() {
+  var line = document.getElementById('floorRouteLine');
+  var dotS = document.getElementById('floorRouteStart');
+  var dotE = document.getElementById('floorRouteEnd');
+  if (line) { line.setAttribute('points', ''); line.setAttribute('opacity', '0'); }
+  if (dotS) dotS.setAttribute('opacity', '0');
+  if (dotE) dotE.setAttribute('opacity', '0');
 }
 
 const _floorImg = document.querySelector('.plan-wrapper .floor-img');
