@@ -130,9 +130,8 @@ textarea { resize: vertical; min-height: 100px; }
         <a href="{{ url_for('content.floor_path_editor') }}" class="{% if 'floor_path' in request.endpoint %}active{% endif %}">Floor Paths</a>
         <div class="section">RFID</div>
         <a href="{{ url_for('content.rfid_logs') }}" class="{% if request.endpoint == 'content.rfid_logs' %}active{% endif %}">Scan Logs</a>
-        <div class="section">Account</div>
-        <a href="{{ url_for('admin.logout') }}">Logout</a>
     </nav>
+    <a href="{{ url_for('admin.logout') }}" style="position:absolute;bottom:20px;left:16px;right:16px;text-align:center;padding:10px 12px;border-radius:6px;color:#fff;text-decoration:none;font-size:14px;background:rgba(255,255,255,0.12);">Logout</a>
 </div>
 
 <div class="main">
