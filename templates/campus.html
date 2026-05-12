@@ -473,7 +473,7 @@
               </div>
               <div id="searchWrap" class="top-right search-wrap" style="display:flex;align-items:center;gap:10px;">
                 <div style="position:relative;">
-                  <input id="buildingSearch" type="text" placeholder="Search buildings…" autocomplete="off">
+                  <input id="buildingSearch" type="text" placeholder="Search buildings or offices…" autocomplete="off">
                   <div id="searchSuggestions"></div>
                 </div>
               </div>
@@ -1270,10 +1270,21 @@ if(new URLSearchParams(window.location.search).get("mobile") === "1"){
 (function() {
   var input = document.getElementById('buildingSearch');
   var sugBox = document.getElementById('searchSuggestions');
-  var _pins  = [];
+  var _pins    = [];
+  var _offices = [];
 
-  // Populated after loadCampusPins fetches
   window._registerPinsForSearch = function(pins) { _pins = pins; };
+  window._registerOfficesForSearch = function(offices) { _offices = offices; };
+
+  // Map building_url → campus pin for office → building lookup
+  function _pinByUrl(url) {
+    if (!url) return null;
+    var base = url.split('?')[0];
+    for (var i = 0; i < _pins.length; i++) {
+      if (_pins[i].page_url && _pins[i].page_url.split('?')[0] === base) return _pins[i];
+    }
+    return null;
+  }
 
   function highlight(text, query) {
     if (!query) return document.createTextNode(text);
@@ -1293,21 +1304,25 @@ if(new URLSearchParams(window.location.search).get("mobile") === "1"){
     var q = query.trim().toLowerCase();
     if (!q) { sugBox.classList.remove('open'); return; }
 
-    var matches = _pins.filter(function(p) {
+    var pinMatches = _pins.filter(function(p) {
       return p.name.toLowerCase().includes(q) ||
              (p.number && p.number.toString().toLowerCase().includes(q));
     });
 
-    if (!matches.length) {
+    var officeMatches = _offices.filter(function(o) {
+      return o.name.toLowerCase().includes(q);
+    });
+
+    if (!pinMatches.length && !officeMatches.length) {
       var none = document.createElement('div');
       none.className = 'search-no-results';
-      none.textContent = 'No buildings found';
+      none.textContent = 'No results found';
       sugBox.appendChild(none);
       sugBox.classList.add('open');
       return;
     }
 
-    matches.forEach(function(pin) {
+    pinMatches.forEach(function(pin) {
       var item = document.createElement('div');
       item.className = 'search-item';
 
@@ -1326,6 +1341,38 @@ if(new URLSearchParams(window.location.search).get("mobile") === "1"){
         input.value = pin.name;
         sugBox.classList.remove('open');
         selectPin(pin);
+      });
+
+      sugBox.appendChild(item);
+    });
+
+    officeMatches.forEach(function(office) {
+      var matchedPin = _pinByUrl(office.building_url);
+      var item = document.createElement('div');
+      item.className = 'search-item';
+
+      var badge = document.createElement('div');
+      badge.className = 'search-item-badge';
+      badge.style.cssText = 'background:#4a4a8a;font-size:9px;padding:2px 4px;';
+      badge.textContent = 'OFFICE';
+
+      var nameEl = document.createElement('div');
+      nameEl.className = 'search-item-name';
+      var nameNode = document.createElement('div');
+      nameNode.appendChild(highlight(office.name, q));
+      var locNode = document.createElement('div');
+      locNode.style.cssText = 'font-size:11px;color:#888;margin-top:2px;';
+      locNode.textContent = office.location || (matchedPin ? matchedPin.name : '');
+      nameEl.appendChild(nameNode);
+      nameEl.appendChild(locNode);
+
+      item.appendChild(badge);
+      item.appendChild(nameEl);
+
+      item.addEventListener('click', function() {
+        input.value = office.name;
+        sugBox.classList.remove('open');
+        if (matchedPin) selectPin(matchedPin);
       });
 
       sugBox.appendChild(item);
@@ -1359,6 +1406,16 @@ if(new URLSearchParams(window.location.search).get("mobile") === "1"){
 
 
 updateYouHere(80, 395);
+
+// Load offices for search
+fetch('/api/offices')
+  .then(function(r){ return r.json(); })
+  .then(function(offices) {
+    if (typeof window._registerOfficesForSearch === 'function') {
+      window._registerOfficesForSearch(offices);
+    }
+  })
+  .catch(function(){});
 
 // Load campus pins from DB and render as clickable overlays
 (function loadCampusPins() {

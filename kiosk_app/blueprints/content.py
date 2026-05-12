@@ -1197,6 +1197,16 @@ def api_campus_pins():
     return jsonify([dict(p) for p in pins])
 
 
+@content_bp.route("/api/offices")
+@limiter.limit("60/minute")
+def api_offices_public():
+    with db_connection() as conn:
+        rows = conn.execute(
+            "SELECT key, name, building_url, location FROM offices WHERE building_url IS NOT NULL AND building_url != '' ORDER BY name"
+        ).fetchall()
+    return jsonify([dict(r) for r in rows])
+
+
 # ---------------------------------------------------------------------------
 # Campus path editor
 # ---------------------------------------------------------------------------
