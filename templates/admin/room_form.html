@@ -146,7 +146,7 @@
     setColor(document.getElementById('room-color-picker').value);
   };
 
-  setColor('{{ cur_color }}');
+  setColor({{ cur_color | tojson }});
 })();
 </script>
 {% endblock %}

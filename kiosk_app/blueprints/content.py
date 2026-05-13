@@ -104,6 +104,14 @@ def _safe_filename(original: str) -> str:
 
 import re as _re
 _SAFE_FILE_RE = _re.compile(r'^(?:uploads|files/uploads)/[0-9a-f]{32}\.pdf$')
+_HEX_COLOR_RE = _re.compile(r'^#[0-9a-fA-F]{6}$')
+_ALLOWED_ROOM_COLORS = {'', 'cr', 'fire-exit', 'elevator'}
+
+def _sanitize_room_color(value: str) -> str:
+    v = value.strip()
+    if v in _ALLOWED_ROOM_COLORS or _HEX_COLOR_RE.match(v):
+        return v
+    return ''
 _SAFE_IMAGE_PATH_RE = _re.compile(r'^uploads/images/[0-9a-f]{32}\.(jpg|jpeg|png|webp|gif)$')
 
 
@@ -601,7 +609,7 @@ def room_add():
                     float(request.form.get("pos_width", 10)),
                     float(request.form.get("pos_height", 10)),
                     request.form.get("office_key", "").strip(),
-                    request.form.get("room_color", "").strip(),
+                    _sanitize_room_color(request.form.get("room_color", "")),
                 ),
             )
             conn.commit()
@@ -637,7 +645,7 @@ def room_edit(room_id: int):
                     float(request.form.get("pos_width", 10)),
                     float(request.form.get("pos_height", 10)),
                     request.form.get("office_key", "").strip(),
-                    request.form.get("room_color", "").strip(),
+                    _sanitize_room_color(request.form.get("room_color", "")),
                     room_id,
                 ),
             )
@@ -736,7 +744,7 @@ def room_placer():
                     float(request.form.get("pos_width", 10)),
                     float(request.form.get("pos_height", 10)),
                     request.form.get("office_key", "").strip(),
-                    request.form.get("room_color", "").strip(),
+                    _sanitize_room_color(request.form.get("room_color", "")),
                 ),
             )
             conn.commit()
