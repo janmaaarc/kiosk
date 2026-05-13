@@ -60,6 +60,7 @@
   }
 
   function advanceSlide() {
+    if (!SCREENSAVER_IMAGES.length) return;
     var img = document.getElementById('kiosk-ss-img');
     if (img) {
       img.src = SCREENSAVER_IMAGES[slideIdx % SCREENSAVER_IMAGES.length];
@@ -68,6 +69,7 @@
   }
 
   function showScreensaver() {
+    if (!SCREENSAVER_IMAGES.length) return;
     if (!screensaverEl) screensaverEl = buildScreensaver();
     slideIdx = 0;
     advanceSlide();

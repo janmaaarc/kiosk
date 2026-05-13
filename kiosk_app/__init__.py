@@ -191,6 +191,17 @@ def create_app() -> Flask:
                         "INSERT OR IGNORE INTO kiosk_settings (key, value) VALUES (?, ?)",
                         (_k, _v),
                     )
+                _has_slides = _conn.execute(
+                    "SELECT COUNT(*) FROM screensaver_images"
+                ).fetchone()[0]
+                if not _has_slides:
+                    for _i, _fn in enumerate(
+                        ["slide1.png", "slide2.png", "slide3.png", "slide4.png"], 1
+                    ):
+                        _conn.execute(
+                            "INSERT INTO screensaver_images (filename, display_order, active) VALUES (?, ?, 1)",
+                            (_fn, _i),
+                        )
                 _conn.commit()
         except Exception as exc:
             app.logger.error("DB init failed: %s", exc)
