@@ -1,0 +1,31 @@
+{% extends "admin/base.html" %}
+{% block title %}Buildings{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <h1 class="page-title">Buildings</h1>
+  <a href="{{ url_for('content.building_add') }}" class="btn btn-primary">+ Add Building</a>
+</div>
+
+<table>
+  <thead>
+    <tr><th>Name</th><th>Actions</th></tr>
+  </thead>
+  <tbody>
+    {% for b in buildings %}
+    <tr>
+      <td><strong>{{ b['name'] }}</strong></td>
+      <td>
+        <a href="{{ url_for('content.building_edit', building_id=b['id']) }}" class="btn btn-secondary btn-sm">Edit</a>
+        <form method="post" action="{{ url_for('content.building_delete', building_id=b['id']) }}"
+              style="display:inline;" onsubmit="return confirm('Delete building ' + {{ b['name'] | tojson }} + '?')">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="2" style="color:#888;text-align:center;padding:24px;">No buildings yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

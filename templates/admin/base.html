@@ -129,6 +129,7 @@ textarea { resize: vertical; min-height: 100px; }
             About Us
         </a>
         <div class="section">Data</div>
+        <a href="{{ url_for('content.buildings_list') }}" class="{% if request.endpoint in ('content.buildings_list','content.building_add','content.building_edit') %}active{% endif %}">Buildings</a>
         <a href="{{ url_for('content.building_floors_list') }}" class="{% if 'building_floor' in request.endpoint %}active{% endif %}">Building Floors</a>
         <a href="{{ url_for('content.rooms_list') }}" class="{% if request.endpoint == 'content.rooms_list' or request.endpoint == 'content.room_add' or request.endpoint == 'content.room_edit' %}active{% endif %}">Room Labels</a>
         <a href="{{ url_for('content.room_placer') }}" class="{% if request.endpoint == 'content.room_placer' %}active{% endif %}">Room Placer</a>

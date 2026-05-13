@@ -10,9 +10,12 @@
 
     <div class="form-group">
         <label for="bf-building">Building *</label>
-        <input type="text" id="bf-building" name="building"
-               value="{{ floor['building'] if floor else '' }}"
-               placeholder="e.g. Academic Building" required>
+        <select id="bf-building" name="building" required>
+            <option value="">— Select Building —</option>
+            {% for b in buildings %}
+            <option value="{{ b }}" {% if floor and floor['building'] == b %}selected{% endif %}>{{ b }}</option>
+            {% endfor %}
+        </select>
     </div>
 
     <div class="form-group">

@@ -54,9 +54,12 @@
         </div>
         <div class="form-group">
             <label>Building</label>
-            <input type="text" name="building"
-                   value="{{ member['building'] if member else '' }}"
-                   placeholder="e.g. IT Building">
+            <select name="building">
+                <option value="">— Select Building —</option>
+                {% for b in buildings %}
+                <option value="{{ b }}" {% if member and member['building'] == b %}selected{% endif %}>{{ b }}</option>
+                {% endfor %}
+            </select>
         </div>
     </div>
 

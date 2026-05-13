@@ -10,12 +10,12 @@
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
     <div class="form-group">
       <label>Building *</label>
-      <input type="text" name="building" list="building-list" required
-             value="{{ room['building'] if room else '' }}"
-             placeholder="e.g. Academic Building">
-      <datalist id="building-list">
-        {% for b in buildings %}<option value="{{ b }}">{% endfor %}
-      </datalist>
+      <select name="building" required>
+        <option value="">— Select Building —</option>
+        {% for b in buildings %}
+        <option value="{{ b }}" {% if room and room['building'] == b %}selected{% endif %}>{{ b }}</option>
+        {% endfor %}
+      </select>
     </div>
     <div class="form-group">
       <label>Floor *</label>

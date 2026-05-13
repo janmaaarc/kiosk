@@ -488,6 +488,81 @@ def office_delete(office_id: int):
 # Building Floors
 # ---------------------------------------------------------------------------
 
+def _get_buildings() -> list[str]:
+    with db_connection() as conn:
+        rows = conn.execute("SELECT name FROM buildings ORDER BY name").fetchall()
+        if rows:
+            return [r[0] for r in rows]
+        return [r[0] for r in conn.execute(
+            "SELECT DISTINCT building FROM building_floors ORDER BY building"
+        ).fetchall()]
+
+
+@content_bp.route("/admin/buildings")
+@login_required
+def buildings_list():
+    with db_connection() as conn:
+        rows = conn.execute("SELECT * FROM buildings ORDER BY name").fetchall()
+    return render_template("admin/buildings.html", buildings=rows)
+
+
+@content_bp.route("/admin/buildings/add", methods=["GET", "POST"])
+@login_required
+def building_add():
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        if not name:
+            flash("Building name is required.", "error")
+            return redirect(url_for("content.building_add"))
+        with db_connection() as conn:
+            try:
+                conn.execute("INSERT INTO buildings (name) VALUES (?)", (name,))
+                conn.commit()
+            except Exception:
+                flash("A building with that name already exists.", "error")
+                return redirect(url_for("content.building_add"))
+        flash("Building added.", "success")
+        return redirect(url_for("content.buildings_list"))
+    return render_template("admin/building_form.html", building=None)
+
+
+@content_bp.route("/admin/buildings/<int:building_id>/edit", methods=["GET", "POST"])
+@login_required
+def building_edit(building_id: int):
+    with db_connection() as conn:
+        building = conn.execute(
+            "SELECT * FROM buildings WHERE id = ?", (building_id,)
+        ).fetchone()
+        if building is None:
+            abort(404)
+        if request.method == "POST":
+            name = request.form.get("name", "").strip()
+            if not name:
+                flash("Building name is required.", "error")
+                return redirect(url_for("content.building_edit", building_id=building_id))
+            try:
+                conn.execute(
+                    "UPDATE buildings SET name = ? WHERE id = ?", (name, building_id)
+                )
+                conn.commit()
+            except Exception:
+                flash("A building with that name already exists.", "error")
+                return redirect(url_for("content.building_edit", building_id=building_id))
+            flash("Building updated.", "success")
+            return redirect(url_for("content.buildings_list"))
+    return render_template("admin/building_form.html", building=building)
+
+
+@content_bp.route("/admin/buildings/<int:building_id>/delete", methods=["POST"])
+@login_required
+def building_delete(building_id: int):
+    with db_connection() as conn:
+        conn.execute("DELETE FROM buildings WHERE id = ?", (building_id,))
+        conn.commit()
+    flash("Building deleted.", "success")
+    return redirect(url_for("content.buildings_list"))
+
+
 @content_bp.route("/admin/building-floors")
 @login_required
 def building_floors_list():
@@ -522,7 +597,7 @@ def building_floor_add():
             conn.commit()
         flash("Floor saved.", "success")
         return redirect(url_for("content.building_floors_list"))
-    return render_template("admin/building_floor_form.html", floor=None)
+    return render_template("admin/building_floor_form.html", floor=None, buildings=_get_buildings())
 
 
 @content_bp.route("/admin/building-floors/<int:floor_id>/edit", methods=["GET", "POST"])
@@ -552,7 +627,7 @@ def building_floor_edit(floor_id: int):
             flash("Floor updated.", "success")
             return redirect(url_for("content.building_floors_list"))
 
-    return render_template("admin/building_floor_form.html", floor=floor)
+    return render_template("admin/building_floor_form.html", floor=floor, buildings=_get_buildings())
 
 
 @content_bp.route("/admin/building-floors/<int:floor_id>/delete", methods=["POST"])
@@ -615,12 +690,7 @@ def room_add():
             conn.commit()
         flash("Room added.", "success")
         return redirect(url_for("content.rooms_list"))
-    buildings = []
-    with db_connection() as conn:
-        buildings = [r[0] for r in conn.execute(
-            "SELECT DISTINCT building FROM building_floors ORDER BY building"
-        ).fetchall()]
-    return render_template("admin/room_form.html", room=None, buildings=buildings)
+    return render_template("admin/room_form.html", room=None, buildings=_get_buildings())
 
 
 @content_bp.route("/admin/rooms/<int:room_id>/edit", methods=["GET", "POST"])
@@ -653,9 +723,7 @@ def room_edit(room_id: int):
             flash("Room updated.", "success")
             return redirect(url_for("content.rooms_list",
                                     building=request.form["building"].strip()))
-        buildings = [r[0] for r in conn.execute(
-            "SELECT DISTINCT building FROM building_floors ORDER BY building"
-        ).fetchall()]
+        buildings = _get_buildings()
     return render_template("admin/room_form.html", room=room, buildings=buildings)
 
 
@@ -757,9 +825,12 @@ def room_placer():
     floor_options = []
 
     with db_connection() as conn:
-        buildings = [r[0] for r in conn.execute(
-            "SELECT DISTINCT building FROM building_floors ORDER BY building"
-        ).fetchall()]
+        bldg_rows = conn.execute("SELECT name FROM buildings ORDER BY name").fetchall()
+        buildings = [r[0] for r in bldg_rows] if bldg_rows else [
+            r[0] for r in conn.execute(
+                "SELECT DISTINCT building FROM building_floors ORDER BY building"
+            ).fetchall()
+        ]
         if building:
             bf = conn.execute(
                 "SELECT floor_number, floor_label, floor_image FROM building_floors"
@@ -830,7 +901,7 @@ def faculty_add():
             conn.commit()
         flash("Faculty member saved.", "success")
         return redirect(url_for("content.faculty_list"))
-    return render_template("admin/faculty_form.html", member=None)
+    return render_template("admin/faculty_form.html", member=None, buildings=_get_buildings())
 
 
 @content_bp.route("/admin/faculty/<int:member_id>/edit", methods=["GET", "POST"])
@@ -870,7 +941,7 @@ def faculty_edit(member_id: int):
             flash("Faculty member updated.", "success")
             return redirect(url_for("content.faculty_list"))
 
-    return render_template("admin/faculty_form.html", member=member)
+    return render_template("admin/faculty_form.html", member=member, buildings=_get_buildings())
 
 
 @content_bp.route("/admin/rfid-logs")

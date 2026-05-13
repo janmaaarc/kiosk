@@ -123,6 +123,11 @@ def _create_tables(cur: sqlite3.Cursor) -> None:
             role       TEXT,
             created_at TEXT DEFAULT (datetime('now'))
         );
+
+        CREATE TABLE IF NOT EXISTS buildings (
+            id   INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE NOT NULL
+        );
         """
     )
 
@@ -291,7 +296,6 @@ def _migrate(conn: sqlite3.Connection) -> None:
             created_at TEXT DEFAULT (datetime('now'))
         )"""
     )
-
     _OFFICE_BUILDING_URLS = {
         "Registrar": "/new_admin_building?floor=1",
         "CASHIER":   "/new_admin_building?floor=1",
@@ -419,6 +423,36 @@ def _ensure_rfid_logs(conn: sqlite3.Connection) -> None:
     """)
 
 
+def _seed_buildings(cur: sqlite3.Cursor) -> None:
+    existing = cur.execute("SELECT COUNT(*) FROM buildings").fetchone()[0]
+    if existing:
+        return
+    _CANONICAL_BUILDINGS = [
+        "Academic Building",
+        "Automotive Technology Building",
+        "Civil Technology Building",
+        "FSM & WAFT Building",
+        "FSM Building",
+        "Graduate School Annex",
+        "Graduate School Building",
+        "Industrial Technology Building",
+        "Mechanical / Electronics Building",
+        "MIST-NCTESD Building",
+        "MIST-NCTESD Dormitory",
+        "Multi-Purpose / Multi-Media Building",
+        "New Admin Building",
+        "Old Admin Building",
+        "Rodriguez Building",
+        "Science Building",
+        "Teacher Education Building",
+        "Tech Building",
+        "WAF & RAC Building",
+        "Ylagan Hall",
+    ]
+    for name in _CANONICAL_BUILDINGS:
+        cur.execute("INSERT OR IGNORE INTO buildings (name) VALUES (?)", (name,))
+
+
 def _seed_rfid_users(cur: sqlite3.Cursor) -> None:
     _RFID_USERS = [
         ("0609475703", "Group 1",       "student"),
@@ -449,6 +483,7 @@ def main() -> None:
         _seed_offices(cur)
         _seed_faculty(cur)
         _seed_rfid_users(cur)
+        _seed_buildings(cur)
         conn.commit()
 
         existing = cur.execute(
