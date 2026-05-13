@@ -746,6 +746,13 @@ const nodes = {
   "SCI_ENT":       {x:1668, y:340},
   "TE_ENT":        {x:1668, y:510},
 
+  // ENTRY NODES FOR ADDITIONAL BUILDINGS
+  "GUARD_HOUSE_ENT":             {x:286,  y:395},
+  "GFD_ENT":                     {x:672,  y:640},
+  "FOODNOOK_ENT":                {x:1294, y:500},
+  "SUPPLY_ENT":                  {x:1150, y:540},
+  "LIBRARY_ENT":                 {x:1648, y:395},
+
   // BUILDING CENTERS
   "RODRIGUEZ BUILDING":       {x:600,  y:77},
   "MIST-NCESTD DORM":         {x:1148, y:125},
@@ -767,18 +774,31 @@ const nodes = {
   "IT BUILDING":              {x:1756, y:122},
   "SCIENCE BUILDING":         {x:1756, y:311},
   "TE BUILDING":              {x:1756, y:637},
+
+  // ADDITIONAL BUILDINGS
+  "GUARD HOUSE":                        {x:286,  y:345},
+  "GFD BUILDING":                       {x:672,  y:669},
+  "MPC FEMP COOP. STORE":               {x:674,  y:736},
+  "GRADUATE SCHOOL ANNEX":              {x:1171, y:548},
+  "SUPPLY OFFICE":                      {x:1134, y:650},
+  "FOODNOOK":                           {x:1294, y:597},
+  "POWER HOUSE":                        {x:1581, y:365},
+  "SUPREME STUDENT COUNCIL OFFICE":     {x:1419, y:268},
+  "NEW MPC LIBRARY BUILDING A":         {x:1562, y:210},
+  "NEW MPC LIBRARY BUILDING B":         {x:1562, y:284},
+  "LIBRARY BUILDING / ATEX BUILDING":   {x:1648, y:370},
 };
 
 var graph = {
   // MAIN ROAD
   "GATE":    ["INT_A", "MIST_BLD_ENT", "NEW_ADM_ENT"],
-  "INT_A":   ["GATE", "INT_B", "TOP_A", "OLD_ADM_ENT"],
+  "INT_A":   ["GATE", "INT_B", "TOP_A", "OLD_ADM_ENT", "GUARD_HOUSE_ENT"],
   "INT_B":   ["INT_A", "ACADEMIC_ENT", "TOP_B", "FSM_ENT"],
-  "INT_C":   ["ACADEMIC_ENT", "INT_D", "TOP_C", "WAF_RAC_ENT", "CIVIL_ENT", "MECH_ENT"],
-  "INT_D":   ["INT_C", "INT_E"],
+  "INT_C":   ["ACADEMIC_ENT", "INT_D", "TOP_C", "WAF_RAC_ENT", "CIVIL_ENT", "MECH_ENT", "SUPPLY_ENT"],
+  "INT_D":   ["INT_C", "INT_E", "FOODNOOK_ENT"],
   "INT_E":   ["INT_D", "INT_MID", "MID_5TH", "TECH_ENT"],
-  "INT_MID": ["INT_E", "INT_F", "UP_MID"],
-  "INT_F":   ["INT_MID", "IT_ENT", "SCI_ENT", "TE_ENT", "BOT_F"],
+  "INT_MID": ["INT_E", "INT_F", "UP_MID", "POWER HOUSE"],
+  "INT_F":   ["INT_MID", "IT_ENT", "SCI_ENT", "TE_ENT", "BOT_F", "LIBRARY_ENT"],
 
   // TOP ROAD
   "TOP_A":   ["INT_A", "YLAGAN_ENT"],
@@ -791,7 +811,7 @@ var graph = {
   "RODRIGUEZ BUILDING": ["TOP_B"],
 
   // BOTTOM ROAD
-  "BOT_B":   ["FSM_ENT", "BOT_C", "WAF & FSM BUILDING"],
+  "BOT_B":   ["FSM_ENT", "BOT_C", "WAF & FSM BUILDING", "GFD_ENT"],
   "BOT_C":   ["BOT_B", "BOT_F", "GRAD_ENT"],
   "BOT_F":   ["BOT_C", "INT_F", "TE_ENT"],
   "WAF & FSM BUILDING": ["BOT_B"],
@@ -815,17 +835,17 @@ var graph = {
   "CIVIL TECH BUILDING": ["CIVIL_ENT"],
   "GRAD_ENT":      ["CIVIL_ENT", "BOT_C", "GRADUATE SCHOOL BUILDING"],
   "GRADUATE SCHOOL BUILDING": ["GRAD_ENT"],
-  "MECH_ENT":      ["INT_C", "MECHANICAL BUILDING"],
+  "MECH_ENT":      ["INT_C", "MECHANICAL BUILDING", "GRADUATE SCHOOL ANNEX"],
   "MECHANICAL BUILDING": ["MECH_ENT"],
 
   // RIGHT CLUSTER
   "TECH_ENT":      ["INT_E", "TECH BUILDING"],
   "TECH BUILDING": ["TECH_ENT"],
-  "MID_5TH":       ["INT_E", "UP_5TH", "POWER ROOM"],
+  "MID_5TH":       ["INT_E", "UP_5TH", "POWER ROOM", "SUPREME STUDENT COUNCIL OFFICE"],
   "POWER ROOM":    ["MID_5TH"],
   "UP_5TH":        ["MID_5TH", "MULTI-PURPOSE BUILDING"],
   "MULTI-PURPOSE BUILDING": ["UP_5TH", "UP_MID"],
-  "UP_MID":        ["INT_MID", "AUTOMOTIVE BUILDING", "MULTI-PURPOSE BUILDING"],
+  "UP_MID":        ["INT_MID", "AUTOMOTIVE BUILDING", "MULTI-PURPOSE BUILDING", "NEW MPC LIBRARY BUILDING A", "NEW MPC LIBRARY BUILDING B"],
   "AUTOMOTIVE BUILDING": ["UP_MID"],
 
   // RIGHT VERTICAL
@@ -835,6 +855,32 @@ var graph = {
   "SCIENCE BUILDING": ["SCI_ENT"],
   "TE_ENT":        ["INT_F", "BOT_F", "TE BUILDING"],
   "TE BUILDING":   ["TE_ENT"],
+
+  // ADDITIONAL BUILDINGS
+  "GUARD_HOUSE_ENT":   ["INT_A", "GUARD HOUSE"],
+  "GUARD HOUSE":       ["GUARD_HOUSE_ENT"],
+
+  "GFD_ENT":           ["BOT_B", "GFD BUILDING", "MPC FEMP COOP. STORE"],
+  "GFD BUILDING":      ["GFD_ENT"],
+  "MPC FEMP COOP. STORE": ["GFD_ENT"],
+
+  "GRADUATE SCHOOL ANNEX": ["MECH_ENT"],
+
+  "SUPPLY_ENT":        ["INT_C", "SUPPLY OFFICE", "GRADUATE SCHOOL ANNEX"],
+  "SUPPLY OFFICE":     ["SUPPLY_ENT"],
+
+  "FOODNOOK_ENT":      ["INT_D", "FOODNOOK"],
+  "FOODNOOK":          ["FOODNOOK_ENT"],
+
+  "POWER HOUSE":       ["INT_MID"],
+
+  "SUPREME STUDENT COUNCIL OFFICE": ["MID_5TH"],
+
+  "NEW MPC LIBRARY BUILDING A": ["UP_MID"],
+  "NEW MPC LIBRARY BUILDING B": ["UP_MID"],
+
+  "LIBRARY_ENT":       ["INT_F", "LIBRARY BUILDING / ATEX BUILDING"],
+  "LIBRARY BUILDING / ATEX BUILDING": ["LIBRARY_ENT"],
 };
 
 // Fetch DB campus paths, replace hardcoded graph if data exists, then run URL-based routing
@@ -1034,7 +1080,6 @@ var _PIN_TO_GRAPH = {
   "TEACHER EDUCATION BUILDING":             "TE BUILDING",
   "AUTOMOTIVE TECHNOLOGY BUILDING":         "AUTOMOTIVE BUILDING",
   "MULTI-PURPOSE / MULTI-MEDIA BUILDING":   "MULTI-PURPOSE BUILDING",
-  "GRADUATE SCHOOL ANNEX":                  "GRADUATE SCHOOL BUILDING",
   "TECH BUILDING":                          "TECH BUILDING",
 };
 
