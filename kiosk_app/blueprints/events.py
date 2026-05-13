@@ -11,7 +11,7 @@ def events():
         rows = conn.execute(
             "SELECT * FROM events"
             " WHERE expires_at IS NULL OR expires_at > datetime('now')"
-            " ORDER BY COALESCE(date, '') DESC, published_at DESC"
+            " ORDER BY id DESC"
         ).fetchall()
     return render_template("events.html", events=[dict(r) for r in rows])
 
