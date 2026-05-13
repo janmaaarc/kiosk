@@ -129,6 +129,7 @@ textarea { resize: vertical; min-height: 100px; }
         <a href="{{ url_for('content.campus_path_editor') }}" class="{% if 'campus_path' in request.endpoint %}active{% endif %}">Campus Paths</a>
         <a href="{{ url_for('content.floor_path_editor') }}" class="{% if 'floor_path' in request.endpoint %}active{% endif %}">Floor Paths</a>
         <div class="section">RFID</div>
+        <a href="{{ url_for('content.rfid_users_list') }}" class="{% if 'rfid_user' in request.endpoint %}active{% endif %}">Registered Users</a>
         <a href="{{ url_for('content.rfid_logs') }}" class="{% if request.endpoint == 'content.rfid_logs' %}active{% endif %}">Scan Logs</a>
     </nav>
     <a href="{{ url_for('admin.logout') }}" style="position:absolute;bottom:20px;left:16px;right:16px;text-align:center;padding:10px 12px;border-radius:6px;color:#fff;text-decoration:none;font-size:14px;background:rgba(255,255,255,0.12);">Logout</a>

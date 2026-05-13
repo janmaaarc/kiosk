@@ -2,6 +2,7 @@ import csv
 import io
 import json
 import os
+import sqlite3
 import uuid
 from datetime import datetime
 
@@ -26,8 +27,9 @@ content_bp = Blueprint("content", __name__)
 _DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT"]
 _TIMES = ["7:00","8:00","9:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00"]
 
-_VALID_DAYS   = {"MON","TUE","WED","THU","FRI","SAT"}
-_VALID_COLORS = {"yellow","green","blue","teal","red","purple"}
+_VALID_DAYS       = {"MON","TUE","WED","THU","FRI","SAT"}
+_VALID_COLORS     = {"yellow","green","blue","teal","red","purple"}
+_VALID_USER_ROLES = {"student", "faculty", "visitor"}
 
 def _parse_schedule_form(form) -> list:
     entries = []
@@ -841,6 +843,83 @@ def rfid_logs_clear():
         conn.commit()
     flash("Scan logs cleared", "success")
     return redirect(url_for("content.rfid_logs"))
+
+
+@content_bp.route("/admin/rfid-users")
+@login_required
+def rfid_users_list():
+    with db_connection() as conn:
+        rows = conn.execute("SELECT * FROM users ORDER BY name").fetchall()
+    return render_template("admin/rfid_users_list.html", users=rows)
+
+
+@content_bp.route("/admin/rfid-users/new", methods=["GET", "POST"])
+@login_required
+def rfid_user_add():
+    if request.method == "POST":
+        uid  = request.form.get("rfid_uid", "").strip()
+        name = request.form.get("name", "").strip()
+        role = request.form.get("role", "student").strip()
+        if role not in _VALID_USER_ROLES:
+            role = "student"
+        if not uid or not name:
+            flash("RFID UID and name are required.", "error")
+            return render_template("admin/rfid_user_form.html", user=None)
+        with db_connection() as conn:
+            try:
+                conn.execute(
+                    "INSERT INTO users (rfid_uid, name, role) VALUES (?,?,?)",
+                    (uid, name, role),
+                )
+                conn.commit()
+                flash(f"User '{name}' added.", "success")
+            except sqlite3.IntegrityError:
+                flash("RFID UID already registered.", "error")
+                return render_template("admin/rfid_user_form.html", user=None)
+        return redirect(url_for("content.rfid_users_list"))
+    return render_template("admin/rfid_user_form.html", user=None)
+
+
+@content_bp.route("/admin/rfid-users/<int:user_id>/edit", methods=["GET", "POST"])
+@login_required
+def rfid_user_edit(user_id: int):
+    with db_connection() as conn:
+        user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    if not user:
+        flash("User not found.", "error")
+        return redirect(url_for("content.rfid_users_list"))
+    if request.method == "POST":
+        uid  = request.form.get("rfid_uid", "").strip()
+        name = request.form.get("name", "").strip()
+        role = request.form.get("role", "student").strip()
+        if role not in _VALID_USER_ROLES:
+            role = "student"
+        if not uid or not name:
+            flash("RFID UID and name are required.", "error")
+            return render_template("admin/rfid_user_form.html", user=user)
+        with db_connection() as conn:
+            try:
+                conn.execute(
+                    "UPDATE users SET rfid_uid=?, name=?, role=? WHERE id=?",
+                    (uid, name, role, user_id),
+                )
+                conn.commit()
+                flash(f"User '{name}' updated.", "success")
+            except sqlite3.IntegrityError:
+                flash("RFID UID already used by another user.", "error")
+                return render_template("admin/rfid_user_form.html", user=user)
+        return redirect(url_for("content.rfid_users_list"))
+    return render_template("admin/rfid_user_form.html", user=user)
+
+
+@content_bp.route("/admin/rfid-users/<int:user_id>/delete", methods=["POST"])
+@login_required
+def rfid_user_delete(user_id: int):
+    with db_connection() as conn:
+        conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        conn.commit()
+    flash("User deleted.", "success")
+    return redirect(url_for("content.rfid_users_list"))
 
 
 @content_bp.route("/api/faculty/<int:member_id>/schedule")

@@ -1,0 +1,52 @@
+{% extends "admin/base.html" %}
+{% block title %}Registered RFID Users{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+    <h1 class="page-title">Registered Users</h1>
+    <a href="{{ url_for('content.rfid_user_add') }}" class="btn btn-primary">+ Add User</a>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>RFID UID</th>
+            <th>Registered</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for u in users %}
+        <tr>
+            <td>{{ u['id'] }}</td>
+            <td style="font-weight:600">{{ u['name'] }}</td>
+            <td>
+                {% set role = u['role'] | lower %}
+                <span style="
+                    display:inline-block;padding:3px 10px;border-radius:10px;
+                    font-size:12px;font-weight:700;letter-spacing:1px;
+                    background:{{ '#7b2d2d' if role=='faculty' else '#1a5c8a' if role=='student' else '#555' }};
+                    color:#fff">
+                    {{ u['role'] | upper }}
+                </span>
+            </td>
+            <td style="font-family:monospace;font-size:13px;color:#666">{{ u['rfid_uid'] }}</td>
+            <td>{{ u['created_at'] }}</td>
+            <td>
+                <a href="{{ url_for('content.rfid_user_edit', user_id=u['id']) }}" class="btn btn-sm">Edit</a>
+                <form method="POST" action="{{ url_for('content.rfid_user_delete', user_id=u['id']) }}"
+                      onsubmit="return confirm('Delete ' + {{ u['name'] | tojson }} + '?')" style="display:inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" style="text-align:center;color:#888;padding:20px">No registered users yet.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

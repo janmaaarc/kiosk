@@ -118,9 +118,50 @@
   function show(input) { target = input; kbd.style.display = 'block'; }
   function hide() { kbd.style.display = 'none'; target = null; }
 
+  // RFID scan interceptor: strip scanner keystrokes from focused text inputs.
+  // RFID scanners fire digits at < 50ms/char. Humans type at > 150ms/char.
+  let _rfidBuf = '';
+  let _rfidSeed = '';
+  let _rfidPrevKey = '';
+  let _rfidPrevTime = 0;
+  let _rfidRapid = false;
+
+  document.addEventListener('keydown', function(e) {
+    const el = document.activeElement;
+    const isText = el && el.tagName === 'INPUT' &&
+      ['text','search','password','email','number',''].includes(el.type || '');
+    const now = Date.now();
+    const gap = now - _rfidPrevTime;
+
+    if (e.key === 'Enter') {
+      const full = _rfidSeed + _rfidBuf;
+      if (_rfidRapid && full.length > 4 && isText) {
+        e.preventDefault();
+        el.value = el.value.slice(0, Math.max(0, el.value.length - full.length));
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      _rfidBuf = ''; _rfidSeed = ''; _rfidRapid = false;
+      _rfidPrevKey = ''; _rfidPrevTime = 0;
+      return;
+    }
+
+    if (e.key.length === 1) {
+      if (gap < 60 && _rfidPrevKey) {
+        if (!_rfidRapid) { _rfidSeed = _rfidPrevKey; _rfidBuf = ''; _rfidRapid = true; }
+        _rfidBuf += e.key;
+      } else {
+        _rfidBuf = ''; _rfidSeed = ''; _rfidRapid = false;
+      }
+      _rfidPrevKey = e.key;
+      _rfidPrevTime = now;
+    } else {
+      _rfidBuf = ''; _rfidSeed = ''; _rfidRapid = false;
+      _rfidPrevKey = ''; _rfidPrevTime = 0;
+    }
+  }, false);
+
   document.addEventListener('DOMContentLoaded', () => {
     document.body.appendChild(kbd);
-    // Apply sizes here — DOM is fully parsed, viewport is settled
     applySize();
 
     document.addEventListener('focusin', e => {
@@ -130,8 +171,18 @@
       }
     });
 
+    // Re-show keyboard when clicking an already-focused input (focusin won't re-fire).
+    document.addEventListener('click', e => {
+      const el = e.target;
+      if (el.tagName === 'INPUT' && ['text','search','password','email','number',''].includes(el.type || '')) {
+        show(el);
+      }
+    });
+
     document.addEventListener('mousedown', e => {
-      if (!kbd.contains(e.target) && e.target !== target) hide();
+      const isInput = e.target.tagName === 'INPUT' &&
+        ['text','search','password','email','number',''].includes(e.target.type || '');
+      if (!kbd.contains(e.target) && !isInput) hide();
     });
   });
 })();

@@ -61,16 +61,16 @@ def rfid():
             "SELECT name, role FROM users WHERE rfid_uid = ?", (uid,)
         ).fetchone()
         if row:
-            _log_rfid(conn, uid, row["name"], row["role"])
-            session["user_role"] = row["role"]
+            role = row["role"] if row["role"] in _VALID_ROLES else "visitor"
+            _log_rfid(conn, uid, row["name"], role)
+            session["user_role"] = role
             session["user_name"] = row["name"]
             return render_template("rfid_scan.html",
-                                   user_name=row["name"], user_role=row["role"])
+                                   user_name=row["name"], user_role=role)
         else:
-            _log_rfid(conn, uid, "Unknown", "visitor")
-    session["user_role"] = "visitor"
-    session["user_name"] = "Visitor"
-    return render_template("rfid_scan.html", user_name="Visitor", user_role="visitor")
+            _log_rfid(conn, uid, "Unknown", "unregistered")
+            session.clear()
+    return render_template("rfid_scan.html", user_name=None, user_role="unregistered")
 
 
 @main_bp.route("/check_rfid", methods=["POST"])
@@ -94,11 +94,10 @@ def check_rfid():
             return jsonify({"status": "authorized",
                             "user": {"name": row["name"], "role": row["role"]}})
         else:
-            _log_rfid(conn, uid, "Unknown", "visitor")
-            session["user_role"] = "visitor"
-            session["user_name"] = "Visitor"
-            return jsonify({"status": "visitor",
-                            "user": {"name": "Visitor", "role": "visitor"}})
+            _log_rfid(conn, uid, "Unknown", "unregistered")
+            session.clear()
+            return jsonify({"status": "unauthorized",
+                            "message": "RFID not registered"})
 
 
 @main_bp.route("/logout")
