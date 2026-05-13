@@ -473,7 +473,7 @@
               </div>
               <div id="searchWrap" class="top-right search-wrap" style="display:flex;align-items:center;gap:10px;">
                 <div style="position:relative;">
-                  <input id="buildingSearch" type="text" placeholder="Search buildings or offices…" autocomplete="off">
+                  <input id="buildingSearch" type="text" placeholder="Search buildings or rooms…" autocomplete="off">
                   <div id="searchSuggestions"></div>
                 </div>
               </div>
@@ -1273,18 +1273,19 @@ if(new URLSearchParams(window.location.search).get("mobile") === "1"){
 (function() {
   var input = document.getElementById('buildingSearch');
   var sugBox = document.getElementById('searchSuggestions');
-  var _pins    = [];
-  var _offices = [];
+  var _pins = [];
+  var _searchTimer = null;
 
   window._registerPinsForSearch = function(pins) { _pins = pins; };
-  window._registerOfficesForSearch = function(offices) { _offices = offices; };
 
-  // Map building_url → campus pin for office → building lookup
-  function _pinByUrl(url) {
-    if (!url) return null;
-    var base = url.split('?')[0];
+  function _pinByBuilding(buildingName) {
+    if (!buildingName) return null;
+    var bn = buildingName.toLowerCase();
     for (var i = 0; i < _pins.length; i++) {
-      if (_pins[i].page_url && _pins[i].page_url.split('?')[0] === base) return _pins[i];
+      if (_pins[i].name.toLowerCase() === bn) return _pins[i];
+    }
+    for (var i = 0; i < _pins.length; i++) {
+      if (_pins[i].name.toLowerCase().includes(bn) || bn.includes(_pins[i].name.toLowerCase())) return _pins[i];
     }
     return null;
   }
@@ -1302,21 +1303,9 @@ if(new URLSearchParams(window.location.search).get("mobile") === "1"){
     return span;
   }
 
-  function openSuggestions(query) {
+  function renderSuggestions(q, pinMatches, roomResults) {
     sugBox.innerHTML = '';
-    var q = query.trim().toLowerCase();
-    if (!q) { sugBox.classList.remove('open'); return; }
-
-    var pinMatches = _pins.filter(function(p) {
-      return p.name.toLowerCase().includes(q) ||
-             (p.number && p.number.toString().toLowerCase().includes(q));
-    });
-
-    var officeMatches = _offices.filter(function(o) {
-      return o.name.toLowerCase().includes(q);
-    });
-
-    if (!pinMatches.length && !officeMatches.length) {
+    if (!pinMatches.length && !roomResults.length) {
       var none = document.createElement('div');
       none.className = 'search-no-results';
       none.textContent = 'No results found';
@@ -1339,68 +1328,81 @@ if(new URLSearchParams(window.location.search).get("mobile") === "1"){
 
       item.appendChild(badge);
       item.appendChild(nameEl);
-
       item.addEventListener('click', function() {
         input.value = pin.name;
         sugBox.classList.remove('open');
         selectPin(pin);
       });
-
       sugBox.appendChild(item);
     });
 
-    officeMatches.forEach(function(office) {
-      var matchedPin = _pinByUrl(office.building_url);
+    roomResults.forEach(function(room) {
+      var pin = _pinByBuilding(room.building);
       var item = document.createElement('div');
       item.className = 'search-item';
 
       var badge = document.createElement('div');
       badge.className = 'search-item-badge';
-      badge.style.cssText = 'background:#4a4a8a;font-size:9px;padding:2px 4px;';
-      badge.textContent = 'OFFICE';
+      badge.style.cssText = 'background:#2d7b4a;font-size:9px;padding:2px 4px;';
+      badge.textContent = 'ROOM';
 
       var nameEl = document.createElement('div');
       nameEl.className = 'search-item-name';
       var nameNode = document.createElement('div');
-      nameNode.appendChild(highlight(office.name, q));
+      nameNode.appendChild(highlight(room.name, q));
       var locNode = document.createElement('div');
       locNode.style.cssText = 'font-size:11px;color:#888;margin-top:2px;';
-      locNode.textContent = office.location || (matchedPin ? matchedPin.name : '');
+      locNode.textContent = room.building || '';
       nameEl.appendChild(nameNode);
       nameEl.appendChild(locNode);
 
       item.appendChild(badge);
       item.appendChild(nameEl);
-
       item.addEventListener('click', function() {
-        input.value = office.name;
+        input.value = room.name;
         sugBox.classList.remove('open');
-        if (matchedPin) {
-          var url = office.building_url || matchedPin.page_url || '';
-          openBuildingPanel(matchedPin.name, url);
-          document.querySelectorAll('.building').forEach(function(b) { b.classList.remove('active'); });
-          document.querySelectorAll('.building').forEach(function(b) {
-            if (b.dataset.name === matchedPin.name) b.classList.add('active');
-          });
+        if (pin && pin.page_url) {
+          window.location.href = pin.page_url + '?location=' + encodeURIComponent(room.name);
+        } else if (room.url) {
+          window.location.href = room.url;
         }
       });
-
       sugBox.appendChild(item);
     });
 
     sugBox.classList.add('open');
   }
 
-  function selectPin(pin) {
-    // Find the DOM element for this pin and trigger tooltip
-    var el = null;
-    document.querySelectorAll('.building').forEach(function(b) {
-      if (b.dataset.name === pin.name) el = b;
+  function openSuggestions(query) {
+    var q = query.trim();
+    if (!q) { sugBox.innerHTML = ''; sugBox.classList.remove('open'); return; }
+
+    var ql = q.toLowerCase();
+    var pinMatches = _pins.filter(function(p) {
+      return p.name.toLowerCase().includes(ql) ||
+             (p.number && p.number.toString().toLowerCase().includes(ql));
     });
+
+    clearTimeout(_searchTimer);
+    _searchTimer = setTimeout(function() {
+      fetch('/api/search?q=' + encodeURIComponent(q))
+        .then(function(r) { return r.json(); })
+        .then(function(results) {
+          var roomResults = results.filter(function(r) { return r.type === 'room'; });
+          renderSuggestions(q, pinMatches, roomResults);
+        })
+        .catch(function() { renderSuggestions(q, pinMatches, []); });
+    }, 150);
+
+    if (pinMatches.length) renderSuggestions(q, pinMatches, []);
+  }
+
+  function selectPin(pin) {
     openBuildingPanel(pin.name, pin.page_url || '');
-    // Clear highlight from all, mark selected
     document.querySelectorAll('.building').forEach(function(b) { b.classList.remove('active'); });
-    if (el) el.classList.add('active');
+    document.querySelectorAll('.building').forEach(function(b) {
+      if (b.dataset.name === pin.name) b.classList.add('active');
+    });
   }
 
   input.addEventListener('input', function() { openSuggestions(input.value); });
@@ -1417,15 +1419,6 @@ if(new URLSearchParams(window.location.search).get("mobile") === "1"){
 
 updateYouHere(80, 395);
 
-// Load offices for search
-fetch('/api/offices')
-  .then(function(r){ return r.json(); })
-  .then(function(offices) {
-    if (typeof window._registerOfficesForSearch === 'function') {
-      window._registerOfficesForSearch(offices);
-    }
-  })
-  .catch(function(){});
 
 // Load campus pins from DB and render as clickable overlays
 (function loadCampusPins() {
