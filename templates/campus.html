@@ -1151,7 +1151,8 @@ function openBuildingPanel(name, pageUrl) {
   const hasFloorPlan = !!pageUrl;
   document.getElementById('panelEnterBtn').style.display = hasFloorPlan ? '' : 'none';
   document.getElementById('panelComingSoon').style.display = hasFloorPlan ? 'none' : 'block';
-  _pendingUrl = hasFloorPlan ? pageUrl + "?from=gate&location=" + encodeURIComponent(name) : null;
+  const _sep = pageUrl && pageUrl.includes('?') ? '&' : '?';
+  _pendingUrl = hasFloorPlan ? pageUrl + _sep + "from=gate&location=" + encodeURIComponent(name) : null;
   document.getElementById('panelBuildingName').textContent = name;
   const img = document.getElementById('panelBuildingImage');
   const photo = BUILDING_PHOTOS[name.toUpperCase()];
@@ -1372,7 +1373,14 @@ if(new URLSearchParams(window.location.search).get("mobile") === "1"){
       item.addEventListener('click', function() {
         input.value = office.name;
         sugBox.classList.remove('open');
-        if (matchedPin) selectPin(matchedPin);
+        if (matchedPin) {
+          var url = office.building_url || matchedPin.page_url || '';
+          openBuildingPanel(matchedPin.name, url);
+          document.querySelectorAll('.building').forEach(function(b) { b.classList.remove('active'); });
+          document.querySelectorAll('.building').forEach(function(b) {
+            if (b.dataset.name === matchedPin.name) b.classList.add('active');
+          });
+        }
       });
 
       sugBox.appendChild(item);
