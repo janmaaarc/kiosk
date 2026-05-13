@@ -46,7 +46,8 @@ dashboard — no coding required.
 | **RFID personalized entry** | Scanning an RFID card shows the user's name, role badge, and a personalized welcome. The main menu displays a greeting for the scanned user. All scans are logged and viewable in the admin dashboard. |
 | **Drag-to-scroll** | IR touch frames that act as a mouse can drag any scrollable area (faculty grid, floor plan sidebar, etc.). Text and image selection are disabled globally on kiosk pages. |
 | **Virtual keyboard** | An on-screen QWERTY keyboard appears when any search input is focused — no physical keyboard needed. |
-| **Idle timeout** | After 60 seconds of inactivity on public pages, the kiosk clears the session and returns to the lock screen. Admin pages show a 10-second countdown warning before redirecting to the menu. |
+| **Idle timeout** | After a configurable period of inactivity on public pages (default 60 s), the kiosk clears the session and returns to the lock screen. Admin pages show a 10-second countdown warning before redirecting to the menu. Both the idle timeout and the screensaver trigger delay are configurable from **Admin → Settings**. |
+| **Screensaver** | After a separate configurable delay (default 120 s), a full-screen slideshow starts over any page. Tap anywhere to dismiss and resume. Images are managed under `static/images/screensaver/`. Slide interval is also configurable. |
 | **QR codes** | Every route has a **GENERATE QR CODE** button. QR images are generated server-side at `/qr?data=…&size=…` — works offline. |
 | **Offline fallback** | A service worker caches static assets and shows a branded `/offline` page when the network drops. |
 
@@ -244,7 +245,7 @@ address. Change the password immediately after first login in production (see
 
 ### Dashboard — `/dashboard`
 
-After login the dashboard shows cards for every content section.
+After login the dashboard shows live stats at the top — RFID scans today, search queries today, total rooms, total faculty, active announcements, and active events — followed by the top 5 searched queries over the past 7 days. Navigation cards for every content section are displayed below.
 
 ---
 
@@ -272,7 +273,7 @@ Paginated at 20 items per page.
 | Title | Required. |
 | Thumbnail | Image shown in the list view. |
 | PDF file | The announcement document. Visitors tap to open or download. |
-| Published at | Auto-fills to now. |
+| Published at | Schedule the announcement to appear on a future date and time. Leave blank or set to now to publish immediately. |
 | Expires at | Leave blank to keep forever. |
 
 ---
@@ -372,6 +373,19 @@ profile page. Use **+ Add Row** and the row delete button to manage entries.
 Shows a paginated table of all RFID scan events: user name, role badge, UID,
 and timestamp. Use **Clear All** to wipe the log. Useful for tracking who has
 accessed the kiosk and when.
+
+---
+
+### Kiosk Settings — `/admin/settings`
+
+| Setting | Default | Notes |
+|---|---|---|
+| **Idle timeout** | 60 s | Inactivity period before the kiosk returns to the lock screen (public pages) or shows the admin countdown warning. |
+| **Screensaver trigger** | 120 s | Inactivity period before the full-screen screensaver slideshow starts. |
+| **Slide interval** | 4000 ms | How long each screensaver image is shown before advancing. |
+| **Admin session** | 60 min | How long an admin login session stays valid before requiring re-authentication. |
+
+Changes take effect on the next page load. Values must be positive integers; invalid input is silently ignored.
 
 ---
 
@@ -589,9 +603,9 @@ going live.
 Go to **Admin → Rooms** and click **Import CSV**.
 
 ```
-building,floor,room,description,pos_left,pos_top,pos_width,pos_height,office_key
-Rodriguez Building,1,Room 101,General Classroom,5,10,15,12,
-IT Building,2,Lab 201,Computer Laboratory,20,15,25,20,it_lab
+building,floor,room,description
+Rodriguez Building,1,Room 101,General Classroom
+IT Building,2,Lab 201,Computer Laboratory
 ```
 
 | Column | Required | Notes |
@@ -600,10 +614,8 @@ IT Building,2,Lab 201,Computer Laboratory,20,15,25,20,it_lab
 | `floor` | Yes | Floor number as text. |
 | `room` | Yes | Room name shown on the overlay. |
 | `description` | No | Info panel text. |
-| `pos_left/top/width/height` | No | Percentages (default 0/0/10/10). |
-| `office_key` | No | Office key to link to. |
 
-Rows with an existing `(building, floor, room)` combination are updated in place.
+Rows with an existing `(building, floor, room)` combination are updated in place. Maximum 500 rows per upload; files over 512 KB are rejected. After import, use the **Room Placer** tool to set the exact position of each room on the floor plan image.
 
 ---
 
@@ -762,13 +774,14 @@ kiosk/
 │       ├── offices.py            /office-selection, /office
 │       ├── announcements.py      /announcements, /announcement-view
 │       ├── events.py             /events, /event/<id>
-│       ├── admin.py              /admin login, /dashboard,
-│       │                         /rooms/import-csv
+│       ├── admin.py              /admin login, /dashboard, /logout,
+│       │                         /admin/settings, /rooms/import-csv
 │       └── content.py            /admin/events|announcements|offices|
 │                                 building-floors|faculty|rooms CRUD,
 │                                 /admin/room-placer,
 │                                 /admin/rfid-logs, /admin/rfid-logs/clear,
-│                                 /admin/upload
+│                                 /admin/upload,
+│                                 /api/kiosk-settings, /api/screensaver-images
 │
 ├── templates/
 │   ├── _breadcrumb.html
@@ -792,16 +805,17 @@ kiosk/
 │       ├── faculty_list.html
 │       ├── faculty_form.html     Faculty editor with schedule row builder
 │       ├── rfid_logs.html        RFID scan log table + clear button
-│       ├── rooms.html            Room list with building filter + actions
+│       ├── rooms.html            Room list with building filter + CSV import
 │       ├── room_form.html        Add/Edit room form
 │       ├── room_placer.html      Visual click-to-place room tool
+│       ├── kiosk_settings.html   Idle/screensaver/session timeout config
 │       └── …                    Event, announcement, office forms
 │
 ├── static/
 │   ├── css/style.css
 │   ├── js/
 │   │   ├── kiosk-scale.js        Auto-scales every page to 1360×768
-│   │   ├── kiosk-idle.js         60s idle → lock screen; admin countdown modal
+│   │   ├── kiosk-idle.js         Configurable idle → lock screen; screensaver slideshow; admin countdown modal
 │   │   ├── drag-scroll.js        Drag-to-scroll for IR touch frames
 │   │   ├── keyboard.js           On-screen QWERTY keyboard for search inputs
 │   │   ├── toast.js              window.toast() notification utility
@@ -847,6 +861,9 @@ kiosk/
 | `faculty` | Faculty members with department, photo, room, schedule JSON, and office link |
 | `users` | RFID UID → name + role (used by `/rfid?uid=` for personalized entry) |
 | `rfid_logs` | Timestamped record of every RFID scan: uid, name, role |
+| `kiosk_settings` | Key-value store for configurable kiosk behaviour (idle timeout, screensaver delays, admin session length) |
+| `search_logs` | Timestamped record of every search query submitted at `/search` — used for the dashboard "top searches" widget |
 
 All content tables have `published_at` and `expires_at` columns. Records with
-a past `expires_at` are automatically excluded from all public-facing queries.
+a future `published_at` or a past `expires_at` are automatically excluded from
+all public-facing queries.
