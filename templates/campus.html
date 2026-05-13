@@ -1275,6 +1275,7 @@ if(new URLSearchParams(window.location.search).get("mobile") === "1"){
   var sugBox = document.getElementById('searchSuggestions');
   var _pins = [];
   var _searchTimer = null;
+  var _fetchSeq = 0;
 
   window._registerPinsForSearch = function(pins) { _pins = pins; };
 
@@ -1285,7 +1286,8 @@ if(new URLSearchParams(window.location.search).get("mobile") === "1"){
       if (_pins[i].name.toLowerCase() === bn) return _pins[i];
     }
     for (var i = 0; i < _pins.length; i++) {
-      if (_pins[i].name.toLowerCase().includes(bn) || bn.includes(_pins[i].name.toLowerCase())) return _pins[i];
+      var pn = _pins[i].name.toLowerCase();
+      if (pn.length >= 5 && (pn.includes(bn) || bn.includes(pn))) return _pins[i];
     }
     return null;
   }
@@ -1385,13 +1387,17 @@ if(new URLSearchParams(window.location.search).get("mobile") === "1"){
 
     clearTimeout(_searchTimer);
     _searchTimer = setTimeout(function() {
+      var seq = ++_fetchSeq;
       fetch('/api/search?q=' + encodeURIComponent(q))
         .then(function(r) { return r.json(); })
         .then(function(results) {
-          var roomResults = results.filter(function(r) { return r.type === 'room'; });
+          if (seq !== _fetchSeq) return;
+          var roomResults = results.filter(function(r) {
+            return r.type === 'room' && (_pinByBuilding(r.building) || r.url);
+          });
           renderSuggestions(q, pinMatches, roomResults);
         })
-        .catch(function() { renderSuggestions(q, pinMatches, []); });
+        .catch(function() { if (seq === _fetchSeq) renderSuggestions(q, pinMatches, []); });
     }, 150);
 
     if (pinMatches.length) renderSuggestions(q, pinMatches, []);
