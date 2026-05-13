@@ -665,22 +665,36 @@ var _floorGraph = null; // { nodes: [{id,label,x_pct,y_pct}], adj: {id:[id,...]}
     .catch(function(){});
 })();
 
-function _bfsFloor(adj, startId, goalId) {
+function _dijkstraFloor(nodes, adj, startId, goalId) {
   if (startId === goalId) return [startId];
-  var visited = {}, prev = {}, queue = [startId];
-  visited[startId] = true;
-  while (queue.length) {
-    var cur = queue.shift();
+  var byId = {};
+  nodes.forEach(function(n){ byId[n.id] = n; });
+  var dist = {}, prev = {}, unvisited = {};
+  nodes.forEach(function(n){ dist[n.id] = Infinity; unvisited[n.id] = true; });
+  dist[startId] = 0;
+  while (true) {
+    var cur = null;
+    Object.keys(unvisited).forEach(function(id){
+      if (cur === null || dist[id] < dist[cur]) cur = id;
+    });
+    if (cur === null || dist[cur] === Infinity) return null;
+    cur = parseInt(cur, 10);
     if (cur === goalId) {
       var path = [];
       while (cur !== undefined) { path.unshift(cur); cur = prev[cur]; }
       return path;
     }
+    delete unvisited[cur];
+    var cn = byId[cur];
     (adj[cur] || []).forEach(function(nb){
-      if (!visited[nb]) { visited[nb] = true; prev[nb] = cur; queue.push(nb); }
+      if (!unvisited[nb]) return;
+      var nn = byId[nb];
+      var dx = cn.x_pct - nn.x_pct, dy = cn.y_pct - nn.y_pct;
+      var w = Math.sqrt(dx*dx + dy*dy);
+      var d = dist[cur] + w;
+      if (d < dist[nb]) { dist[nb] = d; prev[nb] = cur; }
     });
   }
-  return null;
 }
 
 function _nearestNode(nodes, xPct, yPct) {
@@ -705,7 +719,7 @@ function drawFloorRoute(roomBtn) {
   var entry = nodes.find(function(n){ return /ENTRANCE|GATE|ENTRY/i.test(n.label || ''); }) || nodes[0];
   var target = _nearestNode(nodes, roomL, roomT);
 
-  var path = _bfsFloor(adj, entry.id, target.id);
+  var path = _dijkstraFloor(nodes, adj, entry.id, target.id);
   var line  = document.getElementById('floorRouteLine');
   var dotS  = document.getElementById('floorRouteStart');
   var dotE  = document.getElementById('floorRouteEnd');
