@@ -761,6 +761,11 @@ window.addEventListener('resize', repositionRoomLabels);
 
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.room-label').forEach((b, i) => {
+    const color = b.dataset.color;
+    if (color && color.startsWith('#')) {
+      b.style.setProperty('background', color, 'important');
+      b.style.setProperty('border-color', color, 'important');
+    }
     b.style.opacity = '0';
     b.style.transform = 'scale(0.85)';
     b.style.transition = `opacity 0.3s ease ${i * 40}ms, transform 0.3s ease ${i * 40}ms`;

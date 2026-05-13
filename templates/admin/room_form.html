@@ -45,15 +45,43 @@
            placeholder="e.g. Registrar">
   </div>
 
+  {% set cur_color = room['room_color'] if room and room['room_color'] else '' %}
   <div class="form-group">
-    <label>Room Type <span style="font-weight:400;color:#888">(for highlighting)</span></label>
-    <select name="room_color" style="width:100%;padding:9px 12px;border:1px solid #ccc;border-radius:5px;font-size:14px;font-family:inherit;">
-      {% set cur = room['room_color'] if room and room['room_color'] else '' %}
-      <option value="" {% if not cur %}selected{% endif %}>Normal Room</option>
-      <option value="cr" {% if cur=='cr' %}selected{% endif %}>🚻 CR / Comfort Room</option>
-      <option value="fire-exit" {% if cur=='fire-exit' %}selected{% endif %}>🚪 Fire Exit</option>
-      <option value="elevator" {% if cur=='elevator' %}selected{% endif %}>🛗 Elevator</option>
-    </select>
+    <label>Room Color <span style="font-weight:400;color:#888">(optional)</span></label>
+    <input type="hidden" name="room_color" id="room-color-val" value="{{ cur_color }}">
+    <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px;" id="color-swatches">
+      <button type="button" data-color="" title="None"
+        style="width:30px;height:30px;border-radius:5px;border:2px solid #ccc;background:#f5f5f5;cursor:pointer;font-size:13px;">✕</button>
+      <button type="button" data-color="cr" title="CR / Comfort Room"
+        style="width:30px;height:30px;border-radius:5px;border:2px solid #c0392b;background:rgba(192,57,43,0.15);cursor:pointer;font-size:13px;">🚻</button>
+      <button type="button" data-color="fire-exit" title="Fire Exit"
+        style="width:30px;height:30px;border-radius:5px;border:2px solid #27ae60;background:rgba(39,174,96,0.15);cursor:pointer;font-size:13px;">🚪</button>
+      <button type="button" data-color="elevator" title="Elevator"
+        style="width:30px;height:30px;border-radius:5px;border:2px solid #2980b9;background:rgba(41,128,185,0.15);cursor:pointer;font-size:13px;">🛗</button>
+      <button type="button" data-color="#f9e4b7" title="Yellow"
+        style="width:30px;height:30px;border-radius:5px;border:2px solid #e0b94a;background:#f9e4b7;cursor:pointer;"></button>
+      <button type="button" data-color="#d4edda" title="Green"
+        style="width:30px;height:30px;border-radius:5px;border:2px solid #27ae60;background:#d4edda;cursor:pointer;"></button>
+      <button type="button" data-color="#d1ecf1" title="Blue"
+        style="width:30px;height:30px;border-radius:5px;border:2px solid #2980b9;background:#d1ecf1;cursor:pointer;"></button>
+      <button type="button" data-color="#f8d7da" title="Red"
+        style="width:30px;height:30px;border-radius:5px;border:2px solid #c0392b;background:#f8d7da;cursor:pointer;"></button>
+      <button type="button" data-color="#e2d9f3" title="Purple"
+        style="width:30px;height:30px;border-radius:5px;border:2px solid #8e44ad;background:#e2d9f3;cursor:pointer;"></button>
+      <button type="button" data-color="#fde8d8" title="Orange"
+        style="width:30px;height:30px;border-radius:5px;border:2px solid #e67e22;background:#fde8d8;cursor:pointer;"></button>
+      <button type="button" data-color="#e9e9e9" title="Gray"
+        style="width:30px;height:30px;border-radius:5px;border:2px solid #999;background:#e9e9e9;cursor:pointer;"></button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <label style="font-size:12px;color:#666;margin:0;white-space:nowrap;">Custom:</label>
+      <input type="color" id="room-color-picker" value="{{ cur_color if cur_color.startswith('#') else '#ffffff' }}"
+             style="width:36px;height:30px;padding:0;border:1px solid #ccc;border-radius:5px;cursor:pointer;">
+      <button type="button" onclick="applyCustomColor()"
+              style="padding:5px 12px;font-size:12px;background:#7b2d2d;color:#fff;border:none;border-radius:5px;cursor:pointer;font-family:inherit;font-weight:700;">Use</button>
+      <span id="color-preview" style="display:inline-block;width:24px;height:24px;border-radius:4px;border:1px solid #ccc;background:#fff;"></span>
+      <span id="color-label" style="font-size:12px;color:#666;">None</span>
+    </div>
   </div>
 
   <h4 style="font-size:13px;font-weight:700;color:#555;letter-spacing:1px;margin:20px 0 12px;border-top:2px solid #eee;padding-top:16px;">
@@ -89,4 +117,36 @@
   </div>
 </form>
 </div>
+
+<script>
+(function() {
+  var PRESET_LABELS = {
+    '': 'None', 'cr': 'CR / Comfort Room',
+    'fire-exit': 'Fire Exit', 'elevator': 'Elevator',
+    '#f9e4b7': 'Yellow', '#d4edda': 'Green', '#d1ecf1': 'Blue',
+    '#f8d7da': 'Red', '#e2d9f3': 'Purple', '#fde8d8': 'Orange', '#e9e9e9': 'Gray'
+  };
+
+  function setColor(val) {
+    document.getElementById('room-color-val').value = val;
+    var label = PRESET_LABELS[val] || val;
+    document.getElementById('color-label').textContent = label;
+    var preview = document.getElementById('color-preview');
+    preview.style.background = val.startsWith('#') ? val : (val ? '' : '#fff');
+    document.querySelectorAll('#color-swatches button').forEach(function(b) {
+      b.style.outline = b.dataset.color === val ? '3px solid #333' : '';
+    });
+  }
+
+  document.querySelectorAll('#color-swatches button').forEach(function(b) {
+    b.addEventListener('click', function() { setColor(this.dataset.color); });
+  });
+
+  window.applyCustomColor = function() {
+    setColor(document.getElementById('room-color-picker').value);
+  };
+
+  setColor('{{ cur_color }}');
+})();
+</script>
 {% endblock %}
