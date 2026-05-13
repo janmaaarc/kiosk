@@ -57,12 +57,99 @@
         </div>
 
         <div class="form-group">
-            <label>Directions Text <span style="font-weight:400;color:#888;">(optional)</span></label>
-            <textarea name="directions_text" rows="4" maxlength="1000"
-                      placeholder="e.g. From the main gate, turn left at the guard house. Walk straight until you reach the Academic Building on your right."
-                      style="width:100%;resize:vertical;">{{ pin.directions_text or '' }}</textarea>
-            <span class="hint">Shown in the directions panel when a visitor clicks GET DIRECTIONS for this building.</span>
+            <label>Directions <span style="font-weight:400;color:#888;">(optional)</span></label>
+
+            <div id="dir-builder" style="background:#f9f5f5;border:1px solid #e0c8c8;border-radius:10px;padding:16px 18px;margin-bottom:10px;">
+                <div style="font-size:13px;font-weight:700;color:#7b2d2d;margin-bottom:12px;letter-spacing:.5px;">DIRECTION TEMPLATE</div>
+
+                <div style="display:flex;flex-direction:column;gap:10px;">
+
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <span style="font-size:13px;min-width:90px;">From gate,</span>
+                        <select id="dt-initial" style="flex:1;min-width:140px;padding:6px 8px;border-radius:6px;border:1px solid #ccc;font-size:13px;">
+                            <option value="walk straight">walk straight</option>
+                            <option value="turn left and walk">turn left and walk</option>
+                            <option value="turn right and walk">turn right and walk</option>
+                        </select>
+                        <span style="font-size:13px;">along the main path.</span>
+                    </div>
+
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <span style="font-size:13px;min-width:90px;">Landmark</span>
+                        <select id="dt-landmark-action" style="padding:6px 8px;border-radius:6px;border:1px solid #ccc;font-size:13px;">
+                            <option value="none">— skip —</option>
+                            <option value="pass">Pass</option>
+                            <option value="turn left at">Turn left at</option>
+                            <option value="turn right at">Turn right at</option>
+                        </select>
+                        <input id="dt-landmark" type="text" placeholder="e.g. Guard House"
+                               style="flex:1;min-width:120px;padding:6px 8px;border-radius:6px;border:1px solid #ccc;font-size:13px;">
+                    </div>
+
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <span style="font-size:13px;min-width:90px;">Continue</span>
+                        <select id="dt-continue" style="flex:1;min-width:140px;padding:6px 8px;border-radius:6px;border:1px solid #ccc;font-size:13px;">
+                            <option value="straight down the corridor">straight down the corridor</option>
+                            <option value="up the stairs to the next floor">up the stairs to the next floor</option>
+                            <option value="along the walkway">along the walkway</option>
+                            <option value="through the covered walk">through the covered walk</option>
+                            <option value="">— skip —</option>
+                        </select>
+                        <span style="font-size:13px;">.</span>
+                    </div>
+
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <span style="font-size:13px;min-width:90px;">Building is on</span>
+                        <select id="dt-side" style="padding:6px 8px;border-radius:6px;border:1px solid #ccc;font-size:13px;">
+                            <option value="your left">your left</option>
+                            <option value="your right">your right</option>
+                            <option value="straight ahead">straight ahead</option>
+                        </select>
+                        <span style="font-size:13px;">. Enter through the main entrance.</span>
+                    </div>
+
+                </div>
+
+                <button type="button" onclick="buildDirectionsText()"
+                        style="margin-top:14px;padding:7px 18px;background:#7b2d2d;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.5px;">
+                    APPLY TEMPLATE →
+                </button>
+            </div>
+
+            <textarea id="dir-text" name="directions_text" rows="4" maxlength="1000"
+                      placeholder="Generated text appears here. You can also type freely."
+                      style="width:100%;resize:vertical;font-size:13px;">{{ pin.directions_text or '' }}</textarea>
+            <span class="hint">Edit the text freely after applying the template, or type your own.</span>
         </div>
+
+<script>
+function buildDirectionsText() {
+    var initial   = document.getElementById('dt-initial').value;
+    var lmAction  = document.getElementById('dt-landmark-action').value;
+    var landmark  = document.getElementById('dt-landmark').value.trim();
+    var cont      = document.getElementById('dt-continue').value;
+    var side      = document.getElementById('dt-side').value;
+
+    var lines = [];
+    lines.push('From the main gate, ' + initial + ' along the main path.');
+
+    if (lmAction !== 'none' && landmark) {
+        var cap = lmAction.charAt(0).toUpperCase() + lmAction.slice(1);
+        lines.push(cap + ' the ' + landmark + '.');
+    }
+
+    if (cont) {
+        var capC = cont.charAt(0).toUpperCase() + cont.slice(1);
+        lines.push(capC + '.');
+    }
+
+    var name = document.querySelector('[name="name"]').value.trim() || 'the building';
+    lines.push(name + ' will be on ' + side + '.');
+    lines.push('Enter through the main entrance.');
+
+    document.getElementById('dir-text').value = lines.join('\n');
+}
+</script>
 
         <div style="display:flex;gap:16px;">
             <div class="form-group" style="flex:1;">
