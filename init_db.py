@@ -128,7 +128,10 @@ def _create_tables(cur: sqlite3.Cursor) -> None:
 
 
 def _seed_events(cur: sqlite3.Cursor) -> None:
-    from kiosk_app.data.events import EVENT_DETAILS, EVENTS_LIST
+    try:
+        from kiosk_app.data.events import EVENT_DETAILS, EVENTS_LIST
+    except ImportError:
+        return
 
     existing = cur.execute("SELECT COUNT(*) FROM events").fetchone()[0]
     if existing:
@@ -148,7 +151,10 @@ def _seed_events(cur: sqlite3.Cursor) -> None:
 
 
 def _seed_announcements(cur: sqlite3.Cursor) -> None:
-    from kiosk_app.data.announcements import ANNOUNCEMENTS
+    try:
+        from kiosk_app.data.announcements import ANNOUNCEMENTS
+    except ImportError:
+        return
 
     existing = cur.execute("SELECT COUNT(*) FROM announcements").fetchone()[0]
     if existing:
@@ -165,7 +171,10 @@ def _seed_announcements(cur: sqlite3.Cursor) -> None:
 
 
 def _seed_offices(cur: sqlite3.Cursor) -> None:
-    from kiosk_app.data.offices import OFFICE_DETAILS, OFFICE_SUMMARIES
+    try:
+        from kiosk_app.data.offices import OFFICE_DETAILS, OFFICE_SUMMARIES
+    except ImportError:
+        return
 
     existing = cur.execute("SELECT COUNT(*) FROM offices").fetchone()[0]
     if existing:
@@ -190,7 +199,10 @@ def _seed_offices(cur: sqlite3.Cursor) -> None:
 
 
 def _seed_faculty(cur: sqlite3.Cursor) -> None:
-    from kiosk_app.data.faculty import FACULTY
+    try:
+        from kiosk_app.data.faculty import FACULTY
+    except ImportError:
+        return
 
     existing = cur.execute("SELECT COUNT(*) FROM faculty").fetchone()[0]
     if existing:
