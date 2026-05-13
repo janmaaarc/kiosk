@@ -839,18 +839,20 @@ var graph = {
 
 // Fetch DB campus paths, replace hardcoded graph if data exists, then run URL-based routing
 var _campusPathsReady = fetch('/api/campus-paths').then(function(r){ return r.json(); }).then(function(data) {
-  if (!data.nodes || !data.nodes.length) return;
+  if (!data.nodes || !data.nodes.length || !data.edges || !data.edges.length) return;
   var labelById = {};
+  var dbNodes = {};
   data.nodes.forEach(function(n) {
     labelById[n.id] = n.label;
-    nodes[n.label] = { x: n.x_pct / 100 * 1920, y: n.y_pct / 100 * 813 };
+    dbNodes[n.label] = { x: n.x_pct / 100 * 1920, y: n.y_pct / 100 * 813 };
   });
   var dbGraph = {};
-  Object.keys(nodes).forEach(function(k) { dbGraph[k] = []; });
+  Object.keys(dbNodes).forEach(function(k) { dbGraph[k] = []; });
   data.edges.forEach(function(e) {
     var a = labelById[e.node_a], b = labelById[e.node_b];
     if (a && b) { dbGraph[a].push(b); dbGraph[b].push(a); }
   });
+  Object.assign(nodes, dbNodes);
   graph = dbGraph;
 }).catch(function(){});
 
@@ -1193,7 +1195,7 @@ function showDirectionFromPanel() {
   const name = document.getElementById('panelBuildingName').textContent.trim();
   if (!name) return;
   closeBuildingPanel();
-  showDirections(name);
+  _campusPathsReady.then(function(){ showDirections(name); });
 }
 
 function goHome(){
@@ -1594,7 +1596,7 @@ var _mapScale = 0.7;
 
     ptBtn.onclick = function() {
       hideTooltip();
-      showDirections(pin.name);
+      _campusPathsReady.then(function(){ showDirections(pin.name); });
     };
 
     if (pin.page_url) {
