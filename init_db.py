@@ -321,6 +321,38 @@ def _migrate(conn: sqlite3.Connection) -> None:
             "UPDATE offices SET location = ? WHERE key = ?", (loc, key)
         )
 
+    # Add page_url column to campus_pins if missing
+    pin_cols = {r[1] for r in conn.execute("PRAGMA table_info(campus_pins)").fetchall()}
+    if "page_url" not in pin_cols:
+        conn.execute("ALTER TABLE campus_pins ADD COLUMN page_url TEXT")
+
+    _PIN_PAGE_URLS = {
+        "Academic Building":                  "/academic_building",
+        "Civil Technology Building":          "/civil_tech_building",
+        "Industrial Technology Building":     "/it_building",
+        "Tech Building":                      "/tech_building",
+        "Mechanical / Electronics Building":  "/mechanical_building",
+        "Teacher Education Building":         "/te_building",
+        "Science Building":                   "/science_building",
+        "Graduate School Building":           "/graduate_school_building",
+        "Automotive Technology Building":     "/automotive_building",
+        "Multi-Purpose / Multi-Media Building": "/multi_purpose_building",
+        "WAF & RAC BUILDING":                 "/waf_&_rac_building",
+        "FSM & WAFT Building":                "/waf_&_fsm_building",
+        "FSM BUILDING":                       "/fsm_building",
+        "NEW ADMIN BUILDING":                 "/new_admin_building",
+        "OLD ADMIN BUILDING":                 "/old_admin_building",
+        "Rodriguez Building":                 "/rodriguez_building",
+        "YLAGAN HALL":                        "/ylagan_hall",
+        "MIST-NCTESD Dormitory":              "/mist_ncestd_dorm",
+        "MIST-NCTESD BUILDING":              "/mist_ncestd_building",
+    }
+    for name, url in _PIN_PAGE_URLS.items():
+        conn.execute(
+            "UPDATE campus_pins SET page_url = ? WHERE LOWER(name) = LOWER(?)",
+            (url, name),
+        )
+
 
 def _ensure_about_tables(conn: sqlite3.Connection) -> None:
     conn.execute("""
