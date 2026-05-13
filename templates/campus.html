@@ -1024,9 +1024,27 @@ function friendlyDirections(path, destination){
   return steps;
 }
 
+var _PIN_TO_GRAPH = {
+  "CIVIL TECHNOLOGY BUILDING":              "CIVIL TECH BUILDING",
+  "INDUSTRIAL TECHNOLOGY BUILDING":         "IT BUILDING",
+  "MECHANICAL / ELECTRONICS BUILDING":      "MECHANICAL BUILDING",
+  "FSM & WAFT BUILDING":                    "WAF & FSM BUILDING",
+  "MIST-NCTESD DORMITORY":                  "MIST-NCESTD DORM",
+  "MIST-NCTESD BUILDING":                   "MIST-NCESTD BUILDING",
+  "TEACHER EDUCATION BUILDING":             "TE BUILDING",
+  "AUTOMOTIVE TECHNOLOGY BUILDING":         "AUTOMOTIVE BUILDING",
+  "MULTI-PURPOSE / MULTI-MEDIA BUILDING":   "MULTI-PURPOSE BUILDING",
+  "GRADUATE SCHOOL ANNEX":                  "GRADUATE SCHOOL BUILDING",
+  "TECH BUILDING":                          "TECH BUILDING",
+};
+
 function showDirections(destination){
   const start = getNearestNode();
-  const target = nodes[destination] ? destination : destination.toUpperCase();
+  const destUpper = destination.toUpperCase();
+  const target = nodes[destination] ? destination
+               : nodes[destUpper] ? destUpper
+               : (_PIN_TO_GRAPH[destUpper] && nodes[_PIN_TO_GRAPH[destUpper]]) ? _PIN_TO_GRAPH[destUpper]
+               : destUpper;
   const path = findPath(start, target);
 
   const pinEl = document.querySelector(`.building[data-name="${CSS.escape(destination)}"]`);
