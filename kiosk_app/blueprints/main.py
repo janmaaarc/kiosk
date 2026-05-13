@@ -156,11 +156,12 @@ def api_search():
     results = []
     with db_connection() as conn:
         for row in conn.execute(
-            "SELECT room, building FROM rooms WHERE room LIKE ? ESCAPE '\\' LIMIT 5",
+            "SELECT room, building, floor FROM rooms WHERE room LIKE ? ESCAPE '\\' LIMIT 5",
             (pattern,),
         ).fetchall():
             results.append({"type": "room", "name": row["room"],
                             "building": row["building"] or "",
+                            "floor": row["floor"] or 1,
                             "url": "/search?room=" + quote(row["room"], safe="")})
 
         raw_role = session.get("user_role", "visitor")

@@ -1423,15 +1423,16 @@ if(new URLSearchParams(window.location.search).get("mobile") === "1"){
 
       item.appendChild(badge);
       item.appendChild(nameEl);
-      item.addEventListener('click', function() {
-        input.value = room.name;
+      item.addEventListener('click', (function(r, p) { return function() {
+        input.value = r.name;
         sugBox.classList.remove('open');
-        if (pin && pin.page_url) {
-          window.location.href = pin.page_url + '?location=' + encodeURIComponent(room.name);
-        } else if (room.url) {
-          window.location.href = room.url;
+        if (p && p.page_url) {
+          var url = p.page_url + '?floor=' + (r.floor || 1) + '&location=' + encodeURIComponent(r.name);
+          window.location.href = url;
+        } else if (r.url) {
+          window.location.href = r.url;
         }
-      });
+      }; })(room, pin));
       sugBox.appendChild(item);
     });
 
