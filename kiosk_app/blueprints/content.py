@@ -651,6 +651,52 @@ def room_edit(room_id: int):
     return render_template("admin/room_form.html", room=room, buildings=buildings)
 
 
+@content_bp.route("/admin/rooms/import-csv", methods=["POST"])
+@login_required
+def rooms_import_csv():
+    f = request.files.get("csv_file")
+    if not f or not f.filename:
+        flash("No file provided.", "error")
+        return redirect(url_for("content.rooms_list"))
+    _MAX_CSV = 512 * 1024
+    data = f.read(_MAX_CSV + 1)
+    if len(data) > _MAX_CSV:
+        flash("CSV file too large (max 512 KB).", "error")
+        return redirect(url_for("content.rooms_list"))
+    text = data.decode("utf-8", errors="replace")
+    reader = csv.DictReader(io.StringIO(text))
+    inserted = skipped = 0
+    with db_connection() as conn:
+        for i, row in enumerate(reader):
+            if i >= 500:
+                flash("CSV truncated at 500 rows.", "warning")
+                break
+            name = row.get("room", "").strip()
+            if not name:
+                skipped += 1
+                continue
+            try:
+                conn.execute(
+                    "INSERT INTO rooms (building, floor, room, description) VALUES (?, ?, ?, ?)",
+                    (
+                        row.get("building", "").strip(),
+                        row.get("floor", "1").strip(),
+                        name,
+                        row.get("description", "").strip(),
+                    ),
+                )
+                inserted += 1
+            except Exception as exc:
+                skipped += 1
+                current_app.logger.warning("Rooms CSV skip: %s", exc)
+        conn.commit()
+    flash(
+        f"Imported {inserted} room(s)" + (f", skipped {skipped}" if skipped else ""),
+        "success",
+    )
+    return redirect(url_for("content.rooms_list"))
+
+
 @content_bp.route("/admin/rooms/<int:room_id>/delete", methods=["POST"])
 @login_required
 def room_delete(room_id: int):
@@ -1559,3 +1605,15 @@ def api_building_floors():
         }
         for r in rows
     ])
+
+
+
+@content_bp.route("/api/kiosk-settings")
+@limiter.limit("60/minute")
+def api_kiosk_settings():
+    try:
+        with db_connection() as conn:
+            rows = conn.execute("SELECT key, value FROM kiosk_settings").fetchall()
+        return jsonify({r["key"]: r["value"] for r in rows})
+    except Exception:
+        return jsonify({})

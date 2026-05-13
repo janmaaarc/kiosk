@@ -4,12 +4,23 @@
   var SLIDE_INTERVAL_MS = 4000;
   var SCREENSAVER_IMAGES = [];
 
+  fetch('/api/kiosk-settings')
+    .then(function(r) { return r.json(); })
+    .then(function(s) {
+      if (s.idle_timeout_seconds) MENU_TIMEOUT_MS = parseInt(s.idle_timeout_seconds) * 1000;
+      if (s.screensaver_timeout_seconds) SCREENSAVER_TIMEOUT_MS = parseInt(s.screensaver_timeout_seconds) * 1000;
+      if (s.screensaver_slide_interval_ms) SLIDE_INTERVAL_MS = parseInt(s.screensaver_slide_interval_ms);
+      resetTimers();
+    })
+    .catch(function() {});
+
   fetch('/api/screensaver-images')
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      var imgs = (data.images || []).filter(function(i) { return i.active; });
-      if (imgs.length) {
-        SCREENSAVER_IMAGES = imgs.map(function(i) { return '/static/images/screensaver/' + i.filename; });
+      if (Array.isArray(data) && data.length) {
+        SCREENSAVER_IMAGES = data.map(function(fn) {
+          return '/static/images/screensaver/' + fn;
+        });
       }
     })
     .catch(function() {});

@@ -4,37 +4,74 @@
 {% block content %}
 <h1 class="page-title">Dashboard</h1>
 
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:900px">
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;">
+    <div style="background:#7b2d2d;color:#fff;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.15);">
+        <div style="font-size:11px;letter-spacing:1px;opacity:.7;text-transform:uppercase;margin-bottom:6px;">RFID Scans Today</div>
+        <div style="font-size:36px;font-weight:700;">{{ scans_today }}</div>
+    </div>
+    <div style="background:#fff;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.1);border-left:4px solid #7b2d2d;">
+        <div style="font-size:11px;letter-spacing:1px;opacity:.5;text-transform:uppercase;margin-bottom:6px;">Searches Today</div>
+        <div style="font-size:36px;font-weight:700;color:#7b2d2d;">{{ searches_today }}</div>
+    </div>
+    <div style="background:#fff;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.1);border-left:4px solid #555;">
+        <div style="font-size:11px;letter-spacing:1px;opacity:.5;text-transform:uppercase;margin-bottom:6px;">Total Rooms</div>
+        <div style="font-size:36px;font-weight:700;color:#555;">{{ total_rooms }}</div>
+    </div>
+    <div style="background:#fff;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.1);border-left:4px solid #555;">
+        <div style="font-size:11px;letter-spacing:1px;opacity:.5;text-transform:uppercase;margin-bottom:6px;">Faculty</div>
+        <div style="font-size:36px;font-weight:700;color:#555;">{{ total_faculty }}</div>
+    </div>
+</div>
 
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px;max-width:700px;">
+    <div style="background:#fff;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.1);">
+        <div style="font-size:13px;font-weight:700;color:#7b2d2d;margin-bottom:12px;">Active Content</div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:14px;">
+            <span>Announcements</span><strong>{{ active_announcements }}</strong>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:14px;">
+            <span>Events</span><strong>{{ active_events }}</strong>
+        </div>
+    </div>
+    <div style="background:#fff;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.1);">
+        <div style="font-size:13px;font-weight:700;color:#7b2d2d;margin-bottom:12px;">Top Searches (7 days)</div>
+        {% if top_searches %}
+            {% for s in top_searches %}
+            <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:13px;">
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;">{{ s.query }}</span>
+                <strong style="flex-shrink:0;margin-left:8px;color:#7b2d2d;">{{ s.cnt }}×</strong>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="color:#aaa;font-size:13px;">No searches yet.</div>
+        {% endif %}
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:900px">
     <a href="{{ url_for('content.events_list') }}" class="dashboard-card dashboard-card-primary">
         <div class="dashboard-card-title">Events</div>
         <div class="dashboard-card-desc">Add, edit, or expire events</div>
     </a>
-
     <a href="{{ url_for('content.announcements_list') }}" class="dashboard-card dashboard-card-primary">
         <div class="dashboard-card-title">Announcements</div>
         <div class="dashboard-card-desc">Manage digital announcements</div>
     </a>
-
     <a href="{{ url_for('content.offices_list') }}" class="dashboard-card dashboard-card-primary">
         <div class="dashboard-card-title">Offices</div>
         <div class="dashboard-card-desc">Update office information</div>
     </a>
-
     <a href="{{ url_for('content.rooms_list') }}" class="dashboard-card dashboard-card-secondary">
         <div class="dashboard-card-title">Room Labels</div>
         <div class="dashboard-card-desc">Campus room directory</div>
     </a>
-
     <a href="{{ url_for('content.building_floors_list') }}" class="dashboard-card dashboard-card-secondary">
         <div class="dashboard-card-title">Building Floors</div>
         <div class="dashboard-card-desc">Floor images and labels</div>
     </a>
-
     <a href="{{ url_for('content.faculty_list') }}" class="dashboard-card dashboard-card-secondary">
         <div class="dashboard-card-title">Faculty</div>
         <div class="dashboard-card-desc">Faculty members and schedules</div>
     </a>
-
 </div>
 {% endblock %}

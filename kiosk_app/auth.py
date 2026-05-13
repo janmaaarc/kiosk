@@ -1,3 +1,4 @@
+from datetime import datetime
 from functools import wraps
 from typing import Any, Callable
 
@@ -8,6 +9,10 @@ def login_required(f: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(f)
     def wrap(*args: Any, **kwargs: Any) -> Any:
         if "admin" not in session:
+            return redirect(url_for("admin.admin_login"))
+        expire = session.get("admin_expire")
+        if not expire or datetime.utcnow().timestamp() > expire:
+            session.clear()
             return redirect(url_for("admin.admin_login"))
         return f(*args, **kwargs)
 

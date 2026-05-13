@@ -1,0 +1,49 @@
+{% extends "admin/base.html" %}
+{% block title %}Kiosk Settings{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Kiosk Settings</h1>
+
+<div class="form-card">
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <h3 style="font-size:15px;font-weight:700;color:#7b2d2d;margin-bottom:16px;">Idle &amp; Screensaver</h3>
+
+    <div class="form-group">
+        <label for="idle-timeout">Idle timeout (seconds)</label>
+        <input type="text" id="idle-timeout" name="idle_timeout_seconds"
+               value="{{ settings.get('idle_timeout_seconds', '60') }}">
+        <div class="hint">After this many seconds of inactivity, kiosk returns to menu (or shows admin warning). Default: 60</div>
+    </div>
+
+    <div class="form-group">
+        <label for="ss-timeout">Screensaver timeout (seconds)</label>
+        <input type="text" id="ss-timeout" name="screensaver_timeout_seconds"
+               value="{{ settings.get('screensaver_timeout_seconds', '120') }}">
+        <div class="hint">After this many seconds of inactivity, screensaver appears. Default: 120</div>
+    </div>
+
+    <div class="form-group">
+        <label for="slide-interval">Screensaver slide interval (milliseconds)</label>
+        <input type="text" id="slide-interval" name="screensaver_slide_interval_ms"
+               value="{{ settings.get('screensaver_slide_interval_ms', '4000') }}">
+        <div class="hint">How long each screensaver image stays on screen. Default: 4000 (4 seconds)</div>
+    </div>
+
+    <h3 style="font-size:15px;font-weight:700;color:#7b2d2d;margin:20px 0 16px;">Admin Session</h3>
+
+    <div class="form-group">
+        <label for="session-minutes">Admin session duration (minutes)</label>
+        <input type="text" id="session-minutes" name="admin_session_minutes"
+               value="{{ settings.get('admin_session_minutes', '60') }}">
+        <div class="hint">Admin will be logged out after this many minutes of inactivity. Default: 60</div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:8px">
+        <button type="submit" class="btn btn-primary">Save Settings</button>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+</div>
+{% endblock %}

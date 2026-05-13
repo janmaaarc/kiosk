@@ -12,7 +12,8 @@ def digital_announcements():
     with db_connection() as conn:
         rows = conn.execute(
             "SELECT * FROM announcements"
-            " WHERE expires_at IS NULL OR expires_at > datetime('now')"
+            " WHERE (published_at IS NULL OR published_at <= datetime('now'))"
+            " AND (expires_at IS NULL OR expires_at > datetime('now'))"
             " ORDER BY id DESC"
         ).fetchall()
     return render_template("digital_announcements.html", announcements=rows)

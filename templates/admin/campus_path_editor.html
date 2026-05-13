@@ -82,7 +82,7 @@
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
         <h4 style="margin:0;color:#7b2d2d;font-size:14px;">Nodes ({{ nodes|length }})</h4>
       </div>
-      <div style="max-height:200px;overflow-y:auto;">
+      <div style="max-height:200px;overflow-y:auto;touch-action:pan-y;">
       {% if nodes %}
         {% for node in nodes %}
         <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f5f0f0;font-size:13px;">
@@ -104,7 +104,7 @@
     <!-- Edges list -->
     <div style="background:#fff;border-radius:10px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.08);">
       <h4 style="margin:0 0 10px;color:#7b2d2d;font-size:14px;">Edges ({{ edges|length }})</h4>
-      <div style="max-height:200px;overflow-y:auto;">
+      <div style="max-height:200px;overflow-y:auto;touch-action:pan-y;">
       {% if edges %}
         {% for edge in edges %}
         <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #f5f0f0;font-size:13px;">

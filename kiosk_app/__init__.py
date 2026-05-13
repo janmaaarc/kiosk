@@ -170,7 +170,28 @@ def create_app() -> Flask:
                         "INSERT INTO admins (username, password_hash) VALUES ('admin', ?)",
                         (_hash,)
                     )
-                    _conn.commit()
+                _conn.execute("""
+                    CREATE TABLE IF NOT EXISTS kiosk_settings (
+                        key TEXT PRIMARY KEY,
+                        value TEXT NOT NULL
+                    )""")
+                _conn.execute("""
+                    CREATE TABLE IF NOT EXISTS search_logs (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        query TEXT NOT NULL,
+                        searched_at TEXT DEFAULT (datetime('now'))
+                    )""")
+                for _k, _v in [
+                    ("idle_timeout_seconds", "60"),
+                    ("screensaver_timeout_seconds", "120"),
+                    ("screensaver_slide_interval_ms", "4000"),
+                    ("admin_session_minutes", "60"),
+                ]:
+                    _conn.execute(
+                        "INSERT OR IGNORE INTO kiosk_settings (key, value) VALUES (?, ?)",
+                        (_k, _v),
+                    )
+                _conn.commit()
         except Exception as exc:
             app.logger.error("DB init failed: %s", exc)
 

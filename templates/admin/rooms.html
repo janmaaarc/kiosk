@@ -4,11 +4,21 @@
 <div class="toolbar">
   <h1 class="page-title">Room Labels</h1>
   <div style="display:flex;gap:8px;align-items:center;">
-    <a href="{{ url_for('content.room_placer') }}" class="btn btn-primary">🗺 Place Rooms</a>
+    <form method="POST" action="{{ url_for('content.rooms_import_csv') }}"
+          enctype="multipart/form-data" style="display:flex;gap:6px;align-items:center;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="file" name="csv_file" accept=".csv"
+               style="font-size:13px;border:1px solid #ddd;padding:5px 8px;border-radius:5px;">
+        <button type="submit" class="btn btn-secondary btn-sm">Import CSV</button>
+    </form>
+    <a href="{{ url_for('content.room_placer') }}" class="btn btn-primary">Place Rooms</a>
     <a href="{{ url_for('content.room_add') }}" class="btn btn-secondary">+ Add Room</a>
   </div>
 </div>
 
+<p style="font-size:12px;color:#888;margin-bottom:12px;">
+    CSV columns: <code>building, floor, room, description</code>
+</p>
 <form method="get" style="margin-bottom:16px;display:flex;gap:10px;align-items:center;">
   <select name="building" onchange="this.form.submit()"
           style="padding:8px 12px;border-radius:5px;border:1px solid #ccc;font-size:14px;font-family:inherit;">

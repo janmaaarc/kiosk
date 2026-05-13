@@ -21,7 +21,9 @@ def index():
 
 @main_bp.route("/menu")
 def menu():
-    return render_template("menu.html")
+    return render_template("menu.html",
+                           user_name=session.get("user_name"),
+                           user_role=session.get("user_role", "visitor"))
 
 
 @main_bp.route("/faculty")
@@ -181,6 +183,12 @@ def api_search():
             results.append({"type": "faculty", "name": row["name"],
                             "building": row["department"] or "",
                             "url": "/faculty"})
+
+        try:
+            conn.execute("INSERT INTO search_logs (query) VALUES (?)", (q,))
+            conn.commit()
+        except Exception:
+            pass
 
     return jsonify(results[:15])
 

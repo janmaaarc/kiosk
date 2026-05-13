@@ -11,21 +11,30 @@ body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f4f4; color: #
 
 .sidebar {
     position: fixed; top: 0; left: 0; width: 220px; height: 100vh;
-    background: #7b2d2d; color: #fff; padding: 24px 16px 72px; overflow-y: auto;
+    background: #7b2d2d; color: #fff; padding: 16px 12px 16px;
+    overflow-y: auto;
+    touch-action: pan-y;
     scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.3) transparent;
 }
 .sidebar::-webkit-scrollbar { width: 4px; }
 .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 2px; }
-.sidebar h2 { font-size: 15px; letter-spacing: 2px; margin-bottom: 28px; opacity: .7; }
+.sidebar h2 { font-size: 14px; letter-spacing: 2px; margin-bottom: 16px; opacity: .7; }
 .sidebar nav a {
-    display: block; padding: 10px 12px; border-radius: 6px;
-    color: #fff; text-decoration: none; font-size: 14px; margin-bottom: 4px;
+    display: block; padding: 7px 10px; border-radius: 6px;
+    color: #fff; text-decoration: none; font-size: 13px; margin-bottom: 2px;
 }
 .sidebar nav a:hover, .sidebar nav a.active { background: rgba(255,255,255,0.15); }
-.sidebar nav .section { font-size: 11px; letter-spacing: 1px; opacity: .5;
-    margin: 16px 0 6px; text-transform: uppercase; }
+.sidebar nav .section { font-size: 10px; letter-spacing: 1px; opacity: .5;
+    margin: 10px 0 4px; text-transform: uppercase; }
+.sidebar-divider { border: none; border-top: 1px solid rgba(255,255,255,0.15); margin: 10px 0; }
+.sidebar-logout-btn {
+    display: block; padding: 7px 10px; border-radius: 6px;
+    color: #fff; text-decoration: none; font-size: 13px;
+    background: rgba(0,0,0,0.2); text-align: center; letter-spacing: 0.5px;
+}
+.sidebar-logout-btn:hover { background: rgba(0,0,0,0.35); }
 
-.main { position: fixed; left: 220px; right: 0; top: 0; bottom: 0; overflow-y: scroll; scrollbar-gutter: stable; padding: 32px 32px 64px; }
+.main { position: fixed; left: 220px; right: 0; top: 0; bottom: 0; overflow-y: scroll; touch-action: pan-y; scrollbar-gutter: stable; padding: 32px 32px 64px; }
 
 .page-title { font-size: 24px; font-weight: 700; margin-bottom: 20px; color: #7b2d2d; }
 .toolbar .page-title { margin-bottom: 0; }
@@ -131,11 +140,15 @@ textarea { resize: vertical; min-height: 100px; }
         <div class="section">RFID</div>
         <a href="{{ url_for('content.rfid_users_list') }}" class="{% if 'rfid_user' in request.endpoint %}active{% endif %}">Registered Users</a>
         <a href="{{ url_for('content.rfid_logs') }}" class="{% if request.endpoint == 'content.rfid_logs' %}active{% endif %}">Scan Logs</a>
+        <div class="section">System</div>
+        <a href="{{ url_for('admin.kiosk_settings') }}" class="{% if request.endpoint == 'admin.kiosk_settings' %}active{% endif %}">Settings</a>
+        <hr class="sidebar-divider">
+        <a href="{{ url_for('admin.logout') }}" class="sidebar-logout-btn">Logout</a>
     </nav>
-    <a href="{{ url_for('admin.logout') }}" style="position:absolute;bottom:20px;left:16px;right:16px;text-align:center;padding:10px 12px;border-radius:6px;color:#fff;text-decoration:none;font-size:14px;background:rgba(255,255,255,0.12);">Logout</a>
 </div>
 
 <div class="main">
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% for cat, msg in messages %}
             <div class="flash flash-{{ cat }}">{{ msg }}</div>
@@ -188,6 +201,7 @@ function uploadAndPreview(inputId, pathId, previewId) {
 }
 </script>
 <script src="/static/js/toast.js?v=2"></script>
+<script src="/static/js/keyboard.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.flash').forEach(el => {
