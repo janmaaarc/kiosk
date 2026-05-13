@@ -348,10 +348,12 @@ def _migrate(conn: sqlite3.Connection) -> None:
         "MIST-NCTESD BUILDING":              "/mist_ncestd_building",
     }
     for name, url in _PIN_PAGE_URLS.items():
-        conn.execute(
+        cur = conn.execute(
             "UPDATE campus_pins SET page_url = ? WHERE LOWER(name) = LOWER(?)",
             (url, name),
         )
+        if cur.rowcount == 0:
+            print(f"  [warn] campus_pins: no row matched name={name!r}, page_url not set")
 
 
 def _ensure_about_tables(conn: sqlite3.Connection) -> None:
