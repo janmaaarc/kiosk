@@ -644,6 +644,16 @@ function imgToH(yPct) {
   return (_lb.oy + yPct / 100 * _lb.rh) / _lb.ch * 100;
 }
 
+// Convert wrapper-% back to image-% (inverse of imgToW/H)
+function wrapToImgW(wPct) {
+  if (!_lb) return wPct;
+  return (wPct / 100 * _lb.cw - _lb.ox) / _lb.rw * 100;
+}
+function wrapToImgH(hPct) {
+  if (!_lb) return hPct;
+  return (hPct / 100 * _lb.ch - _lb.oy) / _lb.rh * 100;
+}
+
 // Floor path BFS routing
 var _floorGraph = null; // { nodes: [{id,label,x_pct,y_pct}], adj: {id:[id,...]} }
 
@@ -711,9 +721,11 @@ function drawFloorRoute(roomBtn) {
   if (!_floorGraph) return;
   var nodes = _floorGraph.nodes, adj = _floorGraph.adj;
 
-  // Room center in image-% coords
-  var roomL = parseFloat(roomBtn.style.left) + parseFloat(roomBtn.style.width)  / 2;
-  var roomT = parseFloat(roomBtn.style.top)  + parseFloat(roomBtn.style.height) / 2;
+  // Room center: style.left/top are wrapper-%, convert back to image-% for node matching
+  var wL = parseFloat(roomBtn.style.left) + parseFloat(roomBtn.style.width)  / 2;
+  var wT = parseFloat(roomBtn.style.top)  + parseFloat(roomBtn.style.height) / 2;
+  var roomL = wrapToImgW(wL);
+  var roomT = wrapToImgH(wT);
 
   // Entry node = node labeled ENTRANCE/GATE/ENTRY (first match), else first node
   var entry = nodes.find(function(n){ return /ENTRANCE|GATE|ENTRY/i.test(n.label || ''); }) || nodes[0];

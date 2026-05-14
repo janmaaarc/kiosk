@@ -112,7 +112,7 @@ def _sanitize_room_color(value: str) -> str:
     if v in _ALLOWED_ROOM_COLORS or _HEX_COLOR_RE.match(v):
         return v
     return ''
-_SAFE_IMAGE_PATH_RE = _re.compile(r'^uploads/images/[0-9a-f]{32}\.(jpg|jpeg|png|webp|gif)$')
+_SAFE_IMAGE_PATH_RE = _re.compile(r'^(uploads/images/[0-9a-f]{32}|images/[a-zA-Z0-9_/\-]+)\.(jpg|jpeg|png|webp|gif|JPG|JPEG|PNG|WEBP|GIF)$')
 
 
 def _safe_files_json(raw: str) -> str:
