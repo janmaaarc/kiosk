@@ -80,11 +80,12 @@ _VALID_LOCATIONS = {
     "GATE","LAST HORIZONTAL ROAD","MAIN HORIZONTAL ROAD","SECOND HORIZONTAL ROAD",
     "1ST VERTICAL ROAD","2ND VERTICAL ROAD","3RD VERTICAL ROAD","4TH VERTICAL ROAD",
     "5TH VERTICAL ROAD","6TH VERTICAL ROAD","7TH VERTICAL ROAD","8TH VERTICAL ROAD",
-    "ACADEMIC BUILDING","IT BUILDING","FSM BUILDING","CIVIL TECH BUILDING",
-    "TECH BUILDING","MECHANICAL BUILDING","AUTOMOTIVE BUILDING","WAF & RAC BUILDING",
+    "ACADEMIC BUILDING","INDUSTRIAL TECHNOLOGY BUILDING","FSM BUILDING","CIVIL TECH BUILDING",
+    "TECH BUILDING","MECHANICAL / ELECTRONICS BUILDING","AUTOMOTIVE TECHNOLOGY BUILDING","WAF & RAC BUILDING",
     "SCIENCE BUILDING","NEW ADMIN BUILDING","OLD ADMIN BUILDING","YLAGAN HALL",
-    "RODRIGUEZ BUILDING","MIST-NCESTD DORM","MULTI-PURPOSE BUILDING",
-    "MIST-NCESTD BUILDING","TE BUILDING","POWER ROOM","GRADUATE SCHOOL BUILDING",
+    "RODRIGUEZ BUILDING","MIST-NCTESD DORMITORY","MULTI-PURPOSE / MULTI-MEDIA BUILDING",
+    "MIST-NCTESD BUILDING","TEACHER EDUCATION BUILDING","POWER ROOM","GRADUATE SCHOOL BUILDING",
+    "FSM & WAFT BUILDING",
 }
 
 
@@ -292,17 +293,17 @@ def rodriguez_building():
 
 @campus_bp.route("/mist_ncestd_dorm")
 def mist_ncestd_dorm():
-    return _floor_plan("MIST-NCESTD Dorm", floor_count=4, base_url="mist_ncestd_dorm")
+    return _floor_plan("MIST-NCTESD Dormitory", floor_count=4, base_url="mist_ncestd_dorm")
 
 
 @campus_bp.route("/mist_ncestd_building")
 def mist_ncestd_building():
-    return _floor_plan("MIST-NCESTD Building", floor_count=3, base_url="mist_ncestd_building")
+    return _floor_plan("MIST-NCTESD Building", floor_count=3, base_url="mist_ncestd_building")
 
 
 @campus_bp.route("/multi_purpose_building")
 def multi_purpose_building():
-    return _floor_plan("Multi-Purpose Building", floor_count=2, base_url="multi_purpose_building")
+    return _floor_plan("Multi-Purpose / Multi-Media Building", floor_count=2, base_url="multi_purpose_building")
 
 
 @campus_bp.route("/power_room")
@@ -317,7 +318,7 @@ def ylagan():
 
 @campus_bp.route("/automotive_building")
 def automotive():
-    return _floor_plan("Automotive Building", floor_count=3, base_url="automotive_building")
+    return _floor_plan("Automotive Technology Building", floor_count=3, base_url="automotive_building")
 
 
 _ACADEMIC_GROUND_ROOMS = [
@@ -716,7 +717,7 @@ def civil_tech_building():
 
 @campus_bp.route("/waf_&_fsm_building")
 def waf_fsm_building():
-    return _floor_plan("WAF & FSM Building", floor_count=3, base_url="waf_&_fsm_building")
+    return _floor_plan("FSM & WAFT Building", floor_count=3, base_url="waf_&_fsm_building")
 
 
 @campus_bp.route("/tech_building")
@@ -731,12 +732,12 @@ def graduate_school_building():
 
 @campus_bp.route("/mechanical_building")
 def mechanical_building():
-    return _floor_plan("Mechanical Building", floor_count=3, base_url="mechanical_building")
+    return _floor_plan("Mechanical / Electronics Building", floor_count=3, base_url="mechanical_building")
 
 
 @campus_bp.route("/te_building")
 def te_building():
-    return _floor_plan("TE Building", floor_count=3, base_url="te_building")
+    return _floor_plan("Teacher Education Building", floor_count=3, base_url="te_building")
 
 
 @campus_bp.route("/science_building")
@@ -746,7 +747,7 @@ def science_building():
 
 @campus_bp.route("/it_building")
 def it_building():
-    return _floor_plan("IT Building", floor_count=3, base_url="it_building")
+    return _floor_plan("Industrial Technology Building", floor_count=3, base_url="it_building")
 
 
 @campus_bp.route("/engineering-floor1")

@@ -235,6 +235,27 @@ def _seed_faculty(cur: sqlite3.Cursor) -> None:
 
 def _migrate(conn: sqlite3.Connection) -> None:
     """Non-destructive migrations for existing databases."""
+    # Add image column to buildings table
+    bldg_cols = {r[1] for r in conn.execute("PRAGMA table_info(buildings)").fetchall()}
+    if "image" not in bldg_cols:
+        conn.execute("ALTER TABLE buildings ADD COLUMN image TEXT")
+
+    # Rename building_floors rows from old campus.py names → canonical buildings names
+    _BUILDING_RENAMES = {
+        "IT Building":                    "Industrial Technology Building",
+        "MIST-NCESTD Building":           "MIST-NCTESD Building",
+        "MIST-NCESTD Dorm":               "MIST-NCTESD Dormitory",
+        "Mechanical Building":            "Mechanical / Electronics Building",
+        "Multi-Purpose Building":         "Multi-Purpose / Multi-Media Building",
+        "TE Building":                    "Teacher Education Building",
+        "WAF & FSM Building":             "FSM & WAFT Building",
+        "Automotive Building":            "Automotive Technology Building",
+    }
+    for old, new in _BUILDING_RENAMES.items():
+        conn.execute(
+            "UPDATE building_floors SET building = ? WHERE building = ?", (new, old)
+        )
+
     cols = {r[1] for r in conn.execute("PRAGMA table_info(offices)").fetchall()}
     if "building_url" not in cols:
         conn.execute("ALTER TABLE offices ADD COLUMN building_url TEXT")
