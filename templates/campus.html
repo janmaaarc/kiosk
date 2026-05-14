@@ -696,210 +696,29 @@
                               steps.push("Arrive at " + curr + ".");
                               break;
                             }
-                            if(curr.includes("BUILDING")) continue;
-
-                            const turn = getDirection(prev, curr, next); 
+                            const turn = getDirection(prev, curr, next);
                             
                             steps.push(turn + " toward next path."); 
                           } 
                             return steps; 
                           } 
 
-const nodes = {
-  // MAIN HORIZONTAL ROAD (y≈395)
-  "GATE":      {x:80,   y:395},
-  "INT_A":     {x:320,  y:395},
-  "INT_B":     {x:560,  y:395},
-  "INT_C":     {x:900,  y:395},
-  "INT_D":     {x:1150, y:395},
-  "INT_E":     {x:1380, y:395},
-  "INT_MID":   {x:1560, y:395},
-  "INT_F":     {x:1668, y:395},
+var nodes = {};
+var graph = {};
 
-  // TOP HORIZONTAL ROAD (y≈155)
-  "TOP_A":     {x:320,  y:155},
-  "TOP_B":     {x:560,  y:155},
-  "TOP_C":     {x:900,  y:155},
-
-  // BOTTOM HORIZONTAL ROAD (y≈640)
-  "BOT_B":     {x:560,  y:640},
-  "BOT_C":     {x:900,  y:640},
-  "BOT_F":     {x:1668, y:640},
-
-  // APPROACH / ENTRY NODES
-  "MIST_BLD_ENT":  {x:80,   y:255},
-  "NEW_ADM_ENT":   {x:80,   y:510},
-  "OLD_ADM_ENT":   {x:320,  y:460},
-  "YLAGAN_ENT":    {x:455,  y:155},
-  "MIST_DORM_ENT": {x:900,  y:155},
-  "ACADEMIC_ENT":  {x:725,  y:395},
-  "WAF_RAC_ENT":   {x:900,  y:300},
-  "FSM_ENT":       {x:560,  y:510},
-  "CIVIL_ENT":     {x:900,  y:455},
-  "GRAD_ENT":      {x:900,  y:540},
-  "MECH_ENT":      {x:1060, y:455},
-  "TECH_ENT":      {x:1380, y:500},
-  "MID_5TH":       {x:1380, y:265},
-  "UP_5TH":        {x:1380, y:145},
-  "UP_MID":        {x:1560, y:200},
-  "IT_ENT":        {x:1668, y:180},
-  "SCI_ENT":       {x:1668, y:340},
-  "TE_ENT":        {x:1668, y:510},
-
-  // ENTRY NODES FOR ADDITIONAL BUILDINGS
-  "GUARD_HOUSE_ENT":             {x:286,  y:395},
-  "GFD_ENT":                     {x:672,  y:640},
-  "FOODNOOK_ENT":                {x:1294, y:500},
-  "SUPPLY_ENT":                  {x:1150, y:540},
-  "LIBRARY_ENT":                 {x:1648, y:395},
-
-  // BUILDING CENTERS
-  "RODRIGUEZ BUILDING":       {x:600,  y:77},
-  "MIST-NCESTD DORM":         {x:1148, y:125},
-  "MULTI-PURPOSE BUILDING":   {x:1571, y:110},
-  "YLAGAN HALL":              {x:455,  y:265},
-  "MIST-NCESTD BUILDING":     {x:116,  y:292},
-  "AUTOMOTIVE BUILDING":      {x:1573, y:275},
-  "ACADEMIC BUILDING":        {x:725,  y:243},
-  "WAF & RAC BUILDING":       {x:1035, y:313},
-  "POWER ROOM":               {x:1395, y:345},
-  "NEW ADMIN BUILDING":       {x:94,   y:574},
-  "OLD ADMIN BUILDING":       {x:379,  y:528},
-  "FSM BUILDING":             {x:701,  y:521},
-  "CIVIL TECH BUILDING":      {x:858,  y:566},
-  "WAF & FSM BUILDING":       {x:992,  y:742},
-  "TECH BUILDING":            {x:1433, y:534},
-  "GRADUATE SCHOOL BUILDING": {x:982,  y:528},
-  "MECHANICAL BUILDING":      {x:1113, y:528},
-  "IT BUILDING":              {x:1756, y:122},
-  "SCIENCE BUILDING":         {x:1756, y:311},
-  "TE BUILDING":              {x:1756, y:637},
-
-  // ADDITIONAL BUILDINGS
-  "GUARD HOUSE":                        {x:286,  y:345},
-  "GFD BUILDING":                       {x:672,  y:669},
-  "MPC FEMP COOP. STORE":               {x:674,  y:736},
-  "GRADUATE SCHOOL ANNEX":              {x:1171, y:548},
-  "SUPPLY OFFICE":                      {x:1134, y:650},
-  "FOODNOOK":                           {x:1294, y:597},
-  "POWER HOUSE":                        {x:1581, y:365},
-  "SUPREME STUDENT COUNCIL OFFICE":     {x:1419, y:268},
-  "NEW MPC LIBRARY BUILDING A":         {x:1562, y:210},
-  "NEW MPC LIBRARY BUILDING B":         {x:1562, y:284},
-  "LIBRARY BUILDING / ATEX BUILDING":   {x:1648, y:370},
-};
-
-var graph = {
-  // MAIN ROAD
-  "GATE":    ["INT_A", "MIST_BLD_ENT", "NEW_ADM_ENT"],
-  "INT_A":   ["GATE", "INT_B", "TOP_A", "OLD_ADM_ENT", "GUARD_HOUSE_ENT"],
-  "INT_B":   ["INT_A", "ACADEMIC_ENT", "TOP_B", "FSM_ENT"],
-  "INT_C":   ["ACADEMIC_ENT", "INT_D", "TOP_C", "WAF_RAC_ENT", "CIVIL_ENT", "MECH_ENT", "SUPPLY_ENT"],
-  "INT_D":   ["INT_C", "INT_E", "FOODNOOK_ENT"],
-  "INT_E":   ["INT_D", "INT_MID", "MID_5TH", "TECH_ENT"],
-  "INT_MID": ["INT_E", "INT_F", "UP_MID", "POWER HOUSE"],
-  "INT_F":   ["INT_MID", "IT_ENT", "SCI_ENT", "TE_ENT", "BOT_F", "LIBRARY_ENT"],
-
-  // TOP ROAD
-  "TOP_A":   ["INT_A", "YLAGAN_ENT"],
-  "YLAGAN_ENT":   ["TOP_A", "TOP_B", "YLAGAN HALL"],
-  "YLAGAN HALL":  ["YLAGAN_ENT"],
-  "TOP_B":   ["YLAGAN_ENT", "TOP_C", "RODRIGUEZ BUILDING"],
-  "TOP_C":   ["TOP_B", "MIST_DORM_ENT", "WAF_RAC_ENT"],
-  "MIST_DORM_ENT":  ["TOP_C", "MIST-NCESTD DORM"],
-  "MIST-NCESTD DORM": ["MIST_DORM_ENT"],
-  "RODRIGUEZ BUILDING": ["TOP_B"],
-
-  // BOTTOM ROAD
-  "BOT_B":   ["FSM_ENT", "BOT_C", "WAF & FSM BUILDING", "GFD_ENT"],
-  "BOT_C":   ["BOT_B", "BOT_F", "GRAD_ENT"],
-  "BOT_F":   ["BOT_C", "INT_F", "TE_ENT"],
-  "WAF & FSM BUILDING": ["BOT_B"],
-
-  // LEFT SIDE
-  "MIST_BLD_ENT":  ["GATE", "MIST-NCESTD BUILDING"],
-  "MIST-NCESTD BUILDING": ["MIST_BLD_ENT"],
-  "NEW_ADM_ENT":   ["GATE", "NEW ADMIN BUILDING"],
-  "NEW ADMIN BUILDING": ["NEW_ADM_ENT"],
-  "OLD_ADM_ENT":   ["INT_A", "OLD ADMIN BUILDING"],
-  "OLD ADMIN BUILDING": ["OLD_ADM_ENT"],
-
-  // CENTER VERTICALS
-  "ACADEMIC_ENT":  ["INT_B", "INT_C", "ACADEMIC BUILDING"],
-  "ACADEMIC BUILDING": ["ACADEMIC_ENT"],
-  "WAF_RAC_ENT":   ["INT_C", "TOP_C", "WAF & RAC BUILDING"],
-  "WAF & RAC BUILDING": ["WAF_RAC_ENT"],
-  "FSM_ENT":       ["INT_B", "BOT_B", "FSM BUILDING"],
-  "FSM BUILDING":  ["FSM_ENT"],
-  "CIVIL_ENT":     ["INT_C", "GRAD_ENT", "CIVIL TECH BUILDING"],
-  "CIVIL TECH BUILDING": ["CIVIL_ENT"],
-  "GRAD_ENT":      ["CIVIL_ENT", "BOT_C", "GRADUATE SCHOOL BUILDING"],
-  "GRADUATE SCHOOL BUILDING": ["GRAD_ENT"],
-  "MECH_ENT":      ["INT_C", "MECHANICAL BUILDING", "GRADUATE SCHOOL ANNEX"],
-  "MECHANICAL BUILDING": ["MECH_ENT"],
-
-  // RIGHT CLUSTER
-  "TECH_ENT":      ["INT_E", "TECH BUILDING"],
-  "TECH BUILDING": ["TECH_ENT"],
-  "MID_5TH":       ["INT_E", "UP_5TH", "POWER ROOM", "SUPREME STUDENT COUNCIL OFFICE"],
-  "POWER ROOM":    ["MID_5TH"],
-  "UP_5TH":        ["MID_5TH", "MULTI-PURPOSE BUILDING"],
-  "MULTI-PURPOSE BUILDING": ["UP_5TH", "UP_MID"],
-  "UP_MID":        ["INT_MID", "AUTOMOTIVE BUILDING", "MULTI-PURPOSE BUILDING", "NEW MPC LIBRARY BUILDING A", "NEW MPC LIBRARY BUILDING B"],
-  "AUTOMOTIVE BUILDING": ["UP_MID"],
-
-  // RIGHT VERTICAL
-  "IT_ENT":        ["INT_F", "IT BUILDING"],
-  "IT BUILDING":   ["IT_ENT"],
-  "SCI_ENT":       ["INT_F", "SCIENCE BUILDING"],
-  "SCIENCE BUILDING": ["SCI_ENT"],
-  "TE_ENT":        ["INT_F", "BOT_F", "TE BUILDING"],
-  "TE BUILDING":   ["TE_ENT"],
-
-  // ADDITIONAL BUILDINGS
-  "GUARD_HOUSE_ENT":   ["INT_A", "GUARD HOUSE"],
-  "GUARD HOUSE":       ["GUARD_HOUSE_ENT"],
-
-  "GFD_ENT":           ["BOT_B", "GFD BUILDING", "MPC FEMP COOP. STORE"],
-  "GFD BUILDING":      ["GFD_ENT"],
-  "MPC FEMP COOP. STORE": ["GFD_ENT"],
-
-  "GRADUATE SCHOOL ANNEX": ["MECH_ENT", "SUPPLY_ENT"],
-
-  "SUPPLY_ENT":        ["INT_C", "SUPPLY OFFICE", "GRADUATE SCHOOL ANNEX"],
-  "SUPPLY OFFICE":     ["SUPPLY_ENT"],
-
-  "FOODNOOK_ENT":      ["INT_D", "FOODNOOK"],
-  "FOODNOOK":          ["FOODNOOK_ENT"],
-
-  "POWER HOUSE":       ["INT_MID"],
-
-  "SUPREME STUDENT COUNCIL OFFICE": ["MID_5TH"],
-
-  "NEW MPC LIBRARY BUILDING A": ["UP_MID"],
-  "NEW MPC LIBRARY BUILDING B": ["UP_MID"],
-
-  "LIBRARY_ENT":       ["INT_F", "LIBRARY BUILDING / ATEX BUILDING"],
-  "LIBRARY BUILDING / ATEX BUILDING": ["LIBRARY_ENT"],
-};
-
-// Fetch DB campus paths, replace hardcoded graph if data exists, then run URL-based routing
+// Load campus paths from DB only — no hardcoded fallback
 var _campusPathsReady = fetch('/api/campus-paths').then(function(r){ return r.json(); }).then(function(data) {
-  if (!data.nodes || !data.nodes.length || !data.edges || !data.edges.length) return;
+  if (!data.nodes || !data.nodes.length) return;
   var labelById = {};
-  var dbNodes = {};
   data.nodes.forEach(function(n) {
     labelById[n.id] = n.label;
-    dbNodes[n.label] = { x: n.x_pct / 100 * 1920, y: n.y_pct / 100 * 813 };
+    nodes[n.label] = { x: n.x_pct / 100 * 1920, y: n.y_pct / 100 * 813 };
   });
-  var dbGraph = {};
-  Object.keys(dbNodes).forEach(function(k) { dbGraph[k] = []; });
-  data.edges.forEach(function(e) {
+  Object.keys(nodes).forEach(function(k) { graph[k] = []; });
+  (data.edges || []).forEach(function(e) {
     var a = labelById[e.node_a], b = labelById[e.node_b];
-    if (a && b) { dbGraph[a].push(b); dbGraph[b].push(a); }
+    if (a && b) { graph[a].push(b); graph[b].push(a); }
   });
-  Object.assign(nodes, dbNodes);
-  graph = dbGraph;
 }).catch(function(){});
 
                             function drawPath(path){
@@ -943,21 +762,10 @@ var _campusPathsReady = fetch('/api/campus-paths').then(function(r){ return r.js
                               let closest = null; 
                               let minDist = Infinity; 
                               
-                              Object.keys(nodes).forEach(name => { 
-                                
-                                if(!name.includes("BUILDING")){
-                                  
-                                  const n = nodes[name]; 
-                                  
-                                  const dist = Math.sqrt( 
-                                    (n.x - x)**2 + 
-                                    (n.y - y)**2 
-                                  ); 
-                                    
-                                    if(dist < minDist){ 
-                                      minDist = dist; closest = name; 
-                                    } 
-                                  } 
+                              Object.keys(nodes).forEach(name => {
+                                  const n = nodes[name];
+                                  const dist = Math.sqrt((n.x - x)**2 + (n.y - y)**2);
+                                  if(dist < minDist){ minDist = dist; closest = name; }
                                 }); 
                                 
                                 return closest; 
@@ -967,22 +775,10 @@ var _campusPathsReady = fetch('/api/campus-paths').then(function(r){ return r.js
                                   const startPoint = { x:150, y:420 };
                                 let closest = null; 
                                 let minDist = Infinity; 
-                                Object.keys(nodes).forEach(name => { 
-                                  
-                                   if(!name.includes("BUILDING")){
-
-                                    const n = nodes[name]; 
-
-                                    const dist = Math.sqrt( 
-                                      (n.x - startPoint.x)**2 + 
-                                      (n.y - startPoint.y)**2 
-                                    ); 
-                                    
-                                    if(dist < minDist){ 
-                                      minDist = dist; 
-                                      closest = name; 
-                                    } 
-                                  } 
+                                Object.keys(nodes).forEach(name => {
+                                  const n = nodes[name];
+                                  const dist = Math.sqrt((n.x - startPoint.x)**2 + (n.y - startPoint.y)**2);
+                                  if(dist < minDist){ minDist = dist; closest = name; }
                                 }); 
                                 
                                 return closest; 
@@ -1070,26 +866,12 @@ function friendlyDirections(path, destination){
   return steps;
 }
 
-var _PIN_TO_GRAPH = {
-  "CIVIL TECHNOLOGY BUILDING":              "CIVIL TECH BUILDING",
-  "INDUSTRIAL TECHNOLOGY BUILDING":         "IT BUILDING",
-  "MECHANICAL / ELECTRONICS BUILDING":      "MECHANICAL BUILDING",
-  "FSM & WAFT BUILDING":                    "WAF & FSM BUILDING",
-  "MIST-NCTESD DORMITORY":                  "MIST-NCESTD DORM",
-  "MIST-NCTESD BUILDING":                   "MIST-NCESTD BUILDING",
-  "TEACHER EDUCATION BUILDING":             "TE BUILDING",
-  "AUTOMOTIVE TECHNOLOGY BUILDING":         "AUTOMOTIVE BUILDING",
-  "MULTI-PURPOSE / MULTI-MEDIA BUILDING":   "MULTI-PURPOSE BUILDING",
-  "TECH BUILDING":                          "TECH BUILDING",
-};
-
 function showDirections(destination){
   const start = getNearestNode();
   const destUpper = destination.toUpperCase();
   const target = nodes[destination] ? destination
                : nodes[destUpper] ? destUpper
-               : (_PIN_TO_GRAPH[destUpper] && nodes[_PIN_TO_GRAPH[destUpper]]) ? _PIN_TO_GRAPH[destUpper]
-               : destUpper;
+               : (Object.keys(nodes).find(k => k.toUpperCase() === destUpper) || destUpper);
   const path = findPath(start, target);
 
   const pinEl = document.querySelector(`.building[data-name="${CSS.escape(destination)}"]`);
