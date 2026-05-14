@@ -718,7 +718,7 @@ function _nearestNode(nodes, xPct, yPct) {
 }
 
 function drawFloorRoute(roomBtn) {
-  if (!_floorGraph) return;
+  if (!_floorGraph || !_lb) return;
   var nodes = _floorGraph.nodes, adj = _floorGraph.adj;
 
   // Room center: style.left/top are wrapper-%, convert back to image-% for node matching
