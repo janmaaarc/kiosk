@@ -195,55 +195,54 @@ def _floor_plan(building_name: str, floor_count: int = 3, base_url: str = "",
     except (ValueError, TypeError):
         floor_number = 1
 
-    if custom_floors is not None:
-        floors = custom_floors
-    else:
-        with db_connection() as conn:
-            bf_rows = conn.execute(
-                "SELECT floor_number, floor_label, floor_image FROM building_floors"
-                " WHERE building = ? ORDER BY floor_number",
+    with db_connection() as conn:
+        bf_rows = conn.execute(
+            "SELECT floor_number, floor_label, floor_image FROM building_floors"
+            " WHERE building = ? ORDER BY floor_number",
+            (building_name,),
+        ).fetchall()
+
+        if bf_rows:
+            rm_rows = conn.execute(
+                "SELECT room, description, pos_left, pos_top, pos_width,"
+                " pos_height, office_key, floor, room_color FROM rooms"
+                " WHERE LOWER(building)=LOWER(?)"
+                " ORDER BY floor, pos_top, pos_left",
                 (building_name,),
             ).fetchall()
 
-            if bf_rows:
-                rm_rows = conn.execute(
-                    "SELECT room, description, pos_left, pos_top, pos_width,"
-                    " pos_height, office_key, floor, room_color FROM rooms"
-                    " WHERE LOWER(building)=LOWER(?)"
-                    " ORDER BY floor, pos_top, pos_left",
-                    (building_name,),
-                ).fetchall()
+            rooms_by_floor: dict = {}
+            for rm in rm_rows:
+                rooms_by_floor.setdefault(str(rm["floor"]), []).append({
+                    "name": rm["room"],
+                    "desc": rm["description"] or "",
+                    "left": rm["pos_left"],
+                    "top": rm["pos_top"],
+                    "width": rm["pos_width"],
+                    "height": rm["pos_height"],
+                    "office_key": rm["office_key"] or "",
+                    "color": rm["room_color"] or "",
+                })
 
-                rooms_by_floor: dict = {}
-                for rm in rm_rows:
-                    rooms_by_floor.setdefault(str(rm["floor"]), []).append({
-                        "name": rm["room"],
-                        "desc": rm["description"] or "",
-                        "left": rm["pos_left"],
-                        "top": rm["pos_top"],
-                        "width": rm["pos_width"],
-                        "height": rm["pos_height"],
-                        "office_key": rm["office_key"] or "",
-                        "color": rm["room_color"] or "",
-                    })
-
-                floors = {
-                    r["floor_number"]: {
-                        "label": r["floor_label"],
-                        "image": r["floor_image"],
-                        "rooms": rooms_by_floor.get(str(r["floor_number"]), []),
-                    }
-                    for r in bf_rows
+            floors = {
+                r["floor_number"]: {
+                    "label": r["floor_label"],
+                    "image": r["floor_image"],
+                    "rooms": rooms_by_floor.get(str(r["floor_number"]), []),
                 }
-            else:
-                floors = {
-                    n: {
-                        "label": "Ground Floor" if n == 1 else f"Floor {n}",
-                        "image": None,
-                        "rooms": [],
-                    }
-                    for n in range(1, floor_count + 1)
+                for r in bf_rows
+            }
+        elif custom_floors is not None:
+            floors = custom_floors
+        else:
+            floors = {
+                n: {
+                    "label": "Ground Floor" if n == 1 else f"Floor {n}",
+                    "image": None,
+                    "rooms": [],
                 }
+                for n in range(1, floor_count + 1)
+            }
 
     if floor_number not in floors:
         floor_number = min(floors)
