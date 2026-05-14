@@ -1,7 +1,7 @@
 import json
 import socket
 
-from flask import Blueprint, Response, render_template, request
+from flask import Blueprint, Response, abort, render_template, request
 
 from kiosk_app.db import db_connection
 
@@ -730,6 +730,11 @@ def graduate_school_building():
     return _floor_plan("Graduate School Building", floor_count=2, base_url="graduate_school_building")
 
 
+@campus_bp.route("/graduate_school_annex")
+def graduate_school_annex():
+    return _floor_plan("Graduate School Annex", floor_count=2, base_url="graduate_school_annex")
+
+
 @campus_bp.route("/mechanical_building")
 def mechanical_building():
     return _floor_plan("Mechanical / Electronics Building", floor_count=3, base_url="mechanical_building")
@@ -753,3 +758,28 @@ def it_building():
 @campus_bp.route("/engineering-floor1")
 def engineering_floor1():
     return _floor_plan("Engineering Building", floor_count=1, base_url="engineering-floor1")
+
+
+@campus_bp.route("/building/<slug>")
+def dynamic_building(slug: str):
+    """Serves any building that has floor data in the DB but no hardcoded route."""
+    with db_connection() as conn:
+        row = conn.execute(
+            "SELECT page_url, name FROM campus_pins WHERE page_url = ?",
+            (f"/building/{slug}",),
+        ).fetchone()
+        if row is None:
+            row = conn.execute(
+                "SELECT name FROM buildings WHERE LOWER(REPLACE(name,' ','_')) = ?",
+                (slug.lower(),),
+            ).fetchone()
+        if row is None:
+            abort(404)
+        building_name = row["name"]
+        has_floors = conn.execute(
+            "SELECT 1 FROM building_floors WHERE building = ? LIMIT 1",
+            (building_name,),
+        ).fetchone()
+        if not has_floors:
+            abort(404)
+    return _floor_plan(building_name, base_url=f"building/{slug}")

@@ -587,17 +587,25 @@ def building_floors_list():
 @login_required
 def building_floor_add():
     if request.method == "POST":
+        building = request.form["building"]
         with db_connection() as conn:
             conn.execute(
                 """INSERT OR REPLACE INTO building_floors
                    (building, floor_number, floor_label, floor_image)
                    VALUES (?, ?, ?, ?)""",
                 (
-                    request.form["building"],
+                    building,
                     int(request.form["floor_number"]),
                     request.form["floor_label"],
                     request.form.get("floor_image", ""),
                 ),
+            )
+            slug = _re.sub(r'[^a-z0-9_-]', '_',
+                           building.lower().replace("&", "and").replace(" ", "_").replace("/", "_")).strip('_')
+            conn.execute(
+                """UPDATE campus_pins SET page_url = ?
+                   WHERE UPPER(name) = UPPER(?) AND (page_url IS NULL OR page_url = '')""",
+                (f"/building/{slug}", building),
             )
             conn.commit()
         flash("Floor saved.", "success")
