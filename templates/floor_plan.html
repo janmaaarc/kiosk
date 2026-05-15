@@ -608,6 +608,7 @@ function _applyHighlight() {
     if (b.dataset.name.toLowerCase() === _highlightLoc.toLowerCase()) {
       b.classList.add('highlighted');
       showInfo(b);
+      drawFloorRoute(b);
       toast(b.dataset.name, 'success', 2000);
     }
   });
@@ -681,6 +682,11 @@ var _floorGraph = null; // { nodes: [{id,label,x_pct,y_pct}], adj: {id:[id,...]}
         adj[e.to_id].push(e.from_id);
       });
       _floorGraph = { nodes: data.nodes, adj: adj };
+      // If highlight already applied but route couldn't draw (graph wasn't ready), draw now
+      if (_highlightApplied) {
+        var highlighted = document.querySelector('.room-label.highlighted');
+        if (highlighted) drawFloorRoute(highlighted);
+      }
     })
     .catch(function(){});
 })();
