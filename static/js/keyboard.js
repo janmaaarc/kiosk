@@ -115,8 +115,59 @@
     if (shift) shift.style.background = capsOn ? '#7b2d2d' : '#333';
   }
 
-  function show(input) { target = input; kbd.style.display = 'block'; }
-  function hide() { kbd.style.display = 'none'; target = null; }
+  // Floating toggle tab shown when keyboard is hidden but an input is active
+  const toggleTab = document.createElement('button');
+  toggleTab.id = 'vkbd-toggle';
+  toggleTab.textContent = '⌨';
+  toggleTab.style.cssText = `
+    display:none;position:fixed;bottom:16px;right:16px;
+    background:#7b2d2d;color:#fff;border:none;border-radius:50%;
+    width:56px;height:56px;font-size:24px;cursor:pointer;
+    z-index:99998;box-shadow:0 4px 16px rgba(0,0,0,0.35);
+    align-items:center;justify-content:center;
+    user-select:none;-webkit-user-select:none;
+  `;
+
+  function showToggleTab() { toggleTab.style.display = 'flex'; }
+  function hideToggleTab() { toggleTab.style.display = 'none'; }
+
+  function show(input) {
+    target = input;
+    kbd.style.display = 'block';
+    hideToggleTab();
+  }
+
+  function hide() {
+    var saved = target;
+    var savedValue = saved ? saved.value : null;
+    kbd.style.display = 'none';
+    target = null;
+    if (saved && savedValue !== null) {
+      requestAnimationFrame(function() {
+        if (saved.value !== savedValue) {
+          saved.value = savedValue;
+          saved.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      });
+    }
+    // Show toggle tab only if an input is still focused
+    if (document.activeElement && document.activeElement.tagName === 'INPUT') {
+      showToggleTab();
+    }
+  }
+
+  let _toggleTarget = null;
+  toggleTab.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    _toggleTarget = document.activeElement;
+  });
+  toggleTab.addEventListener('click', function() {
+    hideToggleTab();
+    if (_toggleTarget && _toggleTarget.tagName === 'INPUT') {
+      show(_toggleTarget);
+      _toggleTarget = null;
+    }
+  });
 
   // RFID scan interceptor: strip scanner keystrokes from focused text inputs.
   // RFID scanners fire digits at < 50ms/char. Humans type at > 150ms/char.
@@ -162,6 +213,7 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     document.body.appendChild(kbd);
+    document.body.appendChild(toggleTab);
     applySize();
 
     document.addEventListener('focusin', e => {
@@ -182,7 +234,11 @@
     document.addEventListener('mousedown', e => {
       const isInput = e.target.tagName === 'INPUT' &&
         ['text','search','password','email','number',''].includes(e.target.type || '');
-      if (!kbd.contains(e.target) && !isInput) hide();
+      const isToggle = e.target === toggleTab;
+      if (!kbd.contains(e.target) && !isInput && !isToggle) {
+        hide();
+        hideToggleTab();
+      }
     });
   });
 })();

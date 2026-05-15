@@ -147,16 +147,15 @@ body {
   pointer-events:none;
 }
 .top-bar .room-search .suggestions {
-  position:absolute;
-  top:calc(100% + 4px);
-  left:0; right:0;
+  position:fixed;
   background:#fff;
   border-radius:14px;
   box-shadow:0 12px 32px rgba(0,0,0,0.18);
   overflow:hidden;
   z-index:40;
-  max-height:300px;
   overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;
   display:none;
 }
 .top-bar .room-search .suggestions.visible { display:block; }
@@ -564,6 +563,14 @@ const ALL_ROOMS = {{ all_rooms_index | default([]) | tojson }};
       box.appendChild(btn);
     });
     box.classList.add('visible');
+    var rect = input.getBoundingClientRect();
+    var vkbd = document.getElementById('vkbd');
+    var kbdTop = (vkbd && vkbd.style.display !== 'none') ? vkbd.getBoundingClientRect().top : window.innerHeight;
+    var spaceBelow = kbdTop - rect.bottom - 12;
+    box.style.top = (rect.bottom + 4) + 'px';
+    box.style.left = rect.left + 'px';
+    box.style.width = rect.width + 'px';
+    box.style.maxHeight = Math.max(40, spaceBelow) + 'px';
   }
 
   input.addEventListener('input', () => {

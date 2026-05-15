@@ -80,9 +80,7 @@
       }
 
       #searchSuggestions {
-        position: absolute;
-        top: calc(100% + 8px);
-        left: 0;
+        position: fixed;
         width: 320px;
         background: rgba(255,255,255,0.97);
         border-radius: 16px;
@@ -90,8 +88,9 @@
         overflow: hidden;
         display: none;
         z-index: 3100;
-        max-height: 360px;
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
       }
       #searchSuggestions.open { display: block; }
       .search-item {
@@ -1226,6 +1225,13 @@ if(new URLSearchParams(window.location.search).get("mobile") === "1"){
     });
 
     sugBox.classList.add('open');
+    var rect = input.getBoundingClientRect();
+    var vkbd = document.getElementById('vkbd');
+    var kbdTop = (vkbd && vkbd.style.display !== 'none') ? vkbd.getBoundingClientRect().top : window.innerHeight;
+    var spaceBelow = kbdTop - rect.bottom - 12;
+    sugBox.style.top = (rect.bottom + 8) + 'px';
+    sugBox.style.left = rect.left + 'px';
+    sugBox.style.maxHeight = Math.max(40, spaceBelow) + 'px';
   }
 
   function openSuggestions(query) {
