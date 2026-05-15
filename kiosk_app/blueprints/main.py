@@ -129,22 +129,6 @@ def about():
                            officials_image=officials_image)
 
 
-@main_bp.route("/search", methods=["GET", "POST"])
-def search():
-    result = None
-
-    if request.method == "POST":
-        room_number = request.form["room"]
-        safe_prefix = room_number.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
-
-        with db_connection() as conn:
-            result = conn.execute(
-                "SELECT * FROM rooms WHERE room LIKE ? ESCAPE '\\'",
-                (safe_prefix + "%",),
-            ).fetchone()
-
-    return render_template("search.html", result=result)
-
 
 @main_bp.route("/api/search")
 @limiter.limit("60 per minute")
@@ -159,10 +143,21 @@ def api_search():
             "SELECT room, building, floor FROM rooms WHERE room LIKE ? ESCAPE '\\' LIMIT 5",
             (pattern,),
         ).fetchall():
+            building = row["building"] or ""
+            floor = row["floor"] or 1
+            pin = conn.execute(
+                "SELECT page_url FROM campus_pins WHERE LOWER(name) LIKE LOWER(?)",
+                ("%" + building + "%",),
+            ).fetchone()
+            page_url = pin["page_url"] if pin else None
+            if page_url:
+                url = page_url + "?floor=" + str(floor) + "&location=" + quote(row["room"], safe="")
+            else:
+                url = None
             results.append({"type": "room", "name": row["room"],
-                            "building": row["building"] or "",
-                            "floor": row["floor"] or 1,
-                            "url": "/search?room=" + quote(row["room"], safe="")})
+                            "building": building,
+                            "floor": floor,
+                            "url": url})
 
         raw_role = session.get("user_role", "visitor")
         role = raw_role if raw_role in _VALID_ROLES else "visitor"
