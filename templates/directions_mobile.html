@@ -237,9 +237,11 @@ html, body { width:100%; height:100%; background:#1a0a0a; overflow:hidden; font-
 </div>
 
 <script>
-var p    = new URLSearchParams(window.location.search);
-var DEST = (p.get("location") || "").trim().toUpperCase();
-var IMG  = p.get("img") || "";
+var p        = new URLSearchParams(window.location.search);
+var DEST     = (p.get("location") || "").trim().toUpperCase();
+var IMG      = p.get("img") || "";
+var _PENDING_ROOM  = (p.get("room") || "").trim();
+var _PENDING_FLOOR = p.get("floor") ? parseInt(p.get("floor"), 10) : null;
 
 // Orientation prompt
 var _landscapeDismissed = false;
@@ -322,17 +324,24 @@ function buildFloorTabs() {
   for (var i = 0; i < floors.length; i++) {
     (function(idx) {
       var btn = document.createElement("button");
-      btn.className = "floor-btn" + (idx === 0 ? " active" : "");
+      btn.className = "floor-btn";
       btn.textContent = floors[idx].floor_label || ("Floor " + floors[idx].floor_number);
       btn.onclick = function() { showFloor(idx); };
       tabsEl.appendChild(btn);
     })(i);
   }
-  showFloor(0);
+  var startIdx = 0;
+  if (_PENDING_FLOOR !== null) {
+    for (var k = 0; k < floors.length; k++) {
+      if (floors[k].floor_number === _PENDING_FLOOR) { startIdx = k; break; }
+    }
+  }
+  showFloor(startIdx);
 }
 
 var _currentEntrance = {x:50, y:96, hY:50};
 var _floorGraph = null;
+var _activeFloorIdx = 0;
 
 function dijkstraFloor(nodes, adj, start, goal) {
   if (start === goal) return [start];
@@ -367,6 +376,7 @@ function dijkstraFloor(nodes, adj, start, goal) {
 }
 
 function showFloor(idx) {
+  _activeFloorIdx = idx;
   var floors = _dbFloors;
   if (!floors || !floors[idx] || !floors[idx].floor_image_url) return;
 
@@ -378,6 +388,8 @@ function showFloor(idx) {
   while (overlays.firstChild) overlays.removeChild(overlays.firstChild);
   document.getElementById("route-path").setAttribute("d", "");
   document.getElementById("route-svg").style.display = "none";
+  var oldBtn = document.getElementById('mobile-full-route-btn');
+  if (oldBtn) oldBtn.parentNode.removeChild(oldBtn);
 
   var btns = document.querySelectorAll(".floor-btn");
   for (var j = 0; j < btns.length; j++) {
@@ -395,6 +407,8 @@ function showFloor(idx) {
       data.nodes.forEach(function(n){ adj[n.id]=[]; });
       data.edges.forEach(function(e){ adj[e.from_id].push(e.to_id); adj[e.to_id].push(e.from_id); });
       _floorGraph = { nodes: data.nodes, adj: adj };
+      var activeEl = document.querySelector('.room-lbl.active');
+      if (activeEl && activeEl._room) selectRoom(activeEl, activeEl._room);
     })
     .catch(function(){});
 
@@ -418,9 +432,23 @@ function renderRooms(rooms) {
       div.style.width  = room.width  + "%";
       div.style.height = room.height + "%";
       div.textContent  = room.name;
+      div.dataset.name = room.name;
+      div._room = room;
       div.onclick = function() { selectRoom(div, room); };
       overlays.appendChild(div);
     })(rooms[i]);
+  }
+
+  if (_PENDING_ROOM) {
+    var pendingLow = _PENDING_ROOM.toLowerCase();
+    var allDivs = overlays.querySelectorAll('.room-lbl');
+    for (var pi = 0; pi < allDivs.length; pi++) {
+      if (allDivs[pi]._room && allDivs[pi]._room.name.toLowerCase() === pendingLow) {
+        selectRoom(allDivs[pi], allDivs[pi]._room);
+        break;
+      }
+    }
+    _PENDING_ROOM = '';
   }
 }
 
@@ -465,6 +493,23 @@ function selectRoom(el, room) {
 
   document.getElementById("route-path").setAttribute("d", d);
   document.getElementById("route-svg").style.display = "block";
+
+  var existing = document.getElementById('mobile-full-route-btn');
+  if (existing) existing.parentNode.removeChild(existing);
+  var btn = document.createElement('button');
+  btn.id = 'mobile-full-route-btn';
+  btn.textContent = '⬡ SHOW FULL ROUTE';
+  btn.style.cssText = 'position:absolute;bottom:8px;left:50%;transform:translateX(-50%);' +
+    'background:#7b2d2d;color:#fff;border:none;border-radius:20px;' +
+    'padding:7px 16px;font-size:11px;font-weight:900;letter-spacing:1.5px;' +
+    'cursor:pointer;white-space:nowrap;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.3);';
+  var floorNum = (_dbFloors && _dbFloors[_activeFloorIdx]) ? _dbFloors[_activeFloorIdx].floor_number : null;
+  btn.onclick = function() {
+    var floorP = floorNum ? '&room_floor=' + floorNum : '';
+    var loc = encodeURIComponent(DEST_TITLE + ' room ' + room.name);
+    window.location.href = '/campus_map?location=' + loc + floorP + '&mobile=1';
+  };
+  document.getElementById('plan-wrap').appendChild(btn);
 }
 </script>
 

@@ -964,13 +964,21 @@ function showDirections(destination){
   _directionsActive = true;
 
   if (_pendingRoom) {
-    const buildingEl = document.querySelector(`.building[data-name="${CSS.escape(destination)}"]`);
-    const page = buildingEl && buildingEl.dataset.page;
-    if (page) {
+    const isMobile = new URLSearchParams(window.location.search).get('mobile') === '1';
+    if (isMobile) {
       setTimeout(() => {
-        const floorParam = _pendingFloor ? `floor=${_pendingFloor}&` : '';
-        window.location.href = page + '?' + floorParam + 'location=' + encodeURIComponent(_pendingRoom);
+        const floorParam = _pendingFloor !== null ? `&floor=${_pendingFloor}` : '';
+        window.location.href = '/directions?location=' + encodeURIComponent(destination.toLowerCase().split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ')) + '&room=' + encodeURIComponent(_pendingRoom) + floorParam;
       }, 6000);
+    } else {
+      const buildingEl = document.querySelector(`.building[data-name="${CSS.escape(destination)}"]`);
+      const page = buildingEl && buildingEl.dataset.page;
+      if (page) {
+        setTimeout(() => {
+          const floorParam = _pendingFloor !== null ? `floor=${_pendingFloor}&` : '';
+          window.location.href = page + '?' + floorParam + 'location=' + encodeURIComponent(_pendingRoom);
+        }, 6000);
+      }
     }
   }
 }
