@@ -138,19 +138,8 @@
   }
 
   function hide() {
-    var saved = target;
-    var savedValue = saved ? saved.value : null;
     kbd.style.display = 'none';
     target = null;
-    if (saved && savedValue !== null) {
-      requestAnimationFrame(function() {
-        if (saved.value !== savedValue) {
-          saved.value = savedValue;
-          saved.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-      });
-    }
-    // Show toggle tab only if an input is still focused
     if (document.activeElement && document.activeElement.tagName === 'INPUT') {
       showToggleTab();
     }

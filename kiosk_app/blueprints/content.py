@@ -24,6 +24,8 @@ from kiosk_app.extensions import limiter
 
 content_bp = Blueprint("content", __name__)
 
+_STATIC_ROOT = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "static")
+
 _DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT"]
 _TIMES = ["7:00","8:00","9:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00"]
 
@@ -1683,16 +1685,15 @@ def api_building_floors():
             " WHERE building=? ORDER BY floor_number",
             (building,),
         ).fetchall()
-    import posixpath as _pp, os as _os, time as _time
-    _static_root = _os.path.join(_os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))), "static")
+    import posixpath as _pp, time as _time
     def _safe_img(img):
         if not img:
             return None
         clean = _pp.normpath(img.replace("\\", "/")).lstrip("/.")
         if not clean or clean.startswith(".."):
             return None
-        abs_path = _os.path.join(_static_root, clean)
-        mtime = int(_os.path.getmtime(abs_path)) if _os.path.exists(abs_path) else int(_time.time())
+        abs_path = os.path.join(_STATIC_ROOT, clean)
+        mtime = int(os.path.getmtime(abs_path)) if os.path.exists(abs_path) else int(_time.time())
         return "/static/" + clean + "?v=" + str(mtime)
 
     return jsonify([
