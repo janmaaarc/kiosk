@@ -301,10 +301,7 @@ for (var i=0;i<steps.length;i++){var li=document.createElement("li");li.textCont
 function toTitleCase(s) {
   return s.split(' ').map(function(w){ return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(); }).join(' ');
 }
-var _BLDG_ALIASES = {
-  "INDUSTRIAL TECHNOLOGY BUILDING": "IT Building",
-};
-var DEST_TITLE = _BLDG_ALIASES[DEST] || toTitleCase(DEST);
+var DEST_TITLE = toTitleCase(DEST);
 
 var _dbFloors = null;
 
