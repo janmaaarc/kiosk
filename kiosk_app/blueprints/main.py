@@ -146,7 +146,6 @@ def api_search():
             building = row["building"] or ""
             floor = row["floor"] or 1
             _BUILDING_ALIASES = {
-                "it building": "industrial technology building",
                 "electronics technology": "mechanical / electronics building",
                 "technology": "industrial technology building",
             }
