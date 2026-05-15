@@ -542,12 +542,10 @@ def building_edit(building_id: int):
             if not name:
                 flash("Building name is required.", "error")
                 return redirect(url_for("content.building_edit", building_id=building_id))
-            image_raw = request.form.get("image", "").strip()
-            image = image_raw if image_raw and _SAFE_IMAGE_PATH_RE.fullmatch(image_raw) else None
             try:
                 conn.execute(
-                    "UPDATE buildings SET name = ?, image = ? WHERE id = ?",
-                    (name, image, building_id)
+                    "UPDATE buildings SET name = ? WHERE id = ?",
+                    (name, building_id)
                 )
                 conn.commit()
             except Exception:

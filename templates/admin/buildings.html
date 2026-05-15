@@ -8,19 +8,11 @@
 
 <table>
   <thead>
-    <tr><th>Preview</th><th>Name</th><th>Actions</th></tr>
+    <tr><th>Name</th><th>Actions</th></tr>
   </thead>
   <tbody>
     {% for b in buildings %}
     <tr>
-      <td style="width:80px;">
-        {% if b['image'] %}
-        <img src="{{ url_for('static', filename=b['image']) }}"
-             style="width:72px;height:48px;object-fit:cover;border-radius:4px;border:1px solid #ddd;">
-        {% else %}
-        <div style="width:72px;height:48px;border-radius:4px;border:1px dashed #ccc;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:10px;">No img</div>
-        {% endif %}
-      </td>
       <td><strong>{{ b['name'] }}</strong></td>
       <td>
         <a href="{{ url_for('content.building_edit', building_id=b['id']) }}" class="btn btn-secondary btn-sm">Edit</a>
@@ -32,7 +24,7 @@
       </td>
     </tr>
     {% else %}
-    <tr><td colspan="2" style="color:#888;text-align:center;padding:24px;">No buildings yet.</td></tr>
+    <tr><td colspan="2" style="color:#888;text-align:center;padding:24px;">No buildings yet. Add one above.</td></tr>
     {% endfor %}
   </tbody>
 </table>

@@ -593,8 +593,10 @@ const ALL_ROOMS = {{ all_rooms_index | default([]) | tojson }};
 })();
 
 const _highlightLoc = new URLSearchParams(window.location.search).get('location');
+let _highlightApplied = false;
 function _applyHighlight() {
-  if (!_highlightLoc) return;
+  if (!_highlightLoc || _highlightApplied) return;
+  _highlightApplied = true;
   document.querySelectorAll('.room-label').forEach(b => {
     if (b.dataset.name.toLowerCase() === _highlightLoc.toLowerCase()) {
       b.classList.add('highlighted');
