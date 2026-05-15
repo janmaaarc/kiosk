@@ -771,18 +771,19 @@ var _campusPathsReady = fetch('/api/campus-paths').then(function(r){ return r.js
                                 return closest; 
                               } 
                               
-                                function getNearestNode(){ 
+                                function getNearestNode(){
                                   const startPoint = { x:150, y:420 };
-                                let closest = null; 
-                                let minDist = Infinity; 
+                                let closest = null;
+                                let minDist = Infinity;
                                 Object.keys(nodes).forEach(name => {
+                                  if (!graph[name] || !graph[name].length) return;
                                   const n = nodes[name];
                                   const dist = Math.sqrt((n.x - startPoint.x)**2 + (n.y - startPoint.y)**2);
                                   if(dist < minDist){ minDist = dist; closest = name; }
-                                }); 
-                                
-                                return closest; 
-                              } 
+                                });
+
+                                return closest;
+                              }
 
 function updateYouHere(x, y){
                                 const pin = document.getElementById("youHerePin");
@@ -869,6 +870,7 @@ function friendlyDirections(path, destination){
 function getNearestNodeToPoint(px, py) {
   let closest = null, minDist = Infinity;
   Object.keys(nodes).forEach(function(name) {
+    if (!graph[name] || !graph[name].length) return;
     const n = nodes[name];
     const d = Math.sqrt((n.x - px) ** 2 + (n.y - py) ** 2);
     if (d < minDist) { minDist = d; closest = name; }
