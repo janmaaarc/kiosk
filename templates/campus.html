@@ -719,6 +719,11 @@ var _campusPathsReady = fetch('/api/campus-paths').then(function(r){ return r.js
     var a = keyById[e.node_a], b = keyById[e.node_b];
     if (a && b) { graph[a].push(b); graph[b].push(a); }
   });
+  // Place You Are Here pin at ENTRANCE node
+  var entranceKey = Object.keys(nodes).find(function(k) { return k.toUpperCase() === 'ENTRANCE'; });
+  if (entranceKey && nodes[entranceKey]) {
+    updateYouHere(nodes[entranceKey].x, nodes[entranceKey].y);
+  }
 }).catch(function(){});
 
                             function drawPath(path){
@@ -1282,7 +1287,7 @@ if(new URLSearchParams(window.location.search).get("mobile") === "1"){
 })();
 
 
-updateYouHere(80, 395);
+updateYouHere(297, 430); // fallback until DB loads
 
 
 // Load campus pins from DB and render as clickable overlays
