@@ -1683,14 +1683,17 @@ def api_building_floors():
             " WHERE building=? ORDER BY floor_number",
             (building,),
         ).fetchall()
-    import posixpath as _pp
+    import posixpath as _pp, os as _os, time as _time
+    _static_root = _os.path.join(_os.path.dirname(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))), "static")
     def _safe_img(img):
         if not img:
             return None
         clean = _pp.normpath(img.replace("\\", "/")).lstrip("/.")
         if not clean or clean.startswith(".."):
             return None
-        return "/static/" + clean
+        abs_path = _os.path.join(_static_root, clean)
+        mtime = int(_os.path.getmtime(abs_path)) if _os.path.exists(abs_path) else int(_time.time())
+        return "/static/" + clean + "?v=" + str(mtime)
 
     return jsonify([
         {
