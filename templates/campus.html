@@ -984,15 +984,7 @@ document.addEventListener("click", (e) => {
 });
 let _directionsActive = false;
 
-const BUILDING_PHOTOS = {
-  "ACADEMIC BUILDING":         "/static/images/building/academic_building.JPG",
-  "IT BUILDING":               "/static/images/building/it_building.JPG",
-  "TECH BUILDING":             "/static/images/building/tech_building.JPG",
-  "NEW ADMIN BUILDING":        "/static/images/building/admin_building.JPG",
-  "OLD ADMIN BUILDING":        "/static/images/building/admin_building.JPG",
-  "CIVIL TECHNOLOGY BUILDING": "/static/images/building/civil_tech_building.JPG",
-  "TEACHER EDUCATION BUILDING":"/static/images/building/te_building.jpg",
-};
+const BUILDING_PHOTOS = {}; // populated from /api/campus-pins (photo field)
 let _pendingUrl = null;
 function openBuildingPanel(name, pageUrl) {
   const hasFloorPlan = !!pageUrl;
@@ -1277,6 +1269,12 @@ updateYouHere(80, 395);
   fetch('/api/campus-pins')
     .then(function(r){ return r.json(); })
     .then(function(pins) {
+      pins.forEach(function(pin) {
+        if (pin.photo) {
+          var src = pin.photo.startsWith('/') ? pin.photo : '/static/' + pin.photo;
+          BUILDING_PHOTOS[pin.name.toUpperCase()] = src;
+        }
+      });
       if (typeof window._registerPinsForSearch === 'function') {
         window._registerPinsForSearch(pins);
       }

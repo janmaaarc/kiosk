@@ -1409,7 +1409,12 @@ def campus_pin_delete(pin_id: int):
 def api_campus_pins():
     with db_connection() as conn:
         pins = conn.execute(
-            "SELECT id, number, name, left_pct, top_pct, page_url, directions_text FROM campus_pins ORDER BY CAST(number AS INTEGER), number, id"
+            """SELECT cp.id, cp.number, cp.name, cp.left_pct, cp.top_pct,
+                      cp.page_url, cp.directions_text,
+                      COALESCE(cp.photo, b.image) AS photo
+               FROM campus_pins cp
+               LEFT JOIN buildings b ON LOWER(b.name) = LOWER(cp.name)
+               ORDER BY CAST(cp.number AS INTEGER), cp.number, cp.id"""
         ).fetchall()
     return jsonify([dict(p) for p in pins])
 

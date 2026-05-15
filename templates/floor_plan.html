@@ -592,11 +592,11 @@ const ALL_ROOMS = {{ all_rooms_index | default([]) | tojson }};
   });
 })();
 
-const params = new URLSearchParams(window.location.search);
-const loc = params.get('location');
-if (loc) {
+const _highlightLoc = new URLSearchParams(window.location.search).get('location');
+function _applyHighlight() {
+  if (!_highlightLoc) return;
   document.querySelectorAll('.room-label').forEach(b => {
-    if (b.dataset.name.toLowerCase() === loc.toLowerCase()) {
+    if (b.dataset.name.toLowerCase() === _highlightLoc.toLowerCase()) {
       b.classList.add('highlighted');
       showInfo(b);
       toast(b.dataset.name, 'success', 2000);
@@ -632,6 +632,7 @@ function repositionRoomLabels() {
     btn.style.width  = (w / 100 * rw) / cw * 100 + '%';
     btn.style.height = (h / 100 * rh) / ch * 100 + '%';
   });
+  _applyHighlight();
 }
 
 // Convert image-% coordinate to wrapper-% (for SVG viewBox 0-100)
