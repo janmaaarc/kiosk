@@ -145,10 +145,21 @@ def api_search():
         ).fetchall():
             building = row["building"] or ""
             floor = row["floor"] or 1
+            _BUILDING_ALIASES = {
+                "it building": "industrial technology building",
+                "electronics technology": "mechanical / electronics building",
+                "technology": "industrial technology building",
+            }
+            lookup = _BUILDING_ALIASES.get(building.lower(), building)
             pin = conn.execute(
-                "SELECT page_url FROM campus_pins WHERE LOWER(name) LIKE LOWER(?)",
-                ("%" + building + "%",),
+                "SELECT page_url FROM campus_pins WHERE LOWER(name) LIKE LOWER(?) AND page_url IS NOT NULL",
+                ("%" + lookup + "%",),
             ).fetchone()
+            if not pin:
+                pin = conn.execute(
+                    "SELECT page_url FROM campus_pins WHERE LOWER(?) LIKE '%' || LOWER(name) || '%' AND page_url IS NOT NULL",
+                    (lookup,),
+                ).fetchone()
             page_url = pin["page_url"] if pin else None
             if page_url:
                 url = page_url + "?floor=" + str(floor) + "&location=" + quote(row["room"], safe="")
