@@ -866,12 +866,35 @@ function friendlyDirections(path, destination){
   return steps;
 }
 
+function getNearestNodeToPoint(px, py) {
+  let closest = null, minDist = Infinity;
+  Object.keys(nodes).forEach(function(name) {
+    const n = nodes[name];
+    const d = Math.sqrt((n.x - px) ** 2 + (n.y - py) ** 2);
+    if (d < minDist) { minDist = d; closest = name; }
+  });
+  return closest;
+}
+
 function showDirections(destination){
   const start = getNearestNode();
   const destUpper = destination.toUpperCase();
-  const target = nodes[destination] ? destination
-               : nodes[destUpper] ? destUpper
-               : (Object.keys(nodes).find(k => k.toUpperCase() === destUpper) || destUpper);
+
+  // 1. Exact node match
+  let target = nodes[destination] ? destination
+             : nodes[destUpper] ? destUpper
+             : (Object.keys(nodes).find(k => k.toUpperCase() === destUpper) || null);
+
+  // 2. No direct node — route to the nearest node to the building's pin position
+  if (!target || !nodes[target]) {
+    const pos = BUILDING_POSITIONS[destUpper];
+    if (pos && Object.keys(nodes).length > 0) {
+      target = getNearestNodeToPoint(pos.x, pos.y);
+    } else {
+      target = destUpper; // fallback — findPath will return null
+    }
+  }
+
   const path = findPath(start, target);
 
   const pinEl = document.querySelector(`.building[data-name="${CSS.escape(destination)}"]`);
@@ -985,6 +1008,7 @@ document.addEventListener("click", (e) => {
 let _directionsActive = false;
 
 const BUILDING_PHOTOS = {}; // populated from /api/campus-pins (photo field)
+const BUILDING_POSITIONS = {}; // name.toUpperCase() → {x,y} in 1920×813 px
 let _pendingUrl = null;
 function openBuildingPanel(name, pageUrl) {
   const hasFloorPlan = !!pageUrl;
@@ -1088,7 +1112,7 @@ function highlightFromURL(){
 
 }
 
-_campusPathsReady.then(function(){ highlightFromURL(); });
+Promise.all([_campusPathsReady, _pinsReady]).then(function(){ highlightFromURL(); });
 
 // Mobile view: stretch directions panel to cover everything fullscreen
 if(new URLSearchParams(window.location.search).get("mobile") === "1"){
@@ -1265,8 +1289,8 @@ updateYouHere(80, 395);
 
 
 // Load campus pins from DB and render as clickable overlays
-(function loadCampusPins() {
-  fetch('/api/campus-pins')
+var _pinsReady = (function loadCampusPins() {
+  return fetch('/api/campus-pins')
     .then(function(r){ return r.json(); })
     .then(function(pins) {
       pins.forEach(function(pin) {
@@ -1274,6 +1298,10 @@ updateYouHere(80, 395);
           var src = pin.photo.startsWith('/') ? pin.photo : '/static/' + pin.photo;
           BUILDING_PHOTOS[pin.name.toUpperCase()] = src;
         }
+        BUILDING_POSITIONS[pin.name.toUpperCase()] = {
+          x: pin.left_pct / 100 * 1920,
+          y: pin.top_pct / 100 * 813
+        };
       });
       if (typeof window._registerPinsForSearch === 'function') {
         window._registerPinsForSearch(pins);
