@@ -709,14 +709,15 @@ var graph = {};
 // Load campus paths from DB only — no hardcoded fallback
 var _campusPathsReady = fetch('/api/campus-paths').then(function(r){ return r.json(); }).then(function(data) {
   if (!data.nodes || !data.nodes.length) return;
-  var labelById = {};
+  var keyById = {};
   data.nodes.forEach(function(n) {
-    labelById[n.id] = n.label;
-    nodes[n.label] = { x: n.x_pct / 100 * 1920, y: n.y_pct / 100 * 813 };
+    var key = (n.label && n.label.trim()) ? n.label.trim() : ('_node_' + n.id);
+    keyById[n.id] = key;
+    nodes[key] = { x: n.x_pct / 100 * 1920, y: n.y_pct / 100 * 813 };
+    graph[key] = [];
   });
-  Object.keys(nodes).forEach(function(k) { graph[k] = []; });
   (data.edges || []).forEach(function(e) {
-    var a = labelById[e.node_a], b = labelById[e.node_b];
+    var a = keyById[e.node_a], b = keyById[e.node_b];
     if (a && b) { graph[a].push(b); graph[b].push(a); }
   });
 }).catch(function(){});
