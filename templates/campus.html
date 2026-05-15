@@ -726,23 +726,11 @@ var _campusPathsReady = fetch('/api/campus-paths').then(function(r){ return r.js
 
                               const line = document.getElementById("routeLine");
 
-                              let d = ""; 
-                              
-                              for(let i = 0; i < path.length; i++){
-                                const p = nodes[path[i]]; 
-                                if(i === 0)
-                                { d += `M ${p.x} ${p.y}`; 
-                              } 
-
-                                else { 
-                                  const prev = nodes[path[i-1]]; 
-
-                                  const cx = (prev.x + p.x) / 2; 
-                                  const cy = (prev.y + p.y) / 2; 
-                                  
-                                d += `Q ${prev.x} ${prev.y}, ${cx} ${cy}`;
-                              } 
-                            } 
+                              let d = "";
+                              for (let i = 0; i < path.length; i++) {
+                                const p = nodes[path[i]];
+                                d += (i === 0 ? `M ${p.x} ${p.y}` : ` L ${p.x} ${p.y}`);
+                              }
 
                             line.setAttribute("d", d); 
                             
