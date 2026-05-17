@@ -685,6 +685,7 @@
                           line.style.transition = "none";
                           line.style.strokeDasharray = len;
                           line.style.strokeDashoffset = len;
+                          void line.getBoundingClientRect();
                           setTimeout(() => {
                             line.style.transition = "stroke-dashoffset 1.5s ease";
                             line.style.strokeDashoffset = "0";
@@ -756,6 +757,7 @@ var _campusPathsReady = fetch('/api/campus-paths').then(function(r){ return r.js
                             line.style.transition = "none";
                             line.style.strokeDasharray = length;
                             line.style.strokeDashoffset = length;
+                            void line.getBoundingClientRect(); // force reflow — Safari needs this before transition
 
                             setTimeout(()=>{
                               line.style.transition = "stroke-dashoffset 1.5s ease";
@@ -1132,7 +1134,7 @@ function highlightFromURL(){
 
 }
 
-Promise.all([_campusPathsReady, _pinsReady]).then(function(){ highlightFromURL(); });
+// NOTE: _pinsReady is defined below (line ~1321). Promise.all must run after it's assigned.
 
 // Mobile view: stretch directions panel to cover everything fullscreen
 if(new URLSearchParams(window.location.search).get("mobile") === "1"){
@@ -1395,6 +1397,8 @@ var _pinsReady = (function loadCampusPins() {
     })
     .catch(function(err){ console.error('campus-pins load failed:', err); });
 })();
+
+Promise.all([_campusPathsReady, _pinsReady]).then(function(){ highlightFromURL(); });
 
 </script>
 <script src="{{ url_for('static', filename='js/kiosk.js') }}"></script>
