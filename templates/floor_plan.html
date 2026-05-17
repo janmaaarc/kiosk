@@ -501,7 +501,8 @@ function showInfo(btn) {
 
   const routeBtn = document.getElementById('infoRouteBtn');
   const campusLoc = BUILDING_NAME + ' room ' + btn.dataset.name;
-  routeBtn.href = '/campus_map?location=' + encodeURIComponent(campusLoc) + '&room_floor=' + FLOOR_NUMBER;
+  const _rl = parseFloat(btn.dataset.left), _rt = parseFloat(btn.dataset.top);
+  routeBtn.href = '/campus_map?location=' + encodeURIComponent(campusLoc) + '&room_floor=' + FLOOR_NUMBER + '&room_left=' + _rl.toFixed(2) + '&room_top=' + _rt.toFixed(2);
 
   const officeBtn = document.getElementById('infoOfficeBtn');
   const officeKey = btn.dataset.officeKey;
@@ -600,18 +601,32 @@ const ALL_ROOMS = {{ all_rooms_index | default([]) | tojson }};
 })();
 
 const _highlightLoc = new URLSearchParams(window.location.search).get('location');
+const _highlightLeft = new URLSearchParams(window.location.search).get('room_left');
+const _highlightTop  = new URLSearchParams(window.location.search).get('room_top');
 let _highlightApplied = false;
 function _applyHighlight() {
   if (!_highlightLoc || _highlightApplied) return;
   _highlightApplied = true;
-  document.querySelectorAll('.room-label').forEach(b => {
-    if (b.dataset.name.toLowerCase() === _highlightLoc.toLowerCase()) {
-      b.classList.add('highlighted');
-      showInfo(b);
-      drawFloorRoute(b);
-      toast(b.dataset.name, 'success', 2000);
-    }
-  });
+  const matches = Array.from(document.querySelectorAll('.room-label')).filter(b =>
+    b.dataset.name.toLowerCase() === _highlightLoc.toLowerCase()
+  );
+  // If position hint provided, pick the closest room by pos_left/pos_top
+  let target = matches[0];
+  if (matches.length > 1 && _highlightLeft !== null && _highlightTop !== null) {
+    const hl = parseFloat(_highlightLeft), ht = parseFloat(_highlightTop);
+    target = matches.reduce((best, b) => {
+      const bl = parseFloat(b.dataset.left), bt = parseFloat(b.dataset.top);
+      const bd = (bl-hl)*(bl-hl)+(bt-ht)*(bt-ht);
+      const ol = parseFloat(best.dataset.left), ot = parseFloat(best.dataset.top);
+      const od = (ol-hl)*(ol-hl)+(ot-ht)*(ot-ht);
+      return bd < od ? b : best;
+    });
+  }
+  if (!target) return;
+  target.classList.add('highlighted');
+  showInfo(target);
+  drawFloorRoute(target);
+  toast(target.dataset.name, 'success', 2000);
 }
 
 

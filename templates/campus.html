@@ -986,7 +986,9 @@ function showDirections(destination){
     if (isMobile) {
       setTimeout(() => {
         const floorParam = _pendingFloor !== null ? `&floor=${_pendingFloor}` : '';
-        window.location.href = '/directions?location=' + encodeURIComponent(destination.toLowerCase().split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ')) + '&room=' + encodeURIComponent(_pendingRoom) + floorParam;
+        const posParam = (_pendingRoomLeft !== null && _pendingRoomTop !== null)
+          ? '&room_left=' + _pendingRoomLeft + '&room_top=' + _pendingRoomTop : '';
+        window.location.href = '/directions?location=' + encodeURIComponent(destination.toLowerCase().split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ')) + '&room=' + encodeURIComponent(_pendingRoom) + floorParam + posParam;
       }, 6000);
     } else {
       const destLower = destination.toLowerCase();
@@ -995,7 +997,9 @@ function showDirections(destination){
       if (page) {
         setTimeout(() => {
           const floorParam = _pendingFloor !== null ? `floor=${_pendingFloor}&` : '';
-          window.location.href = page + '?' + floorParam + 'location=' + encodeURIComponent(_pendingRoom);
+          const posParam = (_pendingRoomLeft !== null && _pendingRoomTop !== null)
+            ? '&room_left=' + _pendingRoomLeft + '&room_top=' + _pendingRoomTop : '';
+          window.location.href = page + '?' + floorParam + 'location=' + encodeURIComponent(_pendingRoom) + posParam;
         }, 6000);
       }
     }
@@ -1004,6 +1008,8 @@ function showDirections(destination){
 
 let _pendingRoom = null;
 let _pendingFloor = null;
+let _pendingRoomLeft = null;
+let _pendingRoomTop  = null;
 
 const LAN_BASE_URL = {{ lan_base_url | tojson }};
 
@@ -1109,6 +1115,8 @@ function highlightFromURL(){
   const room = parts[1] ? parts[1].trim() : null;
   _pendingRoom = room;
   _pendingFloor = params.get("room_floor") ? parseInt(params.get("room_floor"), 10) : null;
+  _pendingRoomLeft = params.get("room_left") ? parseFloat(params.get("room_left")) : null;
+  _pendingRoomTop  = params.get("room_top")  ? parseFloat(params.get("room_top"))  : null;
 
   let building = raw;
   if(!nodes[raw]){
