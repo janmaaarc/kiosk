@@ -892,7 +892,8 @@ function showDirections(destination){
 
   const path = findPath(start, target);
 
-  const pinEl = document.querySelector(`.building[data-name="${CSS.escape(destination)}"]`);
+  const _destLower = destination.toLowerCase();
+  const pinEl = Array.from(document.querySelectorAll('.building')).find(el => el.dataset.name && el.dataset.name.toLowerCase() === _destLower);
   const writtenText = pinEl && pinEl.dataset.directions ? pinEl.dataset.directions : null;
 
   if(!path){
@@ -971,7 +972,8 @@ function showDirections(destination){
         window.location.href = '/directions?location=' + encodeURIComponent(destination.toLowerCase().split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ')) + '&room=' + encodeURIComponent(_pendingRoom) + floorParam;
       }, 6000);
     } else {
-      const buildingEl = document.querySelector(`.building[data-name="${CSS.escape(destination)}"]`);
+      const destLower = destination.toLowerCase();
+      const buildingEl = Array.from(document.querySelectorAll('.building')).find(el => el.dataset.name && el.dataset.name.toLowerCase() === destLower);
       const page = buildingEl && buildingEl.dataset.page;
       if (page) {
         setTimeout(() => {
