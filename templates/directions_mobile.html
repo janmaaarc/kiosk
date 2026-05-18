@@ -267,13 +267,22 @@ window.addEventListener('resize', checkOrientation);
 checkOrientation();
 
 var _mapRouteBuilt = false;
+var _mapRouteD = '';
 
 function openMapZoom() {
-  // Add cache-bust so updated map image shows after admin re-upload
   var img = document.getElementById('map-zoom-img');
   img.src = '/static/images/labeled_map.jpg?v=' + Math.floor(Date.now() / 60000);
 
   document.getElementById('map-zoom').classList.add('show');
+
+  // Re-draw cached path after image loads (handles img height = 0 on re-open)
+  if (_mapRouteD) {
+    img.onload = function() {
+      document.getElementById('map-route-path').setAttribute('d', _mapRouteD);
+    };
+    document.getElementById('map-route-path').setAttribute('d', _mapRouteD);
+    return;
+  }
 
   if (_mapRouteBuilt) return;
   _mapRouteBuilt = true;
@@ -335,10 +344,14 @@ function openMapZoom() {
         var pt = _nodes[k];
         d += (i === 0 ? 'M ' : ' L ') + pt.x + ' ' + pt.y;
       });
-      document.getElementById('map-route-path').setAttribute('d', d);
+      _mapRouteD = d;
+      img.onload = function() {
+        document.getElementById('map-route-path').setAttribute('d', _mapRouteD);
+      };
+      document.getElementById('map-route-path').setAttribute('d', _mapRouteD);
     })
     .catch(function() {
-      _mapRouteBuilt = false; // allow retry on next open
+      _mapRouteBuilt = false;
     });
 }
 
