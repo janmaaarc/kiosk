@@ -1166,7 +1166,7 @@ if (_isMobileView) {
     #qrBtnFloat { display: none !important; }
     #panelToggle { display: none !important; }
 
-    /* Fullscreen directions panel — slides in from top */
+    /* Fullscreen directions panel */
     #directionsPanel {
       position: fixed !important;
       inset: 0 !important;
@@ -1175,14 +1175,11 @@ if (_isMobileView) {
       overflow-y: auto !important;
       z-index: 99999 !important;
       transform: none !important;
-      transition: none !important;
-    }
-    #directionsPanel.collapsed {
-      transform: translateY(-100vh) !important;
-    }
-    #directionsPanel.mobile-dismissed {
-      transform: translateY(-100vh) !important;
       transition: transform 0.32s cubic-bezier(0.16,1,0.3,1) !important;
+    }
+    #directionsPanel.collapsed,
+    #directionsPanel.mobile-dismissed {
+      transform: translateY(-110vh) !important;
     }
   `;
   document.head.appendChild(mStyle);
