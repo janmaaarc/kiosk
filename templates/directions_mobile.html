@@ -488,13 +488,14 @@ for (var i=0;i<steps.length;i++){var li=document.createElement("li");li.textCont
 
 // ── Floor plan from DB ─────────────────────────────────
 function toTitleCase(s) {
-  return s.split(' ').map(function(w){ return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(); }).join(' ');
+  if (!s) return '';
+  return s.split(' ').filter(Boolean).map(function(w){ return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(); }).join(' ');
 }
 var DEST_TITLE = toTitleCase(DEST);
 
 var _dbFloors = null;
 
-fetch('/api/building-floors?building=' + encodeURIComponent(DEST_TITLE))
+fetch('/api/building-floors?building=' + encodeURIComponent(DEST))
   .then(function(r){ return r.json(); })
   .then(function(data) {
     _dbFloors = data;
@@ -586,7 +587,7 @@ function showFloor(idx) {
   _floorGraph = null;
   var floorNum = floors[idx].floor_number;
 
-  fetch('/api/floor-paths?building=' + encodeURIComponent(DEST_TITLE) + '&floor=' + floorNum)
+  fetch('/api/floor-paths?building=' + encodeURIComponent(DEST) + '&floor=' + floorNum)
     .then(function(r){ return r.json(); })
     .then(function(data) {
       if (!data.nodes || !data.nodes.length) return;
@@ -599,7 +600,7 @@ function showFloor(idx) {
     })
     .catch(function(){});
 
-  fetch("/api/floor_rooms?building=" + encodeURIComponent(DEST_TITLE) + "&floor=" + floorNum)
+  fetch("/api/floor_rooms?building=" + encodeURIComponent(DEST) + "&floor=" + floorNum)
     .then(function(r){ return r.json(); })
     .then(function(data) {
       _currentEntrance = data.entrance || {x:50, y:96, hY:50};
