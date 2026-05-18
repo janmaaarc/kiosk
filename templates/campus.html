@@ -1157,9 +1157,16 @@ function highlightFromURL(){
 // Mobile view — locked-down campus map (QR scan)
 const _isMobileView = new URLSearchParams(window.location.search).get("mobile") === "1";
 if (_isMobileView) {
+  // Force viewport to actual device width — prevents 1920px map from shrinking vw units
+  (function() {
+    var vm = document.querySelector('meta[name="viewport"]');
+    if (vm) vm.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no';
+  })();
+
   // Hide kiosk chrome
   const mStyle = document.createElement("style");
   mStyle.textContent = `
+    body { overflow: hidden !important; }
     .top-icons { display: none !important; }
     #searchWrap { display: none !important; }
     #buildingPanel { display: none !important; }
@@ -1169,17 +1176,19 @@ if (_isMobileView) {
     /* Fullscreen directions panel */
     #directionsPanel {
       position: fixed !important;
-      inset: 0 !important;
-      width: 100vw !important;
-      height: 100vh !important;
+      top: 0 !important; left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      max-width: 100% !important;
       overflow-y: auto !important;
       z-index: 99999 !important;
       transform: none !important;
       transition: transform 0.32s cubic-bezier(0.16,1,0.3,1) !important;
+      box-sizing: border-box !important;
     }
     #directionsPanel.collapsed,
     #directionsPanel.mobile-dismissed {
-      transform: translateY(-110vh) !important;
+      transform: translateY(-110%) !important;
     }
   `;
   document.head.appendChild(mStyle);
