@@ -120,7 +120,7 @@ def api_floor_rooms():
     with db_connection() as conn:
         db_rows = conn.execute(
             "SELECT room, pos_left, pos_top, pos_width, pos_height, description"
-            " FROM rooms WHERE building=? COLLATE NOCASE AND floor=? ORDER BY pos_top, pos_left",
+            " FROM rooms WHERE UPPER(building)=UPPER(?) AND floor=? ORDER BY pos_top, pos_left",
             (building, str(floor_num)),
         ).fetchall()
 

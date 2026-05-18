@@ -1658,15 +1658,15 @@ def api_floor_paths():
         return jsonify({"nodes": [], "edges": []})
     with db_connection() as conn:
         nodes = conn.execute(
-            "SELECT id, label, x_pct, y_pct FROM floor_nodes WHERE building=? COLLATE NOCASE AND floor=? ORDER BY id",
+            "SELECT id, label, x_pct, y_pct FROM floor_nodes WHERE UPPER(building)=UPPER(?) AND floor=? ORDER BY id",
             (building, floor),
         ).fetchall()
         edges = conn.execute(
             "SELECT fe.id, fe.from_id, fe.to_id FROM floor_edges fe "
             "JOIN floor_nodes fn_from ON fn_from.id = fe.from_id "
             "JOIN floor_nodes fn_to   ON fn_to.id   = fe.to_id "
-            "WHERE fn_from.building=? AND fn_from.floor=? "
-            "  AND fn_to.building=?   AND fn_to.floor=? "
+            "WHERE UPPER(fn_from.building)=UPPER(?) AND fn_from.floor=? "
+            "  AND UPPER(fn_to.building)=UPPER(?)   AND fn_to.floor=? "
             "ORDER BY fe.id",
             (building, floor, building, floor),
         ).fetchall() if nodes else []
@@ -1682,7 +1682,7 @@ def api_building_floors():
     with db_connection() as conn:
         rows = conn.execute(
             "SELECT floor_number, floor_label, floor_image FROM building_floors"
-            " WHERE building=? COLLATE NOCASE ORDER BY floor_number",
+            " WHERE UPPER(building)=UPPER(?) ORDER BY floor_number",
             (building,),
         ).fetchall()
     import posixpath as _pp, time as _time
