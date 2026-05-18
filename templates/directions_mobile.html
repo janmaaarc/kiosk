@@ -63,6 +63,10 @@ html, body { width:100%; height:100%; background:#1a0a0a; overflow:hidden; font-
   box-shadow:0 8px 32px rgba(0,0,0,.5);
 }
 #map-zoom-inner img { width:100%; display:block; }
+#map-route-svg {
+  position:absolute; inset:0; width:100%; height:100%;
+  pointer-events:none;
+}
 #map-zoom-close {
   position:absolute; top:8px; right:8px;
   width:30px; height:30px; border-radius:50%;
@@ -200,7 +204,7 @@ html, body { width:100%; height:100%; background:#1a0a0a; overflow:hidden; font-
     <ul id="steps"></ul>
     <div class="campus-thumb" onclick="openMapZoom()">
       <img src="/static/images/labeled_map.jpg" alt="Campus Map" onerror="this.parentElement.style.display='none'">
-      <div class="campus-thumb-hint">TAP TO ZOOM</div>
+      <div class="campus-thumb-hint">TAP FOR ROUTE MAP</div>
     </div>
   </div>
 
@@ -231,7 +235,11 @@ html, body { width:100%; height:100%; background:#1a0a0a; overflow:hidden; font-
 <!-- Campus map zoom overlay -->
 <div id="map-zoom">
   <div id="map-zoom-inner">
-    <img src="/static/images/labeled_map.jpg" alt="Campus Map">
+    <img id="map-zoom-img" src="/static/images/labeled_map.jpg" alt="Campus Map">
+    <svg id="map-route-svg" viewBox="0 0 1920 813" preserveAspectRatio="xMidYMid meet">
+      <path id="map-route-path" fill="none" stroke="#8e44ad" stroke-width="9"
+            stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
     <button id="map-zoom-close" onclick="closeMapZoom()" aria-label="Close">&times;</button>
   </div>
 </div>
@@ -258,9 +266,82 @@ function dismissLandscapePrompt() {
 window.addEventListener('resize', checkOrientation);
 checkOrientation();
 
+var _mapRouteBuilt = false;
+
 function openMapZoom() {
+  // Add cache-bust so updated map image shows after admin re-upload
+  var img = document.getElementById('map-zoom-img');
+  img.src = '/static/images/labeled_map.jpg?v=' + Math.floor(Date.now() / 60000);
+
   document.getElementById('map-zoom').classList.add('show');
+
+  if (_mapRouteBuilt) return;
+  _mapRouteBuilt = true;
+
+  fetch('/api/campus-paths')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.nodes || !data.nodes.length) return;
+
+      // Build nodes + graph
+      var _nodes = {}, _graph = {}, _keyById = {};
+      data.nodes.forEach(function(n) {
+        var k = (n.label && n.label.trim()) ? n.label.trim() : ('_node_' + n.id);
+        _keyById[n.id] = k;
+        _nodes[k] = { x: n.x_pct / 100 * 1920, y: n.y_pct / 100 * 813 };
+        _graph[k] = [];
+      });
+      (data.edges || []).forEach(function(e) {
+        var a = _keyById[e.node_a], b = _keyById[e.node_b];
+        if (a && b) { _graph[a].push(b); _graph[b].push(a); }
+      });
+
+      // BFS path
+      function bfsNodes(start, end) {
+        var queue = [[start]], visited = {};
+        visited[start] = true;
+        while (queue.length) {
+          var path = queue.shift();
+          var node = path[path.length - 1];
+          if (node === end) return path;
+          (_graph[node] || []).forEach(function(nb) {
+            if (!visited[nb]) { visited[nb] = true; queue.push(path.concat(nb)); }
+          });
+        }
+        return null;
+      }
+
+      // Find entrance node
+      var entranceKey = Object.keys(_nodes).find(function(k) {
+        return k.toUpperCase() === 'ENTRANCE';
+      });
+      if (!entranceKey) entranceKey = Object.keys(_nodes)[0];
+
+      // Find best-match node for DEST
+      var destUp = DEST.toUpperCase();
+      var targetKey = Object.keys(_nodes).find(function(k) { return k.toUpperCase() === destUp; });
+      if (!targetKey) {
+        targetKey = Object.keys(_nodes).find(function(k) {
+          return k.toUpperCase().includes(destUp) || destUp.includes(k.toUpperCase());
+        });
+      }
+      if (!entranceKey || !targetKey) return;
+
+      var path = bfsNodes(entranceKey, targetKey);
+      if (!path || path.length < 2) return;
+
+      var d = '';
+      path.forEach(function(k, i) {
+        var pt = _nodes[k];
+        d += (i === 0 ? 'M ' : ' L ') + pt.x + ' ' + pt.y;
+      });
+      document.getElementById('map-route-path').setAttribute('d', d);
+    })
+    .catch(function() {
+      _mapRouteBuilt = false; // allow retry on next open
+    });
 }
+
 function closeMapZoom() {
   document.getElementById('map-zoom').classList.remove('show');
 }

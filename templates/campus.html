@@ -932,8 +932,11 @@ function showDirections(destination){
     const dp = document.getElementById("directionsPanel");
     dp.style.display = "block";
     dp.classList.remove("collapsed");
-    document.getElementById("panelToggle").style.display = "none";
-    document.getElementById("qrBtnFloat").style.display = "flex";
+    dp.classList.remove("mobile-dismissed");
+    if (!_isMobileView) {
+      document.getElementById("panelToggle").style.display = "none";
+      document.getElementById("qrBtnFloat").style.display = "flex";
+    }
     _directionsActive = true;
     return;
   }
@@ -977,8 +980,11 @@ function showDirections(destination){
   const dp = document.getElementById("directionsPanel");
   dp.style.display = "block";
   dp.classList.remove("collapsed");
-  document.getElementById("panelToggle").style.display = "none";
-  document.getElementById("qrBtnFloat").style.display = "flex";
+  dp.classList.remove("mobile-dismissed");
+  if (!_isMobileView) {
+    document.getElementById("panelToggle").style.display = "none";
+    document.getElementById("qrBtnFloat").style.display = "flex";
+  }
   _directionsActive = true;
 
   if (_pendingRoom) {
@@ -1064,6 +1070,10 @@ document.querySelectorAll('.building[data-page]').forEach(b => {
 function toggleDirectionsPanel() {
   const panel  = document.getElementById('directionsPanel');
   const toggle = document.getElementById('panelToggle');
+  if (_isMobileView) {
+    panel.classList.toggle('mobile-dismissed');
+    return;
+  }
   const collapsed = panel.classList.toggle('collapsed');
   toggle.style.display = collapsed ? 'block' : 'none';
 }
@@ -1144,10 +1154,19 @@ function highlightFromURL(){
 
 // NOTE: _pinsReady is defined below (line ~1321). Promise.all must run after it's assigned.
 
-// Mobile view: stretch directions panel to cover everything fullscreen
-if(new URLSearchParams(window.location.search).get("mobile") === "1"){
-  const style = document.createElement("style");
-  style.textContent = `
+// Mobile view — locked-down campus map (QR scan)
+const _isMobileView = new URLSearchParams(window.location.search).get("mobile") === "1";
+if (_isMobileView) {
+  // Hide kiosk chrome
+  const mStyle = document.createElement("style");
+  mStyle.textContent = `
+    .top-icons { display: none !important; }
+    #searchWrap { display: none !important; }
+    #buildingPanel { display: none !important; }
+    #qrBtnFloat { display: none !important; }
+    #panelToggle { display: none !important; }
+
+    /* Fullscreen directions panel — slides in from top */
     #directionsPanel {
       position: fixed !important;
       inset: 0 !important;
@@ -1155,10 +1174,31 @@ if(new URLSearchParams(window.location.search).get("mobile") === "1"){
       height: 100vh !important;
       overflow-y: auto !important;
       z-index: 99999 !important;
-      padding: 30px 24px !important;
+      transform: none !important;
+      transition: none !important;
+    }
+    #directionsPanel.collapsed {
+      transform: translateY(-100vh) !important;
+    }
+    #directionsPanel.mobile-dismissed {
+      transform: translateY(-100vh) !important;
+      transition: transform 0.32s cubic-bezier(0.16,1,0.3,1) !important;
     }
   `;
-  document.head.appendChild(style);
+  document.head.appendChild(mStyle);
+
+  // Disable building pin interaction — map is read-only
+  document.addEventListener('click', function(e) {
+    var t = e.target;
+    while (t && t !== document.body) {
+      if (t.classList && (t.classList.contains('building') || t.classList.contains('pin-marker'))) {
+        e.stopPropagation();
+        e.preventDefault();
+        return;
+      }
+      t = t.parentElement;
+    }
+  }, true);
 }
 
 (function() {
