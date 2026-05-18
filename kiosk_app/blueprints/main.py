@@ -62,17 +62,23 @@ def rfid():
         row = conn.execute(
             "SELECT name, role FROM users WHERE rfid_uid = ?", (uid,)
         ).fetchone()
+        dur_row = conn.execute(
+            "SELECT value FROM kiosk_settings WHERE key='rfid_redirect_duration_ms'"
+        ).fetchone()
+        redirect_ms = int(dur_row["value"]) if dur_row else 5000
         if row:
             role = row["role"] if row["role"] in _VALID_ROLES else "visitor"
             _log_rfid(conn, uid, row["name"], role)
             session["user_role"] = role
             session["user_name"] = row["name"]
             return render_template("rfid_scan.html",
-                                   user_name=row["name"], user_role=role)
+                                   user_name=row["name"], user_role=role,
+                                   redirect_ms=redirect_ms)
         else:
             _log_rfid(conn, uid, "Unknown", "unregistered")
             session.clear()
-    return render_template("rfid_scan.html", user_name=None, user_role="unregistered")
+    return render_template("rfid_scan.html", user_name=None, user_role="unregistered",
+                           redirect_ms=redirect_ms)
 
 
 @main_bp.route("/check_rfid", methods=["POST"])

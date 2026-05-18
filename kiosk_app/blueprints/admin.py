@@ -100,7 +100,8 @@ def logout():
 @login_required
 def kiosk_settings():
     _int_keys = {"idle_timeout_seconds", "screensaver_timeout_seconds",
-                 "screensaver_slide_interval_ms", "admin_session_minutes"}
+                 "screensaver_slide_interval_ms", "admin_session_minutes",
+                 "rfid_redirect_duration_ms"}
     with db_connection() as conn:
         if request.method == "POST":
             for key in _int_keys:

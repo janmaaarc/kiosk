@@ -89,7 +89,7 @@ body {
 .bar-fill {
   height: 100%;
   border-radius: 3px;
-  animation: drain 5s linear forwards;
+  animation: drain {{ (redirect_ms | default(5000)) / 1000 }}s linear forwards;
 }
 .bar-faculty      { background: #7b2d2d; }
 .bar-student      { background: #1a5c8a; }
@@ -134,9 +134,9 @@ localStorage.setItem('rfid_user', JSON.stringify({
   name: {{ user_name | tojson }},
   role: {{ user_role | tojson }}
 }));
-setTimeout(() => { window.location.href = '/menu'; }, 5000);
+setTimeout(() => { window.location.href = '/menu'; }, {{ redirect_ms | default(5000) }});
 {% else %}
-setTimeout(() => { window.location.href = '/'; }, 3000);
+setTimeout(() => { window.location.href = '/'; }, Math.min({{ redirect_ms | default(5000) }}, 3000));
 {% endif %}
 </script>
 </body>

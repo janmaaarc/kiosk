@@ -186,6 +186,7 @@ def create_app() -> Flask:
                     ("screensaver_timeout_seconds", "120"),
                     ("screensaver_slide_interval_ms", "4000"),
                     ("admin_session_minutes", "60"),
+                    ("rfid_redirect_duration_ms", "5000"),
                 ]:
                     _conn.execute(
                         "INSERT OR IGNORE INTO kiosk_settings (key, value) VALUES (?, ?)",

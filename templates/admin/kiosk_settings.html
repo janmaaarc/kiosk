@@ -31,6 +31,15 @@
         <div class="hint">How long each screensaver image stays on screen. Default: 4000 (4 seconds)</div>
     </div>
 
+    <h3 style="font-size:15px;font-weight:700;color:#7b2d2d;margin:20px 0 16px;">RFID Welcome Screen</h3>
+
+    <div class="form-group">
+        <label for="rfid-redirect-duration">Redirect duration (milliseconds)</label>
+        <input type="text" id="rfid-redirect-duration" name="rfid_redirect_duration_ms"
+               value="{{ settings.get('rfid_redirect_duration_ms', '5000') }}">
+        <div class="hint">How long the welcome screen stays before redirecting. Default: 5000 (5 seconds)</div>
+    </div>
+
     <h3 style="font-size:15px;font-weight:700;color:#7b2d2d;margin:20px 0 16px;">Admin Session</h3>
 
     <div class="form-group">
