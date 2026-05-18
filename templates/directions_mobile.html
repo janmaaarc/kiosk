@@ -53,26 +53,33 @@ html, body { width:100%; height:100%; background:#1a0a0a; overflow:hidden; font-
 /* Campus map zoom overlay */
 #map-zoom {
   display:none; position:fixed; inset:0; z-index:1000;
-  background:rgba(0,0,0,.92);
+  background:rgba(0,0,0,.95);
   flex-direction:column; align-items:center; justify-content:center;
+  touch-action:none;
 }
 #map-zoom.show { display:flex; }
 #map-zoom-inner {
-  position:relative; width:92vw; max-width:600px;
-  border-radius:8px; overflow:hidden;
-  box-shadow:0 8px 32px rgba(0,0,0,.5);
+  position:relative; width:100%; height:100%;
+  overflow:hidden;
 }
-#map-zoom-inner img { width:100%; display:block; }
+#map-zoom-canvas {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  transform-origin:center center;
+  will-change:transform;
+}
+#map-zoom-canvas img { width:92vw; max-width:700px; display:block; border-radius:8px; }
 #map-route-svg {
-  position:absolute; inset:0; width:100%; height:100%;
+  position:absolute;
   pointer-events:none;
 }
 #map-zoom-close {
-  position:absolute; top:8px; right:8px;
-  width:30px; height:30px; border-radius:50%;
+  position:fixed; top:12px; right:12px; z-index:1001;
+  width:36px; height:36px; border-radius:50%;
   background:rgba(123,45,45,.9); color:#fff;
-  font-size:18px; font-weight:900; line-height:30px; text-align:center;
+  font-size:20px; font-weight:900; line-height:36px; text-align:center;
   cursor:pointer; border:none; font-family:var(--f);
+  box-shadow:0 2px 8px rgba(0,0,0,.5);
 }
 
 /* ── RIGHT PANEL (floor plan) ── */
@@ -235,11 +242,13 @@ html, body { width:100%; height:100%; background:#1a0a0a; overflow:hidden; font-
 <!-- Campus map zoom overlay -->
 <div id="map-zoom">
   <div id="map-zoom-inner">
-    <img id="map-zoom-img" src="/static/images/labeled_map.jpg" alt="Campus Map">
-    <svg id="map-route-svg" viewBox="0 0 1920 813" preserveAspectRatio="xMidYMid meet">
-      <path id="map-route-path" fill="none" stroke="#8e44ad" stroke-width="9"
-            stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
+    <div id="map-zoom-canvas">
+      <img id="map-zoom-img" src="/static/images/labeled_map.jpg" alt="Campus Map">
+      <svg id="map-route-svg" viewBox="0 0 1920 813" preserveAspectRatio="xMidYMid meet">
+        <path id="map-route-path" fill="none" stroke="#8e44ad" stroke-width="9"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
     <button id="map-zoom-close" onclick="closeMapZoom()" aria-label="Close">&times;</button>
   </div>
 </div>
@@ -269,17 +278,31 @@ checkOrientation();
 var _mapRouteBuilt = false;
 var _mapRouteD = '';
 
+function _syncSvg() {
+  var img = document.getElementById('map-zoom-img');
+  var svg = document.getElementById('map-route-svg');
+  svg.style.left   = img.offsetLeft + 'px';
+  svg.style.top    = img.offsetTop  + 'px';
+  svg.style.width  = img.offsetWidth  + 'px';
+  svg.style.height = img.offsetHeight + 'px';
+}
+
 function openMapZoom() {
   var img = document.getElementById('map-zoom-img');
   img.src = '/static/images/labeled_map.jpg?v=' + Math.floor(Date.now() / 60000);
 
+  // Reset zoom state on each open
+  _pzScale = 1; _pzX = 0; _pzY = 0;
+  document.getElementById('map-zoom-canvas').style.transform = '';
   document.getElementById('map-zoom').classList.add('show');
 
   // Re-draw cached path after image loads (handles img height = 0 on re-open)
   if (_mapRouteD) {
     img.onload = function() {
+      _syncSvg();
       document.getElementById('map-route-path').setAttribute('d', _mapRouteD);
     };
+    _syncSvg();
     document.getElementById('map-route-path').setAttribute('d', _mapRouteD);
     return;
   }
@@ -346,8 +369,10 @@ function openMapZoom() {
       });
       _mapRouteD = d;
       img.onload = function() {
+        _syncSvg();
         document.getElementById('map-route-path').setAttribute('d', _mapRouteD);
       };
+      _syncSvg();
       document.getElementById('map-route-path').setAttribute('d', _mapRouteD);
     })
     .catch(function() {
@@ -357,10 +382,78 @@ function openMapZoom() {
 
 function closeMapZoom() {
   document.getElementById('map-zoom').classList.remove('show');
+  _pzScale = 1; _pzX = 0; _pzY = 0;
+  document.getElementById('map-zoom-canvas').style.transform = '';
 }
 document.addEventListener('click', function(e) {
   var z = document.getElementById('map-zoom');
   if (z.classList.contains('show') && e.target === z) closeMapZoom();
+});
+
+// ── Pinch-zoom + pan for campus map overlay ──
+var _pzScale = 1, _pzX = 0, _pzY = 0;
+var _pzLastDist = 0, _pzLastMid = null;
+var _pzPanStart = null;
+var MIN_SCALE = 1, MAX_SCALE = 6;
+
+function _pzApply() {
+  var c = document.getElementById('map-zoom-canvas');
+  c.style.transform = 'translate(' + _pzX + 'px,' + _pzY + 'px) scale(' + _pzScale + ')';
+}
+
+function _pzDist(t) {
+  var dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY;
+  return Math.sqrt(dx*dx + dy*dy);
+}
+function _pzMid(t) {
+  return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 };
+}
+
+var _mapZoomEl = document.getElementById('map-zoom');
+_mapZoomEl.addEventListener('touchstart', function(e) {
+  if (!document.getElementById('map-zoom').classList.contains('show')) return;
+  if (e.touches.length === 2) {
+    e.preventDefault();
+    _pzLastDist = _pzDist(e.touches);
+    _pzLastMid  = _pzMid(e.touches);
+    _pzPanStart = null;
+  } else if (e.touches.length === 1) {
+    _pzPanStart = { x: e.touches[0].clientX - _pzX, y: e.touches[0].clientY - _pzY };
+  }
+}, { passive: false });
+
+_mapZoomEl.addEventListener('touchmove', function(e) {
+  if (!document.getElementById('map-zoom').classList.contains('show')) return;
+  if (e.touches.length === 2) {
+    e.preventDefault();
+    var dist = _pzDist(e.touches);
+    var mid  = _pzMid(e.touches);
+    var ratio = dist / _pzLastDist;
+    var newScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, _pzScale * ratio));
+    // Adjust translate so zoom anchors at pinch midpoint
+    _pzX = mid.x - (mid.x - _pzX) * (newScale / _pzScale) + (mid.x - _pzLastMid.x);
+    _pzY = mid.y - (mid.y - _pzY) * (newScale / _pzScale) + (mid.y - _pzLastMid.y);
+    _pzScale = newScale;
+    _pzLastDist = dist;
+    _pzLastMid  = mid;
+    _pzApply();
+  } else if (e.touches.length === 1 && _pzScale > 1 && _pzPanStart) {
+    e.preventDefault();
+    _pzX = e.touches[0].clientX - _pzPanStart.x;
+    _pzY = e.touches[0].clientY - _pzPanStart.y;
+    _pzApply();
+  }
+}, { passive: false });
+
+// Double-tap to reset zoom
+var _pzLastTap = 0;
+_mapZoomEl.addEventListener('touchend', function(e) {
+  if (e.touches.length !== 0) return;
+  var now = Date.now();
+  if (now - _pzLastTap < 300) {
+    _pzScale = 1; _pzX = 0; _pzY = 0; _pzApply();
+  }
+  _pzLastTap = now;
 });
 
 function tc(s) {
