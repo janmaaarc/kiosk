@@ -1196,6 +1196,67 @@ if (_isMobileView) {
       t = t.parentElement;
     }
   }, true);
+
+  // Pinch-zoom + pan on campus map
+  (function() {
+    var wrapper = document.querySelector('.map-wrapper');
+    if (!wrapper) return;
+    wrapper.style.touchAction = 'none';
+    wrapper.style.transformOrigin = 'top left';
+
+    var scale = 1, tx = 0, ty = 0;
+    var lastDist = 0, lastMid = null, panStart = null;
+    var MIN = 1, MAX = 6;
+
+    function apply() {
+      wrapper.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')';
+    }
+    function dist(t) {
+      var dx = t[0].clientX - t[1].clientX, dy = t[0].clientY - t[1].clientY;
+      return Math.sqrt(dx*dx + dy*dy);
+    }
+    function mid(t) {
+      return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 };
+    }
+
+    document.body.addEventListener('touchstart', function(e) {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        lastDist = dist(e.touches);
+        lastMid  = mid(e.touches);
+        panStart = null;
+      } else if (e.touches.length === 1) {
+        panStart = { x: e.touches[0].clientX - tx, y: e.touches[0].clientY - ty };
+      }
+    }, { passive: false });
+
+    document.body.addEventListener('touchmove', function(e) {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        var d = dist(e.touches), m = mid(e.touches);
+        var ratio = d / lastDist;
+        var ns = Math.min(MAX, Math.max(MIN, scale * ratio));
+        tx = m.x - (m.x - tx) * (ns / scale) + (m.x - lastMid.x);
+        ty = m.y - (m.y - ty) * (ns / scale) + (m.y - lastMid.y);
+        scale = ns; lastDist = d; lastMid = m;
+        apply();
+      } else if (e.touches.length === 1 && scale > 1 && panStart) {
+        e.preventDefault();
+        tx = e.touches[0].clientX - panStart.x;
+        ty = e.touches[0].clientY - panStart.y;
+        apply();
+      }
+    }, { passive: false });
+
+    // Double-tap reset
+    var lastTap = 0;
+    document.body.addEventListener('touchend', function(e) {
+      if (e.touches.length !== 0) return;
+      var now = Date.now();
+      if (now - lastTap < 300) { scale = 1; tx = 0; ty = 0; apply(); }
+      lastTap = now;
+    });
+  })();
 }
 
 (function() {
